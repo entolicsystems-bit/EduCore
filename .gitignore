@@ -53,8 +53,12 @@ lcov.info
 .idea/
 *.iml
 
+
+
 ####################################
 # OS Files
 ####################################
 .DS_Store
 Thumbs.db
+
+/generated/prisma
