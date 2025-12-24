@@ -147,6 +147,25 @@ html, body{
   font-weight: 600;
   font-size: 28px;
   margin-top: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn:not(:disabled){
+  background: #0A84FF;
+  color: white;
+  cursor: pointer;
+}
+
+.btn:not(:disabled):hover{
+  background:#006FDF;
+}
+
+/* disabled button */
+.btn:disabled{
+  background:#d1d5db;     /* light gray */
+  /* color:#9ca3af; */
+  cursor:not-allowed;
+  opacity: 0.9;
 }
 
 /* links row */

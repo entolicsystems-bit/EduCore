@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
@@ -8,40 +8,51 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isValid, setIsValid] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const validate = () => {
-    if (!email || !password) {
-      setError("Please fill in all fields.");
-      // console.log("Validation failed");
+  useEffect(() => {
+  validateForm();
+}, [email, password]);
+
+
+  const validateForm = () => {
+    if (!email.trim() || !password.trim()) {
+      // setError("Please fill in all fields.");
+      setIsValid(false);
       return false;
     }
 
-    // console.log("Validation successful");
-    setError("");
+    // setError("");
+    setIsValid(true);
     return true;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setSubmitted(true);
 
-    // console.log("Email:", email);
-    // console.log("Password:", password);
 
-    if (!validate()) return;
-    
+    if (!validateForm()){
+      setError("Please fill in all fields.");
+      return;
+    }
+
     const storedUser = JSON.parse(localStorage.getItem("user"));
+
     if (!storedUser ){
       setError("No user found. Please register first.");
       return;
     }
-    if (email === storedUser.email && 
+
+    if (
+      email === storedUser.email && 
       password === storedUser.password
     ) {
       localStorage.setItem("isLoggiedIn", "true");
       navigate("/dashboard");
     } else {
       setError("Invalid email or password.");
-      
     }
   };
 
@@ -69,14 +80,18 @@ const Login = () => {
               />
 
               <input type="password" 
-              placeholder="Password" 
+              placeholder="EnterPassword" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               />
 
-              {error && <p style={{ color: "red" }}>{error}</p>}
+              {/* when user shows error after submission */}
+              {submitted && error && (
+                <p style={{ color: "red" }}>{error}</p>
+                )}
 
-              <button className="btn" type="submit">
+              {/* Disable button until valid */}
+                <button className="btn" type="submit" disabled={!isValid}>
                 Log In
               </button>
 
