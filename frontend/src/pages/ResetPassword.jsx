@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ResetPassword.css";
 
@@ -8,6 +8,20 @@ const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isValid, setValid] = useState(false);
+
+  useEffect(() => {
+    if (
+      newPassword.trim().length >= 6 &&
+      confirmPassword.trim().length >= 6 &&
+      newPassword === confirmPassword
+    ) {
+      setError("");
+      setValid(true);
+    } else {
+      setValid(false);
+    }
+  }, [newPassword, confirmPassword]);
 
   const handleReset = (e) => {
     e.preventDefault();
@@ -75,7 +89,7 @@ const ResetPassword = () => {
 
               {error && <p className="error-text">{error}</p>}
 
-              <button className="reset-btn" type="submit">
+              <button className="reset-btn" type="submit" disabled={!isValid}>
                 Reset
               </button>
             </form>
