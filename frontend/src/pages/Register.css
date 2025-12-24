@@ -108,8 +108,16 @@
   font-weight: 600;
   cursor: pointer;
   margin-top: 8px;
+  transition: all 0.3s ease;
 }
 
+.btn:not(:disabled):hover{
+  background-color: #0f66d6;
+}
+ .btn:disabled{
+  background: #a0c4ff;
+  cursor: not-allowed;
+}
 /* BACK LINK */
 .back-link{
   text-align: center;

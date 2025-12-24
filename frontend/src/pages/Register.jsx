@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Register.css";
 
@@ -9,50 +9,65 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isValid, setIsValid] = useState(false);
 
-  const validate = () => {
-    if (!name || !email || !password) {
+  // user types input,re-check the form
+  useEffect(() => {
+    validateForm();
+  }, [name, email, password]);
+
+
+  const validateForm = () => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
       setError("Please fill in all fields.");
-      // console.log("Validation failed");
-      return false;
+      setIsValid(false);
+      return;
     }
-
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {  
+    if (!emailRegex.test(email.trim())) {  
       setError("Please enter a valid email address.");
-      // console.log("Validation failed");
-      return false;
+      setIsValid(false);
+      return;
     }
 
-    if (password.length < 6) {
+    if (password.trim().length < 6) {
       setError("Password must be at least 6 characters long.");
-      // console.log("Validation failed");
-      return false;
+      setIsValid(false);
+      return;
     }
 
     setError("");
-    // console.log("Validation successful");
-    return true;
+    setIsValid(true);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // console.log("Submitting registration form");
-    // console.log("Name:", name);
-    // console.log("Email:", email);
-    // console.log("Password:", password);
 
-    if (validate()) {
-      const userData = { name, email, password };
+    if (!isValid) return;
+    
+    // check if user aleady exists
+    const existingUser = JSON.parse(localStorage.getItem("user"));
+
+    if (existingUser && existingUser.email === email.trim()){
+      setError("User with this email already exists.");
+      return;
+    } 
+
+
+      const userData = { 
+        name: name.trim(), 
+        email: email.trim(), 
+        password,
+      };
 
       localStorage.setItem("user", JSON.stringify(userData));
       console.log("registration successful");
 
       navigate("/");
-    }
-  };
+    };
+  
       
   
     return (
@@ -92,8 +107,8 @@ const Register = () => {
 
               {error && <p className="error-message">{error}</p>}
 
-              
-              <button className="btn" type="submit">
+              {/* Disable button until valid */}
+              <button className="btn" type="submit" disabled={!isValid}>
                 Register
               </button>
 
