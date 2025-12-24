@@ -63,7 +63,7 @@ const Register = () => {
           {/* LEFT card */}
           <div className="left-card">
             <div className="art-wrap">
-              <img src="/register.png" alt="register" className="float" />
+              <img src="/Register.png" alt="register" className="float" />
             </div>
           </div>
 
