@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../services/authService";
 import "./Login.css";
 
 const Login = () => {
@@ -10,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
   validateForm();
@@ -28,7 +30,7 @@ const Login = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
 
@@ -38,21 +40,19 @@ const Login = () => {
       return;
     }
 
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    setLoading(true);
+    setError("");
 
-    if (!storedUser ){
-      setError("No user found. Please register first.");
-      return;
-    }
+    try {
+      const data = await loginUser({ email, password });
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    if (
-      email === storedUser.email && 
-      password === storedUser.password
-    ) {
-      localStorage.setItem("isLoggiedIn", "true");
       navigate("/dashboard");
-    } else {
-      setError("Invalid email or password.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,8 +91,10 @@ const Login = () => {
                 )}
 
               {/* Disable button until valid */}
-                <button className="btn" type="submit" disabled={!isValid}>
-                Log In
+                <button className="btn" type="submit" 
+                disabled={!isValid || loading}
+                >
+                {loading ? "Logging in..." : "Log In"}
               </button>
 
               <div className="links">
