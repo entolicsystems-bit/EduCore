@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./VerifyOtp.css";
 
@@ -7,6 +7,24 @@ const Otp = () => {
 
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [error, setError] = useState("");
+  const [timeLeft, setTimeLeft]= useState(30);
+  const [canResend, setCanResend] = useState(false);
+
+  const inputRefs = useRef([]);
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      setCanResend(true);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+    }, [timeLeft]);
+
 
   const handleChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
@@ -14,6 +32,12 @@ const Otp = () => {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+    setError("");
+
+    // auto focus to next input
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus();
+    }
   };
 
   const handleVerify = () => {
@@ -31,6 +55,17 @@ const Otp = () => {
       setError("Invalid OTP");
     }
   };
+
+  const handleResendOtp = () => {
+    setOtp(["", "", "", ""]);
+    setTimeLeft(30);
+    setCanResend(false);
+    setError("");
+    inputRefs.current[0].focus();
+  };
+
+  const isOtpComplete = otp.every((digit) => digit !== "");
+
 
   return (
     <div className="page">
@@ -56,6 +91,7 @@ const Otp = () => {
                   type="text"
                   maxLength="1"
                   value={digit}
+                  ref={(el) => (inputRefs.current[index] = el)}
                   onChange={(e) => handleChange(e.target.value, index)}
                 />
               ))}
@@ -64,12 +100,24 @@ const Otp = () => {
             {error && <p className="error-text">{error}</p>}
 
             {/* VERIFY BUTTON */}
-            <button className="verify-btn" onClick={handleVerify}>
+            <button className="verify-btn"
+             onClick={handleVerify}
+             disabled={!isOtpComplete}
+             >
               Verify
             </button>
 
-            {/* RESEND TEXT */}
-            <p className="resend-text">Resend OTP in : 00:30</p>
+            {/* RESEND BUTTON */}
+            {!canResend ? (
+              <p className="resend-text">Resend OTP in : 00:{timeLeft.toString().padStart(2, "0")}
+              </p>
+            ) : (
+              <button className="resend-btn" onClick={handleResendOtp}>
+                Resend OTP
+              </button>
+            )}
+
+          
           </div>
 
         </div>
