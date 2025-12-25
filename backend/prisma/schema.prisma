@@ -29,8 +29,21 @@ model LeadActivity {
 }
 
 model User {
-  id    String  @id @default(uuid()) @db.VarChar(250)
-  name  String? @db.VarChar(250)
-  email String  @unique @db.VarChar(250) // 👈 REQUIRED
-  role  String? @db.VarChar(250)
+  id            String        @id @default(uuid()) @db.VarChar(250)
+  name          String?       @db.VarChar(250)
+  email         String        @unique @db.VarChar(250)
+  role          String?       @db.VarChar(250)
+  passwordHash  String?       @db.VarChar(250)
+  phone         String?       @db.VarChar(250)
+  refreshTokens RefreshToken?
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String
+  userId    String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  jti       String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

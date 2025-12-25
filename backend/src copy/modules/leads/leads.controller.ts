@@ -14,6 +14,8 @@ import { CreateLeadDto } from '../../dto/create-lead.dto';
 import { LeadFilterDto } from '../../dto/lead-filter.dto';
 import { LeadTimelineDto } from '../../dto/lead-timeline.dto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { Roles } from 'src/common/decorator/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
 
 @Controller('v1/leads')
 export class LeadsController {
@@ -46,7 +48,8 @@ export class LeadsController {
     return this.service.getLeadTimeline(id, query);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard,RolesGuard)
+   @Roles('ADMIN', 'COUNSELLOR')
   @Patch(':id')
   updateLead(
     @Param('id') id: string,
@@ -59,7 +62,8 @@ export class LeadsController {
 
 
   // 🔐 PROTECTED — counsellor creates lead
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard,RolesGuard)
+@Roles('ADMIN', 'COUNSELLOR')
 @Post('counsellor')
 createByCounsellor(
   @Body() dto: CreateLeadDto,
@@ -72,7 +76,8 @@ createByCounsellor(
 
 
   // 🔐 PROTECTED — admin assigns counsellor
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @Roles('ADMIN')
   @Post(':id/assign')
   assignCounsellor(
     @Param('id') leadId: string,

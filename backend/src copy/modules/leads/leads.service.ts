@@ -148,12 +148,21 @@ export class LeadsService {
   user: { id: string; role: string },
 ) {
   const lead = await this.repo.findById(leadId);
+
   if (!lead) {
     throw new BadRequestException('Lead not found');
   }
 
-  // 🔐 COUNSELLOR RULE
+  // 🔐 COUNSELLOR RULES
   if (user.role === 'COUNSELLOR') {
+    // ❌ not assigned yet
+    if (!lead.owner_id) {
+      throw new ForbiddenException(
+        'Lead is not assigned to you yet',
+      );
+    }
+
+    // ❌ assigned to someone else
     if (lead.owner_id !== user.id) {
       throw new ForbiddenException(
         'You can update only your assigned leads',
@@ -185,6 +194,7 @@ export class LeadsService {
 
   return updatedLead;
 }
+
 
 
 }
