@@ -17,57 +17,37 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  // ================= REGISTER =================
-  async register(data: {
-    email: string;
-    password: string;
-    name: string;
-    phone: string;
-  }) {
-    const exists = await this.prisma.user.findUnique({
-      where: { email: data.email },
-    });
 
-    if (exists) {
-      throw new BadRequestException('User already exists');
-    }
-
-    const passwordHash = await bcrypt.hash(data.password, 10);
-
-    const user = await this.prisma.user.create({
-      data: {
-        email: data.email,
-        name: data.name,
-        phone: data.phone,
-        role: 'USER',
-        passwordHash,
-      },
-    });
-
-    return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    };
-  }
 
   // ================= LOGIN =================
   async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
+  const user = await this.prisma.user.findUnique({
+    where: { email },
+  });
 
-    if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    return this.issueTokens(user.id);
+  if (!user || !user.passwordHash) {
+    throw new UnauthorizedException('Invalid credentials');
   }
+
+  const isValid = await bcrypt.compare(password, user.passwordHash);
+  if (!isValid) {
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  // 🔹 get tokens
+  const tokens = await this.issueTokens(user.id);
+
+  // 🔹 return tokens + user info
+  return {
+    ...tokens,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+  };
+}
+
 
   // ================= ISSUE TOKENS =================
 async issueTokens(userId: string) {
@@ -111,7 +91,8 @@ async issueTokens(userId: string) {
     }),
   ]);
 
-  return { accessToken, refreshToken };
+  return { accessToken, refreshToken 
+  };
 }
 
 
