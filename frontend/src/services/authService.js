@@ -1,6 +1,6 @@
 export const loginUser = async ( { email, password }) => {
     const response = await fetch(
-        '/api/login',
+        "https:/api/login",
          {
         method: 'POST',
         headers: {
@@ -11,13 +11,19 @@ export const loginUser = async ( { email, password }) => {
             email, 
             password,
          }),
-      }
-    );
+      });
 
+    const data = await response.json();
+ 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
+        throw new Error(data.message || 'Login failed');
     }
 
-    return response.json();
+    return {
+         token: data.token,
+         user: { email },
+    };
 };
+
+
+
