@@ -47,3 +47,13 @@ model RefreshToken {
   jti       String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model AuditLog{
+  id        Int  @id @default(autoincrement())
+  tableName String 
+  action    String
+  oldValue  Json?
+  newValue  Json?
+  userId    String?
+  createdAt DateTime @default(now())
+}
