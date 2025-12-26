@@ -10,6 +10,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // user types input,re-check the form
   useEffect(() => {
@@ -41,11 +42,30 @@ const Register = () => {
     setIsValid(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
 
 
     if (!isValid) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await registerUser({ 
+        name: name.trim(), 
+        email: email.trim(), 
+        password,
+      });
+    //  success > go to login
+      navigate("/");
+    } catch (err) {
+      // backend error message shown here
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  
     
     // check if user aleady exists
     const existingUser = JSON.parse(localStorage.getItem("user"));
@@ -108,8 +128,8 @@ const Register = () => {
               {error && <p className="error-message">{error}</p>}
 
               {/* Disable button until valid */}
-              <button className="btn" type="submit" disabled={!isValid}>
-                Register
+              <button className="btn" type="submit" disabled={!isValid || loading}>
+                {loading ? "Registering..." : "Register"}
               </button>
 
              
