@@ -4,10 +4,11 @@ import { DatabaseModule } from "./database/database.module";
 import { LeadsModule } from "./modules/leads/leads.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CsvModule } from "./import/csv.module";
-import { winstonOpions } from './logs/winston.options';
+import { winstonOpions } from "./logs/winston.options";
 import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { AuditContextMiddleware } from "./middleware/audit-context";
 import { WinstonModule } from "nest-winston";
+import { AuditLogModule } from "./logs/audit-log.module";
 
 @Module({
   imports: [
@@ -19,12 +20,13 @@ import { WinstonModule } from "nest-winston";
     AuthModule,
     LeadsModule,
     CsvModule,
-     WinstonModule.forRoot(winstonOpions),
+    AuditLogModule,
+    WinstonModule.forRoot(winstonOpions),
   ],
 })
-export class AppModule implements NestModule{
-   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
-    consumer.apply(AuditContextMiddleware).forRoutes('*');
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes("*");
+    consumer.apply(AuditContextMiddleware).forRoutes("*");
   }
 }

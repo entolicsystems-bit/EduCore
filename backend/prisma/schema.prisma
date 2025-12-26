@@ -54,6 +54,6 @@ model AuditLog{
   action    String
   oldValue  Json?
   newValue  Json?
-  userId    Int?
+  userId    String?
   createdAt DateTime @default(now())
 }
