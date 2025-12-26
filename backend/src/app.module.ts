@@ -4,11 +4,12 @@ import { DatabaseModule } from "./database/database.module";
 import { LeadsModule } from "./modules/leads/leads.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CsvModule } from "./import/csv.module";
-import { winstonOpions } from "./logs/winston.options";
+import { winstonOpions } from "./modules/logs/winston.options";
 import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { AuditContextMiddleware } from "./middleware/audit-context";
 import { WinstonModule } from "nest-winston";
-import { AuditLogModule } from "./logs/audit-log.module";
+import { AuditLogModule } from "./modules/logs/audit-log.module";
+import { RolesModule } from "./modules/roles/roles.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuditLogModule } from "./logs/audit-log.module";
     LeadsModule,
     CsvModule,
     AuditLogModule,
+    RolesModule,
     WinstonModule.forRoot(winstonOpions),
   ],
 })
