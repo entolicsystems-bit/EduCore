@@ -36,6 +36,7 @@ model User {
   passwordHash  String?       @db.VarChar(250)
   phone         String?       @db.VarChar(250)
   refreshTokens RefreshToken?
+  roles         UserRole[]
 }
 
 model RefreshToken {
@@ -48,12 +49,55 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model AuditLog{
-  id        Int  @id @default(autoincrement())
-  tableName String 
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  tableName String
   action    String
   oldValue  Json?
   newValue  Json?
   userId    String?
   createdAt DateTime @default(now())
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model UserRole {
+  id     Int    @id @default(autoincrement())
+  userId String
+  roleId Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model Permission {
+  id        Int      @id @default(autoincrement())
+  module    String
+  action    String
+  createdAt DateTime @default(now())
+
+  rolePermissions RolePermission[]
+
+  @@unique([module, action])
+}
+
+model RolePermission {
+  id Int @id @default(autoincrement())
+
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
 }
