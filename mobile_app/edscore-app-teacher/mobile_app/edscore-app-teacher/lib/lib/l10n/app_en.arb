@@ -1,0 +1,16 @@
+{
+  "login": "Log In",
+  "emailHint": "Enter your email",
+  "passwordHint": "Enter Password",
+  "forgot": "Forgot password?",
+  "loginButton": "Log In",
+  "version": "version : v1.0",
+  "help": "Get help",
+
+  "emailRequired": "Email is required",
+  "emailInvalid": "Please enter a valid email address",
+  "passwordRequired": "Password is required",
+  "passwordShort": "Password must be at least 6 characters",
+
+  "loginSuccess": "Login successful"
+}
