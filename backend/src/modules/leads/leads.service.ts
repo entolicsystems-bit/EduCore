@@ -55,7 +55,7 @@ export class LeadsService {
       },
     });
 
-    return { success: true };
+    return lead;
   }
 
   getLeads(filters: LeadFilterDto) {
