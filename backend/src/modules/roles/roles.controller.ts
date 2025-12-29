@@ -6,7 +6,6 @@ import { AssignRoleDto } from "../../dto/assign-role.dto";
 import { JwtAuthGuard } from "../../guards/jwt-auth.guard";
 import { RegisterDto } from "src/dto/register.dto";
 import { PrismaService } from "src/database/prisma.service";
-import { Role } from "@prisma/client";
 
 @Controller("v1/roles")
 export class RolesController {
