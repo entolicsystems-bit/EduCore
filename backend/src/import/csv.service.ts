@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma.service';
-import { CreateStudentCsvDto } from 'src/dto/csv-import-dto';
-import * as bcrypt from 'bcrypt';
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { PrismaService } from "src/database/prisma.service";
+import { CreateStudentCsvDto } from "src/dto/csv-import-dto";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class CsvService {
@@ -9,8 +9,7 @@ export class CsvService {
 
   async bulkCreate(data: CreateStudentCsvDto[]) {
     try {
-      
-      const existingStudents = await this.prisma.user.findMany({
+      const existingStudents = await this.prisma.lead.findMany({
         where: {
           email: {
             in: data.map((d) => d.email),
@@ -21,23 +20,20 @@ export class CsvService {
 
       const existingEmails = new Set(existingStudents.map((s) => s.email));
 
-
       const skippedData = data.filter((d) => existingEmails.has(d.email));
       const newData = data.filter((d) => !existingEmails.has(d.email));
 
-    
       const usersToInsert = await Promise.all(
         newData.map(async (student) => ({
           email: student.email,
           name: student.name,
           phone: student.phone,
-          role: student.role,
-          passwordHash: await bcrypt.hash(student.password, 10),
-        })),
+          source: "CSV Import",
+          status: "NEW",
+        }))
       );
 
-      
-      const result = await this.prisma.user.createMany({
+      const result = await this.prisma.lead.createMany({
         data: usersToInsert,
       });
 
@@ -47,8 +43,8 @@ export class CsvService {
         skippedData,
       };
     } catch (error) {
-      console.error('CSV import error:', error);
-      throw new BadRequestException('Failed to import students');
+      console.error("CSV import error:", error);
+      throw new BadRequestException("Failed to import students");
     }
   }
 }

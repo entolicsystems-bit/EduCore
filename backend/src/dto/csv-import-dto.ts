@@ -11,9 +11,5 @@ export class CreateStudentCsvDto {
   @IsString()
   phone: string;
 
-  @IsNotEmpty()
-  password: string;
-
-  @IsEnum(["ADMIN", "USER"])
-  role: "ADMIN" | "USER";
+  source: string;
 }
