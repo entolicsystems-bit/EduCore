@@ -35,7 +35,7 @@ model User {
   role          String?       @db.VarChar(250)
   passwordHash  String?       @db.VarChar(250)
   phone         String?       @db.VarChar(250)
-  refreshTokens RefreshToken?
+  refreshTokens RefreshToken
   roles         UserRole[]
 }
 

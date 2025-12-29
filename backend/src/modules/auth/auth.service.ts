@@ -37,14 +37,9 @@ export class AuthService {
   // 🔹 get tokens
   const tokens = await this.issueTokens(user.id);
 
-  // 🔹 return tokens + user info
+  // 🔹 return tokens
   return {
     ...tokens,
-    user: {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    },
   };
 }
 
