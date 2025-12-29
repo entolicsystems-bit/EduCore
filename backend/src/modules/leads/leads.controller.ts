@@ -22,7 +22,7 @@ export class LeadsController {
   constructor(private readonly service: LeadsService) {}
 
   // 🔓 PUBLIC — website/manual lead
-  @Post()
+  @Post("create")
   create(@Body() dto: CreateLeadDto) {
     return this.service.createWebsiteLead(dto);
   }
