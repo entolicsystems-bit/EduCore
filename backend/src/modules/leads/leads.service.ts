@@ -73,31 +73,6 @@ export class LeadsService {
     return { lead, timeline };
   }
 
-  async importCsv(file: Express.Multer.File, userId: string) {
-    const rows = await parseCsv(file.buffer);
-
-    if (rows.length > 10000) {
-      throw new BadRequestException("CSV limit exceeded");
-    }
-
-    const leads = rows.map((row) => ({
-      ...row,
-      owner_id: userId,
-    }));
-
-    await this.repo.bulkInsertLeads(leads);
-
-    const activities = leads.map((row) => ({
-      lead_id: row.id,
-      action: LeadTimelineAction.IMPORT,
-      metadata: { performedBy: userId },
-    }));
-
-    await this.repo.bulkInsertActivities(activities);
-
-    return { inserted: leads.length };
-  }
-
   async createCounsellorLead(dto: CreateLeadDto, counsellorId: string) {
     const lead = await this.repo.createLead({
       ...dto,
