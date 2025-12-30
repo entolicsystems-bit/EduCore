@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "EduCore is an enterprise-grade education management platform by Entolic Systems, designed to manage academic operations, automation, and institutional workflows. This repository follows a structured Git flow with strict branch governance, CI/CD integration, and production-grade release management.",
   "main": "index.js",
-  
   "engines": {
     "node": "20.22.0",
     "npm": "11.7.0"
@@ -37,7 +36,7 @@
     "@nestjs/platform-express": "11.1.9",
     "@nestjs/testing": "11.1.10",
     "@prisma/adapter-pg": "7.2.0",
-    "@prisma/client": "7.2.0",
+    "@prisma/client": "^7.2.0",
     "@prisma/extension-accelerate": "3.0.1",
     "bcrypt": "6.0.0",
     "class-transformer": "0.5.1",
