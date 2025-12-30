@@ -12,4 +12,6 @@ export class CreateStudentCsvDto {
   phone: string;
 
   source: string;
+
+  status: string;
 }
