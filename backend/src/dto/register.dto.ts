@@ -22,8 +22,10 @@ export class RegisterDto {
   })
   phone: string;
 
-  @IsString()
-  @MinLength(8)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/, {
+    message:
+      "Password must be at least 8 characters long and contain one uppercase letter, one lowercase letter, one number, and one special character",
+  })
   password: string;
 
   @IsString()
