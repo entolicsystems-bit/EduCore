@@ -3,10 +3,17 @@
   "version": "1.0.0",
   "description": "EduCore is an enterprise-grade education management platform by Entolic Systems, designed to manage academic operations, automation, and institutional workflows. This repository follows a structured Git flow with strict branch governance, CI/CD integration, and production-grade release management.",
   "main": "index.js",
+  "engines": {
+    "node": "22.20.0",
+    "npm": "11.7.0"
+  },
   "scripts": {
     "build": "nest build",
     "start": "node dist/main.js",
-    "start:dev": "nest start --watch"
+    "start:dev": "nest start --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -47,10 +54,13 @@
     "@nestjs/cli": "^11.0.14",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/multer": "^2.0.0",
     "@types/node": "^25.0.3",
     "@types/passport-jwt": "^4.0.1",
+    "jest": "^30.2.0",
     "prisma": "^7.2.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

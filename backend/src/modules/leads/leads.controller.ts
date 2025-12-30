@@ -8,21 +8,21 @@ import {
   UseGuards,
   Req,
   Patch,
-} from '@nestjs/common';
-import { LeadsService } from './leads.service';
-import { CreateLeadDto } from '../../dto/create-lead.dto';
-import { LeadFilterDto } from '../../dto/lead-filter.dto';
-import { LeadTimelineDto } from '../../dto/lead-timeline.dto';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { Roles } from 'src/common/decorator/roles.decorator';
-import { RolesGuard } from 'src/guards/roles.guard';
+} from "@nestjs/common";
+import { LeadsService } from "./leads.service";
+import { CreateLeadDto } from "../../dto/create-lead.dto";
+import { LeadFilterDto } from "../../dto/lead-filter.dto";
+import { LeadTimelineDto } from "../../dto/lead-timeline.dto";
+import { JwtAuthGuard } from "../../guards/jwt-auth.guard";
+import { Roles } from "src/common/decorator/roles.decorator";
+import { RolesGuard } from "src/guards/roles.guard";
 
-@Controller('v1/leads')
+@Controller("v1/leads")
 export class LeadsController {
   constructor(private readonly service: LeadsService) {}
 
   // 🔓 PUBLIC — website/manual lead
-  @Post()
+  @Post("create")
   create(@Body() dto: CreateLeadDto) {
     return this.service.createWebsiteLead(dto);
   }
@@ -34,60 +34,29 @@ export class LeadsController {
   }
 
   // 🔓 PUBLIC — lead details
-  @Get(':id')
-  detail(@Param('id') id: string) {
+  @Get(":id")
+  detail(@Param("id") id: string) {
     return this.service.getLead(id);
   }
 
   // 🔓 PUBLIC — timeline
-  @Get(':id/timeline')
-  timeline(
-    @Param('id') id: string,
-    @Query() query: LeadTimelineDto,
-  ) {
+  @Get(":id/timeline")
+  timeline(@Param("id") id: string, @Query() query: LeadTimelineDto) {
     return this.service.getLeadTimeline(id, query);
   }
 
-  @UseGuards(JwtAuthGuard,RolesGuard)
-   @Roles('ADMIN', 'COUNSELLOR')
-  @Patch(':id')
-  updateLead(
-    @Param('id') id: string,
-    @Body() body: any,
-    @Req() req,
-  ) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR")
+  @Patch(":id")
+  updateLead(@Param("id") id: string, @Body() body: any, @Req() req) {
     return this.service.updateLead(id, body, req.user);
   }
 
-
-
   // 🔐 PROTECTED — counsellor creates lead
-@UseGuards(JwtAuthGuard,RolesGuard)
-@Roles('ADMIN', 'COUNSELLOR')
-@Post('counsellor')
-createByCounsellor(
-  @Body() dto: CreateLeadDto,
-  @Req() req,
-) {
-  return this.service.createCounsellorLead(dto, req.user.id);
-}
-
-
-
-
-  // 🔐 PROTECTED — admin assigns counsellor
-  @UseGuards(JwtAuthGuard,RolesGuard)
-  @Roles('ADMIN')
-  @Post(':id/assign')
-  assignCounsellor(
-    @Param('id') leadId: string,
-    @Body() body: { counsellorId: string },
-    @Req() req,
-  ) {
-    return this.service.assignCounsellor(
-      leadId,
-      body.counsellorId,
-      req.user.id, // ADMIN ID from JWT
-    );
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR")
+  @Post("counsellor")
+  createByCounsellor(@Body() dto: CreateLeadDto, @Req() req) {
+    return this.service.createCounsellorLead(dto, req.user.id);
   }
 }

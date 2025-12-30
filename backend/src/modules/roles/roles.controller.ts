@@ -21,8 +21,10 @@ export class RolesController {
     return this.rolesService.assignRole(dto.userId, dto.roleId);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
   @Post("create")
-  register(@Body() dto: RegisterDto) {
-    return this.rolesService.createUser(dto);
+  createStaff(@Body() dto: RegisterDto) {
+    return this.rolesService.registerStaff(dto);
   }
 }
