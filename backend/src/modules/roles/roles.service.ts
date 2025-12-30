@@ -31,12 +31,14 @@ export class RolesService {
     const phone = dto.phone;
     const password = dto.password;
     const roleName = dto.role.toUpperCase();
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
     if (existingUser) {
-      throw new BadRequestException("User already exists");
+      throw new BadRequestException("Email already exists");
     }
+
     const existingPhone = await this.prisma.user.findFirst({
       where: { phone },
     });
@@ -55,6 +57,7 @@ export class RolesService {
         passwordHash: hashedPassword,
       },
     });
+    
     if (roleName === "COUNSELLOR") this.assignRole(user.id, 2);
     else if (roleName === "TEACHER") this.assignRole(user.id, 3);
     else if (roleName === "ACCOUNTANT") this.assignRole(user.id, 4);

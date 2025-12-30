@@ -19,11 +19,12 @@ import { CreateStudentCsvDto } from "src/dto/csv-import-dto";
 export class CsvController {
   constructor(private readonly csvService: CsvService) {}
 
+
   @Post("import")
   @UseInterceptors(
     FileInterceptor("file", {
       storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: 10 * 1024 * 1024 }, //10MB
       fileFilter: (_, file, cb) => {
         if (!file.originalname.endsWith(".csv")) {
           return cb(
@@ -36,10 +37,7 @@ export class CsvController {
     })
   )
   async importCsv(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException("CSV file is required.");
-    }
-
+   
     const validStudents: CreateStudentCsvDto[] = [];
     const errors: any[] = [];
 
@@ -56,7 +54,7 @@ export class CsvController {
 
           if (!row.email) rowErrors.push("Email is required");
           if (!row.name) rowErrors.push("Name is required");
-          if (!row.phone) rowErrors.push("Phone is required");
+          if (!row.phone) rowErrors.push("PhoneNo is required");
 
           if (rowErrors.length > 0) {
             errors.push({ row: rowNumber, errors: rowErrors, data: row });
