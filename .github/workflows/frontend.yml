@@ -23,5 +23,6 @@ jobs:
       - name: Check Node version
         run: node -v
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
+        working-directory: frontend
         run: npm ci
