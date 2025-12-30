@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/database/prisma.service";
 import { CreateStudentCsvDto } from "src/dto/csv-import-dto";
-import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class CsvService {
@@ -9,29 +8,41 @@ export class CsvService {
 
   async bulkCreate(data: CreateStudentCsvDto[]) {
     try {
+      // Find existing emails and phone numbers in bulk
       const existingStudents = await this.prisma.lead.findMany({
         where: {
-          email: {
-            in: data.map((d) => d.email),
-          },
+          OR: [
+            { email: { in: data.map((d) => d.email) } },
+            { phone: { in: data.map((d) => d.phone) } },
+          ],
         },
-        select: { email: true },
+        select: { email: true, phone: true },
       });
 
       const existingEmails = new Set(existingStudents.map((s) => s.email));
+      const existingPhones = new Set(existingStudents.map((s) => s.phone));
 
-      const skippedData = data.filter((d) => existingEmails.has(d.email));
-      const newData = data.filter((d) => !existingEmails.has(d.email));
+      const skippedData: { student: CreateStudentCsvDto; reason: string }[] = [];
+      const newData = data.filter((d) => {
+        if (existingEmails.has(d.email)) {
+          skippedData.push({ student: d, reason: "Duplicate email" });
+          return false;
+        }
+        if (existingPhones.has(d.phone)) {
+          skippedData.push({ student: d, reason: "Duplicate phone" });
+          return false;
+        }
+        return true;
+      });
 
-      const usersToInsert = await Promise.all(
-        newData.map(async (student) => ({
-          email: student.email,
-          name: student.name,
-          phone: student.phone,
-          source: "CSV Import",
-          status: "NEW",
-        }))
-      );
+      // Prepare data for insertion
+      const usersToInsert = newData.map((student) => ({
+        email: student.email,
+        name: student.name,
+        phone: student.phone,
+        source: "CSV Import",
+        status: "NEW",
+      }));
 
       const result = await this.prisma.lead.createMany({
         data: usersToInsert,
@@ -40,7 +51,7 @@ export class CsvService {
       return {
         insertedCount: result.count,
         skippedCount: skippedData.length,
-        skippedData,
+        skippedData: skippedData.map((d) => d.student),
       };
     } catch (error) {
       console.error("CSV import error:", error);

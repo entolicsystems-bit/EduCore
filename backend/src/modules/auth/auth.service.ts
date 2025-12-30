@@ -2,7 +2,6 @@ import {
   Injectable,
   UnauthorizedException,
   ForbiddenException,
-  BadRequestException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/database/prisma.service";
@@ -32,13 +31,9 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    // 🔹 get tokens
     const tokens = await this.issueTokens(user.id);
 
-    // 🔹 return tokens + user info
-    return {
-      ...tokens,
-    };
+    return { ...tokens };
   }
 
   // ================= ISSUE TOKENS =================
@@ -67,18 +62,18 @@ export class AuthService {
     );
 
     await this.prisma.$transaction([
-      // 🔥 remove old refresh token
+      // remove old refresh tokens for this user
       this.prisma.refreshToken.deleteMany({
         where: { userId },
       }),
 
-      // 🔥 insert new refresh token
+      // insert new refresh token
       this.prisma.refreshToken.create({
         data: {
           userId,
           jti,
           tokenHash: await bcrypt.hash(refreshToken, 10),
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
         },
       }),
     ]);
@@ -98,7 +93,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
-    const stored = await this.prisma.refreshToken.findUnique({
+    const stored = await this.prisma.refreshToken.findFirst({
       where: { userId: payload.sub },
     });
 
@@ -114,8 +109,8 @@ export class AuthService {
     const newJti = randomUUID();
 
     return this.prisma.$transaction(async (tx) => {
-      // 🔥 DELETE r1
-      await tx.refreshToken.delete({
+      // Delete old tokens for this user
+      await tx.refreshToken.deleteMany({
         where: { userId: payload.sub },
       });
 
@@ -135,7 +130,7 @@ export class AuthService {
         }
       );
 
-      // 🔥 INSERT r2
+      // Insert new refresh token
       await tx.refreshToken.create({
         data: {
           userId: payload.sub,
@@ -164,7 +159,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
-    const stored = await this.prisma.refreshToken.findUnique({
+    const stored = await this.prisma.refreshToken.findFirst({
       where: { userId: payload.sub },
     });
 
@@ -172,18 +167,16 @@ export class AuthService {
       return { message: "No active session" };
     }
 
-    // 🔥 CRITICAL CHECK (THIS WAS MISSING)
     if (stored.jti !== payload.jti) {
       return { message: "Refresh token already rotated" };
     }
 
-    // 🔐 secondary safety
     const valid = await bcrypt.compare(refreshToken, stored.tokenHash);
     if (!valid) {
-      return { message: "Logout already done session expired" };
+      return { message: "Logout already done or session expired" };
     }
 
-    await this.prisma.refreshToken.delete({
+    await this.prisma.refreshToken.deleteMany({
       where: { userId: payload.sub },
     });
 

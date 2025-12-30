@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Patch,
+  Delete,
 } from "@nestjs/common";
 import { LeadsService } from "./leads.service";
 import { CreateLeadDto } from "../../dto/create-lead.dto";
@@ -50,6 +51,13 @@ export class LeadsController {
   @Patch(":id")
   updateLead(@Param("id") id: string, @Body() body: any, @Req() req) {
     return this.service.updateLead(id, body, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR")
+  @Delete(":id")
+  deleteLead(@Param("id") id: string, @Req() req) {
+    return this.service.deleteLead(id, req.user);
   }
 
   // 🔐 PROTECTED — counsellor creates lead

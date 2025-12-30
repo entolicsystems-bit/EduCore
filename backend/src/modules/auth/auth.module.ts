@@ -13,7 +13,7 @@ import { DatabaseModule } from 'src/database/database.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
 
     JwtModule.register({
-      secret: jwtConfig.accessSecret, // ✅ ACCESS SECRET
+      secret: jwtConfig.accessSecret, // ✅ ACCESS SECRET from 
     }),
   ],
   controllers: [AuthController],
