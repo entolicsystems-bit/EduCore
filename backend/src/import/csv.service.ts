@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/database/prisma.service";
 import { CreateStudentCsvDto } from "src/dto/csv-import-dto";
-import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class CsvService {

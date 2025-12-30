@@ -194,4 +194,38 @@ export class LeadsService {
 
     return updatedLead;
   }
+
+  async deleteLead(leadId: string, user: { id: string; role: string }) {
+    const lead = await this.repo.findById(leadId);
+
+    if (!lead) {
+      throw new BadRequestException("Lead not found");
+    }
+
+    if (user.role === "COUNSELLOR") {
+      // ❌ not assigned yet
+      if (!lead.owner_id) {
+        throw new ForbiddenException("Lead is not assigned to you yet");
+      }
+
+      // ❌ assigned to someone else
+      if (lead.owner_id !== user.id) {
+        throw new ForbiddenException("You can update only your assigned leads");
+      }
+    }
+
+    const deleteLead = await this.repo.deleteLead(leadId);
+
+    await this.prisma.auditLog.create({
+      data: {
+        tableName: "Lead",
+        action: "DELETE",
+        oldValue: { status: lead }, // previous value
+        newValue: null,
+        userId: user.id, // whoever made the change
+      },
+    });
+
+    return deleteLead;
+  }
 }
