@@ -1,14 +1,13 @@
-name: Frontend CI/CD
+name: Backend CI
 
 on:
   push:
-    paths:
-      - "frontend/**"
-    branches:
-      - main
+    branches: [ "main", "develop", "feature" ]
+  pull_request:
+    branches: [ "main", "develop", "feature" ]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,18 +17,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18.20.2
+          cache: 'npm'
+
+      - name: Check Node version
+        run: node -v
 
       - name: Install dependencies
-        run: |
-          cd frontend
-          npm install
-
-      - name: Build frontend
-        run: |
-          cd frontend
-          npm run build
-
-      - name: Deploy to S3
-        run: |
-          aws s3 sync frontend/build s3://educore-frontend-bucket --delete
+        run: npm ci
