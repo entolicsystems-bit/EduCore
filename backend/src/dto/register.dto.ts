@@ -18,7 +18,7 @@ export class RegisterDto {
 
   @IsString()
   @Matches(/^[6-9]\d{9}$/, {
-    message: "Invalid phone number",
+    message: "Phone number must be a valid 10-digit mobile number",
   })
   phone: string;
 
