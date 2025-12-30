@@ -3,6 +3,7 @@ generator client {
 }
 
 datasource db {
+<<<<<<< HEAD
   provider = "postgresql"
   // Prisma 7 does not support `url` in schema. 
   // Connection string should be defined in prisma.config.ts or environment variable.
@@ -11,6 +12,13 @@ datasource db {
 //////////////////////////
 // Leads and Activities //
 //////////////////////////
+=======
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+>>>>>>> 32bde50 (Local backend config and prisma updates)
 
 model Lead {
   id         String         @id @default(uuid())
