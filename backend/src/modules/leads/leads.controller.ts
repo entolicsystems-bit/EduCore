@@ -22,25 +22,28 @@ import { RolesGuard } from "src/guards/roles.guard";
 export class LeadsController {
   constructor(private readonly service: LeadsService) {}
 
-  // 🔓 PUBLIC — website/manual lead
+  //PUBLIC — website/manual lead
   @Post("create")
   create(@Body() dto: CreateLeadDto) {
     return this.service.createWebsiteLead(dto);
   }
 
-  // 🔓 PUBLIC — list leads
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
   @Get()
   list(@Query() filters: LeadFilterDto) {
     return this.service.getLeads(filters);
   }
 
-  // 🔓 PUBLIC — lead details
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
   @Get(":id")
   detail(@Param("id") id: string) {
     return this.service.getLead(id);
   }
 
-  // 🔓 PUBLIC — timeline
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
   @Get(":id/timeline")
   timeline(@Param("id") id: string, @Query() query: LeadTimelineDto) {
     return this.service.getLeadTimeline(id, query);
@@ -60,7 +63,7 @@ export class LeadsController {
     return this.service.deleteLead(id, req.user);
   }
 
-  // 🔐 PROTECTED — counsellor creates lead
+  //counsellor and admin creates lead
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR")
   @Post("counsellor")

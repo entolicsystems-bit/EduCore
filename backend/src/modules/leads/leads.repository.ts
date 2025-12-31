@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../../database/prisma.service";
 
 @Injectable()
 export class LeadsRepository {
@@ -28,9 +28,9 @@ export class LeadsRepository {
 
     if (filters.search) {
       where.OR = [
-        { name: { contains: filters.search, mode: 'insensitive' } },
-        { phone: { contains: filters.search, mode: 'insensitive' } },
-        { email: { contains: filters.search, mode: 'insensitive' } },
+        { name: { contains: filters.search, mode: "insensitive" } },
+        { phone: { contains: filters.search, mode: "insensitive" } },
+        { email: { contains: filters.search, mode: "insensitive" } },
       ];
     }
 
@@ -38,7 +38,7 @@ export class LeadsRepository {
       where,
       skip,
       take: limit,
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { updatedAt: "desc" },
       select: {
         id: true,
         name: true,
@@ -58,11 +58,7 @@ export class LeadsRepository {
     });
   }
 
-  addActivity(
-    leadId: string,
-    action: string,
-    metadata?: any,
-  ) {
+  addActivity(leadId: string, action: string, metadata?: any) {
     return this.prisma.leadActivity.create({
       data: {
         lead_id: leadId,
@@ -79,7 +75,7 @@ export class LeadsRepository {
       where: { lead_id },
       skip,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -97,12 +93,12 @@ export class LeadsRepository {
   }
 
   updateLeadOwner(leadId: string, ownerId: string) {
-      return this.prisma.lead.update({
-        where: { id: leadId },
-        data: { owner_id: ownerId },
-      });
-    }
-    
+    return this.prisma.lead.update({
+      where: { id: leadId },
+      data: { owner_id: ownerId },
+    });
+  }
+
   updateLeadFields(leadId: string, data: any) {
     return this.prisma.lead.update({
       where: { id: leadId },
@@ -110,18 +106,16 @@ export class LeadsRepository {
     });
   }
 
-
   updateLead(leadId: string, ownerId: string) {
-  return this.prisma.lead.update({
-    where: { id: leadId },
-    data: { owner_id: ownerId },
-  });
-}
+    return this.prisma.lead.update({
+      where: { id: leadId },
+      data: { owner_id: ownerId },
+    });
+  }
 
- deleteLead(leadId: string) {
-  return this.prisma.lead.delete({
-    where: { id: leadId }
-  });
-}
-
+  deleteLead(leadId: string) {
+    return this.prisma.lead.delete({
+      where: { id: leadId },
+    });
+  }
 }

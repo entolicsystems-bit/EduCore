@@ -46,6 +46,11 @@ export class RolesService {
       throw new BadRequestException("PhoneNo already exists");
     }
 
+    const allowedRoles = ["COUNSELLOR", "TEACHER", "ACCOUNTANT"];
+    if (!allowedRoles.includes(roleName)) {
+      throw new BadRequestException("Invalid role");
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.prisma.user.create({
@@ -57,7 +62,7 @@ export class RolesService {
         passwordHash: hashedPassword,
       },
     });
-    
+
     if (roleName === "COUNSELLOR") this.assignRole(user.id, 2);
     else if (roleName === "TEACHER") this.assignRole(user.id, 3);
     else if (roleName === "ACCOUNTANT") this.assignRole(user.id, 4);
