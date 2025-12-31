@@ -1,127 +1,243 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import "./Leads.css";
 
-const leads = [
-  {
-    id: 1,
-    name: "rushikesh",
-    email: "rushikesh123@gmail.com",
-    phone: "8585858585",
-    source: "Website",
-    owner: "saurav",
-    status: "NEW",
-  },
-  {
-    id: 2,
-    name: "saurav",
-    email: "saurav123@gmail.com",
-    phone: "6545217865",
-    source: "Referral",
-    owner: "rushikesh",
-    status: "FOLLOW_UP",
-  },
-  {
-    id: 3,
-    name: "ajay",
-    email: "ajay123@gmail.com",
-    phone: "8527419637",
-    source: "Social Media",
-    owner: "ajay",
-    status: "CONTACTED",
-  },
-];
-
+const ITEMS_PER_PAGE = 8;
+const MAX_VISIBLE_PAGES = 7;
 
 const Leads = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  const [leads, setLeads] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [sourceFilter, setSourceFilter] = useState("ALL");
+  const [ownerFilter, setOwnersFilter] = useState("ALL");
+  const [search, setSearch] = useState("");
+
+  const [owner, setOwners] = useState([]);
+
+  /* LOAD LEADS */
+  useEffect(() => {
+    const loadLeads = () => {
+      const storedLeads = JSON.parse(localStorage.getItem("leads")) || [];
+      setLeads(storedLeads);
+
+      const uniqueOwners = [
+        ...new Set(
+          storedLeads.map((lead) => lead.owner).filter(Boolean)
+        ),
+      ];
+      setOwners(uniqueOwners);
+    };
+
+    loadLeads();
+    window.addEventListener("focus", loadLeads);
+    return () => window.removeEventListener("focus", loadLeads);
+  }, []);
+
+  /* RESET PAGE ON FILTER CHANGE */
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, sourceFilter,ownerFilter, search]);
+
+  /* FILTER */
+  const filteredLeads = leads.filter((lead) => {
+    const statusMatch =
+      statusFilter === "ALL" || lead.status === statusFilter;
+
+    const sourceMatch =
+      sourceFilter === "ALL" || lead.source === sourceFilter;
+
+    const ownerMatch =
+      ownerFilter === "ALL" || lead.owner === ownerFilter;
+
+     
+
+    const searchText = search.toLowerCase();
+    const searchMatch =
+      lead.name?.toLowerCase().includes(searchText) ||
+      lead.email?.toLowerCase().includes(searchText);
+
+    return statusMatch && sourceMatch && ownerMatch && searchMatch;
+  });
+
+  /* PAGINATION */
+  const totalItems = filteredLeads.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentLeads = filteredLeads.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
+  const showingFrom = totalItems === 0 ? 0 : startIndex + 1;
+  const showingTo = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+
+  const getVisiblePages = () => {
+    let start = Math.max(currentPage - 3, 1);
+    let end = Math.min(start + MAX_VISIBLE_PAGES - 1, totalPages);
+
+    if (end - start < MAX_VISIBLE_PAGES - 1) {
+      start = Math.max(end - MAX_VISIBLE_PAGES + 1, 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
   return (
-    <DashboardLayout >
-    <div className="leads-page">
-      {/* HEADER */}
-      <div className="leads-header">
-        <h2>Leads</h2>
+    <DashboardLayout>
+      <div className="leads-page">
 
-        <div className="header-actions">
-          <button className="btn-outline">Import CSV</button>
-          <button className="btn-primary"
-          onClick={()=> navigate("/leads/create")}>
-            Create Lead</button>
+        {/* HEADER */}
+        <div className="leads-header">
+          <h2>Leads</h2>
+          <div className="header-actions">
+            <button
+              className="btn-outline"
+              onClick={() => navigate("/leads/import")}
+            >
+              Import CSV
+            </button>
+            <button
+              className="btn-primary"
+              onClick={() => navigate("/leads/create")}
+            >
+              Create Lead
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* FILTERS */}
-      <div className="filters">
-        <select>
-          <option>All Status</option>
-        </select>
+        {/* FILTERS */}
+        <div className="filters">
+          <select onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="ALL">All Status</option>
+            <option value="NEW">New</option>
+            <option value="FOLLOW_UP">Follow Up</option>
+            <option value="CONTACTED">Contacted</option>
+          </select>
 
-        <select>
-          <option>All Sources</option>
-        </select>
+          <select onChange={(e) => setSourceFilter(e.target.value)}>
+            <option value="ALL">All Sources</option>
+            <option value="Website">Website</option>
+            <option value="Referral">Referral</option>
+            <option value="Social Media">Social Media</option>
+            <option value="Email Campaign">Email Campaign</option>
+          </select>
 
-        <select>
-          <option>All Owners</option>
-        </select>
-
-        <input type="text" placeholder="Search leads..." />
-      </div>
-
-      {/* TABLE */}
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>NAME</th>
-              <th>PHONE</th>
-              <th>SOURCE</th>
-              <th>OWNER</th>
-              <th>STATUS</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {leads.map((lead) => (
-              <tr key={lead.id}>
-                <td>
-                  <div className="name-cell">
-                    <strong>{lead.name}</strong>
-                    <span>{lead.email}</span>
-                  </div>
-                </td>
-                <td>{lead.phone}</td>
-                <td>{lead.source}</td>
-                <td>
-                  <div className="owner-badge">
-                    {lead.owner.charAt(0).toUpperCase()}
-                  </div>
-                  {lead.owner}
-                </td>
-                <td>
-                  <span className={`status ${lead.status.toLowerCase()}`}>
-                    {lead.status}
-                  </span>
-                </td>
-              </tr>
+          <select 
+             value={ownerFilter}
+             onChange={(e) => setSourceFilter(e.target.value)}>
+            <option value="ALL">All Owner</option>
+            {owner.map((owner, index) => (
+              <option key={index} value={owner}>
+                {owner}
+              </option>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </select>
 
-      {/* PAGINATION */}
-      <div className="pagination">
-        <span>Showing 1 to 9 of 124 results</span>
-
-        <div className="pages">
-          <button>{"<"}</button>
-          <button className="active">1</button>
-          <button>2</button>
-          <button>3</button>
-          <button>{">"}</button>
+          {/* RIGHT ALIGNED SEARCH */}
+          <input
+            className="search-input"
+            placeholder="Search leads..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
+
+        {/* TABLE */}
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>NAME</th>
+                <th>PHONE</th>
+                <th>SOURCE</th>
+                <th>OWNER</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentLeads.map((lead) => (
+                <tr
+                  key={lead.id}
+                  className="clickable-row"
+                  onClick={() => navigate(`/leads/${lead.id}`)}
+                >
+                  <td>
+                    <div className="name-cell">
+                      <strong>{lead.name}</strong>
+                      <span>{lead.email}</span>
+                    </div>
+                  </td>
+                  <td>{lead.phone}</td>
+                  <td>{lead.source}</td>
+                  <td>
+                    <div className="owner-cell">
+                      <div className="owner-badge">
+                        {lead.owner?.charAt(0).toUpperCase()}
+                      </div>
+                      {lead.owner}
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`status ${lead.status.toLowerCase()}`}>
+                      {lead.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+
+              {currentLeads.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="no-data">
+                    No leads found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* PAGINATION */}
+        
+          <div className="pagination">
+            <span>
+              Showing {showingFrom} to {showingTo} of {totalItems} results
+            </span>
+
+            <div className="pages">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+              >
+                ‹
+              </button>
+
+              {getVisiblePages().map((page) => (
+                <button
+                  key={page}
+                  className={currentPage === page ? "active" : ""}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        
       </div>
-    </div>
-    </DashboardLayout > 
+    </DashboardLayout>
   );
 };
 
