@@ -6,6 +6,9 @@ import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import Otp from './pages/Otp'
 import ResetPassword from './pages/ResetPassword'
+import Leads from './pages/LeadsList'
+import CreateLead from './pages/CreateLead'
+
 // import VerifyOtp from "./pages/VerifyOtp"
 
 function App() {
@@ -17,6 +20,9 @@ function App() {
                 <Route path="/forgot" element={<ForgotPassword />} />
                 <Route path="/otp" element={<Otp />} />
                 <Route path="/reset" element={<ResetPassword />} />
+                <Route path="/leads" element={<Leads /> }/>
+                <Route path='/leads/create' element={<CreateLead/>}/>
+
 
             </Routes>
         </BrowserRouter>

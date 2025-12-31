@@ -1,0 +1,140 @@
+.leads-page {
+  padding: 24px;
+  background: #f3f7ff;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.leads-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-outline {
+  padding: 8px 14px;
+  border: 1px solid #1d6bff;
+  background: transparent;
+  color: #1d6bff;
+  border-radius: 8px;
+}
+
+.btn-primary {
+  padding: 8px 14px;
+  background: #1d6bff;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+}
+
+/* FILTERS */
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters select,
+.filters input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+/* TABLE */
+.table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f9fafb;
+}
+
+th {
+  text-align: left;
+  padding: 14px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+td {
+  padding: 14px;
+  border-top: 1px solid #eef2f7;
+}
+
+.name-cell span {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* OWNER */
+.owner-badge {
+  width: 28px;
+  height: 28px;
+  background: #2563eb;
+  color: white;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-size: 13px;
+}
+
+/* STATUS */
+.status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status.new {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.status.follow_up {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status.contacted {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.pages button {
+  margin: 0 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.pages .active {
+  background: #1d6bff;
+  color: #fff;
+}
