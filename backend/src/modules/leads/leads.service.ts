@@ -35,27 +35,48 @@ export class LeadsService {
   }
 
   async createWebsiteLead(dto: CreateLeadDto) {
-    const lead = await this.repo.createLead({
-      ...dto,
-      owner_id: null, // 👈 intentional
-      status: "NEW",
+    const email = dto.email;
+    const existingEmail = await this.prisma.lead.findUnique({
+      where: { email },
     });
-
-    await this.repo.addActivity(lead.id, "CREATE", {
-      source: "WEBSITE",
+    if (existingEmail) {
+      throw new BadRequestException("Email already exists");
+    }
+    const phone = dto.phone;
+    const existingPhone = await this.prisma.lead.findUnique({
+      where: { phone },
     });
+    if (existingPhone) {
+      throw new BadRequestException("PhoneNo already exists");
+    }
+    try {
+      const lead = await this.repo.createLead({
+        ...dto,
+        owner_id: null, //new lead has no owner id
+        status: "NEW",
+      });
 
-    await this.prisma.auditLog.create({
-      data: {
-        tableName: "Lead",
-        action: "CREATE",
-        oldValue: null,
-        newValue: lead,
-        userId: null,
-      },
-    });
+      await Promise.all([
+        this.repo.addActivity(lead.id, "CREATE", { source: "WEBSITE" }),
+        this.prisma.auditLog.create({
+          data: {
+            tableName: "Lead",
+            action: "CREATE",
+            oldValue: null,
+            newValue: lead,
+            userId: null,
+          },
+        }),
+      ]);
 
-    return lead;
+      return lead;
+    } catch (error) {
+      if (error.code === "P2002") {
+        const field = error.meta?.target?.[0];
+        throw new BadRequestException(`${field} already exists`);
+      }
+      throw error;
+    }
   }
 
   getLeads(filters: LeadFilterDto) {
@@ -162,6 +183,20 @@ export class LeadsService {
       if (lead.owner_id !== user.id) {
         throw new ForbiddenException("You can update only your assigned leads");
       }
+    }
+    const email = dto.email;
+    const existingEmail = await this.prisma.lead.findFirst({
+      where: { email },
+    });
+    if (existingEmail) {
+      throw new BadRequestException("Email already exists");
+    }
+    const phone = dto.phone;
+    const existingPhone = await this.prisma.lead.findFirst({
+      where: { phone },
+    });
+    if (existingPhone) {
+      throw new BadRequestException("PhoneNo already exists");
     }
 
     // 🧼 sanitize update fields (NO owner_id allowed)
