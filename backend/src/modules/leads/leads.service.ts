@@ -36,7 +36,7 @@ export class LeadsService {
 
   async createWebsiteLead(dto: CreateLeadDto) {
     const email = dto.email;
-    const existingEmail = await this.prisma.lead.findFirst({
+    const existingEmail = await this.prisma.lead.findUnique({
       where: { email },
     });
     if (existingEmail) {
