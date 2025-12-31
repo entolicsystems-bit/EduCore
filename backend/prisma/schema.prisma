@@ -24,7 +24,7 @@ model Lead {
   id         String         @id @default(uuid())
   name       String
   phone      String         @unique
-  email      String?
+  email      String?        @unique
   source     String
   status     String         @default("NEW")
   owner_id   String?

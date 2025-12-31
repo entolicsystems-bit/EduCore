@@ -3,7 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { DatabaseModule } from "./database/database.module";
 import { LeadsModule } from "./modules/leads/leads.module";
 import { AuthModule } from "./modules/auth/auth.module";
-import { CsvModule } from "./import/csv.module";
+import { CsvModule } from "./modules/import/csv.module";
 import { winstonOpions } from "./modules/logs/winston.options";
 import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { AuditContextMiddleware } from "./middleware/audit-context";
