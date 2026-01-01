@@ -49,6 +49,7 @@ model User {
   phone         String?       @db.VarChar(250)
   refreshTokens RefreshToken[]  // Changed from single RefreshToken to array for 1:N relation
   roles         UserRole[]      // No change, kept 1:N relation with UserRole
+  createdAt DateTime @default(now())
 }
 
 model RefreshToken {
@@ -61,7 +62,7 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])   // Added index for better query performance
-  // Removed @unique on userId to allow multiple tokens per user
+  
 }
 
 /////////////////////
