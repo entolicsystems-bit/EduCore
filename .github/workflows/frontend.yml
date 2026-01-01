@@ -1,28 +1,36 @@
-name: Backend CI
+name: Deploy Frontend to S3
 
 on:
   push:
-    branches: [ "main", "develop", "feature" ]
-  pull_request:
-    branches: [ "main", "develop", "feature" ]
+    branches:
+      - feature   # or main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18.20.2
-          cache: 'npm'
+          node-version: 18
 
-      - name: Check Node version
-        run: node -v
-
-      - name: Install frontend dependencies
+      - name: Install dependencies
+        run: npm install
         working-directory: frontend
-        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync frontend/dist s3://$educore-frontend-bucket --delete
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AKIAZZFNQ6NZD3UWZWE4 }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.+9VoqRe3vnDrNPgAvLpSSN+2Eo2iJX6kjJwYqXLT }}
+          AWS_REGION: ${{ secrets.ap-south-1 }}
+          S3_BUCKET_NAME: ${{ secrets.educore-frontend-bucket }}
