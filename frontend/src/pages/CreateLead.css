@@ -1,0 +1,94 @@
+.create-lead-page {
+  height: 100%;          /* ✔ fill parent */
+  background: #f3f7ff;
+  padding: 40px;
+  overflow: hidden;     /* ✔ stop page scroll */
+}
+
+/* BACK */
+.back-btn {
+  font-size: 22px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+/* CARD */
+.create-lead-card {
+  max-width: 720px;
+  background: #ffffff;
+  margin: auto;
+  border-radius: 16px;
+  padding: 39px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.create-lead-card h2 {
+  text-align: center;
+  color: #0D99FF;
+  margin-bottom: 24px;
+}
+
+/* FORM */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #6b7280;
+}
+
+.form-group input,
+.form-group select {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0 12px;
+}
+
+.full-width {
+  width: 150px;
+}
+
+/* BUTTONS */
+.actions {
+
+  gap: 8px;
+  width: 100%;
+  margin-top: 20px;              /* ✅ IMPORTANT */
+}
+
+.btn-cancel {
+  background: #ff7d2d;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 10px;
+  text-transform: lowercase;
+  text-align: right;
+  margin: auto;
+  
+}
+
+.btn-save {
+  background: #0D99FF;
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 10px;
+  text-transform: lowercase;
+  margin: auto;
+}
+
+.form-group label{
+  text-align: left;
+  
+}
