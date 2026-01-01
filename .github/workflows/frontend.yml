@@ -3,7 +3,7 @@ name: Deploy Frontend to S3
 on:
   push:
     branches:
-      - feature   # or main
+      - feature  
 
 jobs:
   deploy:
@@ -34,3 +34,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.+9VoqRe3vnDrNPgAvLpSSN+2Eo2iJX6kjJwYqXLT }}
           AWS_REGION: ${{ secrets.ap-south-1 }}
           S3_BUCKET_NAME: ${{ secrets.educore-frontend-bucket }}
+          
