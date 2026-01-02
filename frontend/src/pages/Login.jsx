@@ -4,8 +4,8 @@ import { loginUser } from "../services/authService";
 import "./Login.css";
 
 const Login = () => {
-  const navigate = useNavigate(); 
-  
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -14,9 +14,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-  validateForm();
-}, [email, password]);
-
+    validateForm();
+  }, [email, password]);
 
   const validateForm = () => {
     if (!email.trim() || !password.trim()) {
@@ -34,8 +33,7 @@ const Login = () => {
     e.preventDefault();
     setSubmitted(true);
 
-
-    if (!validateForm()){
+    if (!validateForm()) {
       setError("Please fill in all fields.");
       return;
     }
@@ -59,63 +57,67 @@ const Login = () => {
   return (
     <div className="page">
       <div className="outer-card">
-        <div className="container">
-
+        <div className="grid grid-cols-2">
           {/* LEFT */}
-          <div className="left-card">
-            <div className="art-wrap">
+          <div className=" border-2 border-gray-300 bg-white h-">
+            <div className="">
               <img src="/login.png" alt="illustration" className="float" />
             </div>
           </div>
 
           {/* RIGHT */}
-          <div className="right-card1">
-            <form className="form" onSubmit={handleSubmit}>
-              <h2>Log In</h2>
+          <div className="flex justify-center items-center">
+            <form
+              className="bg-[#ffffff] px-5 py-5 flex flex-col gap-7 border-2 border-gray-300 rounded-2xl w-90"
+              onSubmit={handleSubmit}
+            >
+              <h2 className="text-2xl font-bold">Log In</h2>
 
-              <input type="text" 
-              placeholder="Email / Phone"
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)}
+              <input
+                type="text"
+                className="border-2 border-gray-300 px-3 py-3 rounded-2xl"
+                placeholder="Email / Phone"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
 
-              <input type="password" 
-              placeholder="EnterPassword" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              <input
+                type="password"
+                className="border-2 border-gray-300 px-3 py-3 rounded-2xl"
+                placeholder="EnterPassword"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
 
               {/* when user shows error after submission */}
-              {submitted && error && (
-                <p style={{ color: "red" }}>{error}</p>
-                )}
+              {submitted && error && <p style={{ color: "red" }}>{error}</p>}
 
               {/* Disable button until valid */}
-                <button className="btn" type="submit" 
+              <button
+                className="btn"
+                type="submit"
                 disabled={!isValid || loading}
-                >
+              >
                 {loading ? "Logging in..." : "Log In"}
               </button>
 
-              <div className="links">
-                {/* <span
-                  className="link"
+              <div className="flex justify-between">
+                <span
+                  className="link hover:text-orange-500 text-[#0a84ff] cursor-pointer"
                   onClick={() => navigate("/register")}
                 >
                   Register
-                </span> */}
+                </span>
 
                 <span
-                  className="link2"
+                  className="link2 hover:text-orange-500 text-[#0a84ff] cursor-pointer"
                   onClick={() => navigate("/forgot")}
                 >
                   Forgot Password
                 </span>
               </div>
-
             </form>
           </div>
-
         </div>
       </div>
     </div>
