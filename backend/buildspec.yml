@@ -5,14 +5,12 @@ phases:
     runtime-versions:
       nodejs: 18
     commands:
-      - echo "Entering backend directory"
       - cd backend
-      - echo "Setting dummy DATABASE_URL"
-      - export DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19QSGpKMXpMOTlNU3lfZ3k3akNFbXEiLCJhcGlfa2V5IjoiMDFLQ1FXOEpZTTBOTlQwRVFBRDJWR0dQSkQiLCJ0ZW5hbnRfaWQiOiJiZGQzNWFjYTJjNWU5NzE5YWQ2YTg4MjU0ZTE4ZmNjODFhZTYxOWZhZDI2ZDhjZWVmODU2ZjNkYmMxNmNlNjMzIiwiaW50ZXJuYWxfc2VjcmV0IjoiMDc4OGUyY2MtYjJkYS00YmVkLWE3YTgtMzc2YTFmMjFhNjYwIn0.D1i0ElglnyCxm3aPCDq3_husT6OPrh9tnDmXNRjReZI"
-      - npm install
+      - npm ci
 
   build:
     commands:
+      - npx prisma generate
       - npm run build
 
 artifacts:
