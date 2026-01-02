@@ -2,43 +2,28 @@ name: Backend CI
 
 on:
   push:
-    branches: feature
-    paths:
-      - "backend/**"
+    branches: [ main, develop, feature ]
   pull_request:
-    branches: feature
-    paths:
-      - "backend/**"
+    branches: [ main, develop, feature ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20.22.0
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
-      - name: Check Node version
-        run: node -v
-
-      - name: Install backend dependencies
-        working-directory: backend
+      - name: Install backend deps
         run: npm ci
-
-      - name: Generate Prisma Client
         working-directory: backend
-        env:
-          DATABASE_URL: "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19QSGpKMXpMOTlNU3lfZ3k3akNFbXEiLCJhcGlfa2V5IjoiMDFLQ1FXOEpZTTBOTlQwRVFBRDJWR0dQSkQiLCJ0ZW5hbnRfaWQiOiJiZGQzNWFjYTJjNWU5NzE5YWQ2YTg4MjU0ZTE4ZmNjODFhZTYxOWZhZDI2ZDhjZWVmODU2ZjNkYmMxNmNlNjMzIiwiaW50ZXJuYWxfc2VjcmV0IjoiMDc4OGUyY2MtYjJkYS00YmVkLWE3YTgtMzc2YTFmMjFhNjYwIn0.D1i0ElglnyCxm3aPCDq3_husT6OPrh9tnDmXNRjReZI"
-        run: npx prisma generate
 
-        
-      - name: Generate Prisma Client
-        working-directory: backend
+      - name: Prisma Generate
         run: npx prisma generate
+        working-directory: backend
