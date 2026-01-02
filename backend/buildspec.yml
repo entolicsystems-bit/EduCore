@@ -1,16 +1,29 @@
-version: 0.2
+name: Backend CI
 
-phases:
-  install:
-    runtime-versions:
-      nodejs: 20
-    commands:
-      - node -v
-      - npm -v
-      - cd backend
-      - npm ci
+on:
+  push:
+    branches: [ main, develop, feature ]
+  pull_request:
+    branches: [ main, develop, feature ]
 
+jobs:
   build:
-    commands:
-      - npx prisma generate
-      - npm run build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.22.0
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend deps
+        run: npm ci
+        working-directory: backend
+
+      - name: Prisma Generate
+        run: npx prisma generate
+        working-directory: backend
