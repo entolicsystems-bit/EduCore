@@ -1,43 +1,20 @@
-name: Backend CI
+version: 0.2
 
-on:
-  push:
-    branches: feature
-    paths:
-      - "backend/**"
-  pull_request:
-    branches: feature
-    paths:
-      - "backend/**"
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Entering backend directory"
+      - cd backend
+      - echo "Setting dummy DATABASE_URL"
+      - export DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19QSGpKMXpMOTlNU3lfZ3k3akNFbXEiLCJhcGlfa2V5IjoiMDFLQ1FXOEpZTTBOTlQwRVFBRDJWR0dQSkQiLCJ0ZW5hbnRfaWQiOiJiZGQzNWFjYTJjNWU5NzE5YWQ2YTg4MjU0ZTE4ZmNjODFhZTYxOWZhZDI2ZDhjZWVmODU2ZjNkYmMxNmNlNjMzIiwiaW50ZXJuYWxfc2VjcmV0IjoiMDc4OGUyY2MtYjJkYS00YmVkLWE3YTgtMzc2YTFmMjFhNjYwIn0.D1i0ElglnyCxm3aPCDq3_husT6OPrh9tnDmXNRjReZI"
+      - npm install
 
-jobs:
   build:
-    runs-on: ubuntu-latest
+    commands:
+      - npm run build
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Check Node version
-        run: node -v
-
-      - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci
-
-      - name: Generate Prisma Client
-        working-directory: backend
-        env:
-          DATABASE_URL: "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19QSGpKMXpMOTlNU3lfZ3k3akNFbXEiLCJhcGlfa2V5IjoiMDFLQ1FXOEpZTTBOTlQwRVFBRDJWR0dQSkQiLCJ0ZW5hbnRfaWQiOiJiZGQzNWFjYTJjNWU5NzE5YWQ2YTg4MjU0ZTE4ZmNjODFhZTYxOWZhZDI2ZDhjZWVmODU2ZjNkYmMxNmNlNjMzIiwiaW50ZXJuYWxfc2VjcmV0IjoiMDc4OGUyY2MtYjJkYS00YmVkLWE3YTgtMzc2YTFmMjFhNjYwIn0.D1i0ElglnyCxm3aPCDq3_husT6OPrh9tnDmXNRjReZI"
-        run: npx prisma generate
-
-        
-      - name: Generate Prisma Client
-        working-directory: backend
-        run: npx prisma generate
+artifacts:
+  files:
+    - '**/*'
