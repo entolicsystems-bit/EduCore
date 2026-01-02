@@ -20,7 +20,7 @@ const Login = () => {
 
   const validateForm = () => {
     if (!email.trim() || !password.trim()) {
-      // setError("Please fill in all fields.");
+      setError("Please fill in all fields.");
       setIsValid(false);
       return false;
     }
@@ -51,6 +51,7 @@ const Login = () => {
       navigate("/leads");
     } catch (err) {
       setError(err.message);
+      
     } finally {
       setLoading(false);
     }
