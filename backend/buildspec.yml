@@ -5,12 +5,12 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
-      - node -v
-      - npm -v
-      - cd backend
       - npm ci
 
   build:
     commands:
-      - npx prisma generate
       - npm run build
+
+artifacts:
+  files:
+    - '**/*'
