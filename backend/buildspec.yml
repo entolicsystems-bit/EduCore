@@ -3,8 +3,10 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 18
+      nodejs: 20
     commands:
+      - node -v
+      - npm -v
       - cd backend
       - npm ci
 
@@ -12,7 +14,3 @@ phases:
     commands:
       - npx prisma generate
       - npm run build
-
-artifacts:
-  files:
-    - '**/*'
