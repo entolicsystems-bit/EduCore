@@ -53,6 +53,7 @@ const ResetPassword = () => {
   };
 
   return (
+    
     <div className="page">
       <div className="outer-card">
         <div className="container">
@@ -102,6 +103,8 @@ const ResetPassword = () => {
         </div>
       </div>
     </div>
+  
+
   );
 };
 

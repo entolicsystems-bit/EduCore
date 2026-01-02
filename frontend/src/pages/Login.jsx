@@ -48,7 +48,7 @@ const Login = () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      navigate("/dashboard");
+      navigate("/leads");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -98,15 +98,15 @@ const Login = () => {
               </button>
 
               <div className="links">
-                <span
+                {/* <span
                   className="link"
                   onClick={() => navigate("/register")}
                 >
                   Register
-                </span>
+                </span> */}
 
                 <span
-                  className="link"
+                  className="link2"
                   onClick={() => navigate("/forgot")}
                 >
                   Forgot Password

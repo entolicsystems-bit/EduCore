@@ -53,7 +53,7 @@ const ForgotPassword = () => {
           {/* RIGHT */}
           <div className="right-card forgot-card">
             <form className="form" onSubmit={handleSendOtp}>
-              <h2>Forgot<br />Password</h2>
+              <h2 className="form-title">Forgot<br /> Password</h2>
 
               <input
                 type="email"
@@ -67,9 +67,7 @@ const ForgotPassword = () => {
                 Send OTP
               </button>
 
-              <p className="back-link" onClick={() => navigate("/")}>
-                Go back to login
-              </p>
+             
             </form>
           </div>
 
