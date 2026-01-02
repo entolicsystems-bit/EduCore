@@ -14,13 +14,55 @@ const CreateLead = () => {
     source: "",
   });
 
+  const [errors, setErrors] = useState({});
+
+  // HANDLE CHANGE (phone digits only)
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "phone" && !/^\d*$/.test(value)) return;
+
+    setForm({ ...form, [name]: value });
+    setErrors({ ...errors, [name]: "" });
   };
 
+  // VALIDATION
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!form.name.trim()) {
+      newErrors.name = "Name is required";
+    }
+
+    if (!form.phone) {
+      newErrors.phone = "Phone number is required";
+    } else if (form.phone.length !== 10) {
+      newErrors.phone = "Phone number must be exactly 10 digits";
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+      newErrors.email = "Invalid email address";
+    }
+
+    if (!form.owner.trim()) {
+      newErrors.owner = "Owner is required";
+    }
+
+    if (!form.source) {
+      newErrors.source = "Source is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // SAVE
   const handleSave = () => {
-    const existingLeads =
-      JSON.parse(localStorage.getItem("leads")) || [];
+    if (!validateForm()) return;
+
+    const existingLeads = JSON.parse(localStorage.getItem("leads")) || [];
 
     const newLead = {
       id: Date.now().toString(),
@@ -28,10 +70,7 @@ const CreateLead = () => {
       status: "NEW",
     };
 
-    localStorage.setItem(
-      "leads",
-      JSON.stringify([...existingLeads, newLead])
-    );
+    localStorage.setItem("leads", JSON.stringify([...existingLeads, newLead]));
 
     navigate("/leads");
   };
@@ -39,24 +78,15 @@ const CreateLead = () => {
   return (
     <DashboardLayout>
       <div className="create-lead-page">
-        {/* BACK */}
-        <div className="back-btn" onClick={() => navigate("/leads")}>
-          
-        </div>
-
-        {/* CARD */}
         <div className="create-lead-card">
-          <h2>Create Lead</h2>
+          <h2 className="font-bold text-2xl">Create Lead</h2>
 
           {/* FORM */}
           <div className="form-grid">
             <div className="form-group">
               <label>Name</label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-              />
+              <input name="name" value={form.name} onChange={handleChange} />
+              {errors.name && <small className="error">{errors.name}</small>}
             </div>
 
             <div className="form-group">
@@ -65,7 +95,9 @@ const CreateLead = () => {
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
+                maxLength={10}
               />
+              {errors.phone && <small className="error">{errors.phone}</small>}
             </div>
 
             <div className="form-group">
@@ -76,46 +108,42 @@ const CreateLead = () => {
                 value={form.email}
                 onChange={handleChange}
               />
+              {errors.email && <small className="error">{errors.email}</small>}
             </div>
 
             <div className="form-group">
               <label>Owner</label>
-              <input
-                name="owner"
-                value={form.owner}
-                onChange={handleChange}
-              />
+              <input name="owner" value={form.owner} onChange={handleChange} />
+              {errors.owner && <small className="error">{errors.owner}</small>}
             </div>
 
             <div className="form-group full-width">
               <label>Source</label>
-              <select
-                name="source"
-                value={form.source}
-                onChange={handleChange}
-              >
-                <option value="">Select source</option>
+              <select name="source" value={form.source} onChange={handleChange}>
+                <option value="" className="text-sm">
+                  Select source
+                </option>
                 <option>Website</option>
                 <option>Referral</option>
                 <option>Social Media</option>
               </select>
+              {errors.source && (
+                <small className="error">{errors.source}</small>
+              )}
             </div>
           </div>
 
           {/* ACTIONS */}
           <div className="actions">
             <button
-              className="btn-cancel"
+              className="btn-cancel cursor-pointer"
               onClick={() => navigate("/leads")}
             >
-              cancel
+              Cancel
             </button>
 
-            <button
-              className="btn-save"
-              onClick={handleSave}
-            >
-              save
+            <button className="btn-save cursor-pointer" onClick={handleSave}>
+              Save
             </button>
           </div>
         </div>

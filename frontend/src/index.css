@@ -1,9 +1,11 @@
 /* ===== RESET ===== */
-* {
+@import "tailwindcss";
+
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
+} */
 
 *,
 *::before,
@@ -31,7 +33,12 @@ body {
 body {
   width: 100%;
   font-family: "Poppins", sans-serif;
-  background: rgba(10, 132, 255, 0.08); /* Moved background here to ensure full coverage */
+  background: rgba(
+    10,
+    132,
+    255,
+    0.08
+  ); /* Moved background here to ensure full coverage */
 }
 
 /* ===== CSS VARIABLES ===== */
@@ -53,7 +60,7 @@ a {
 /* ===== SAFE BUTTON BASE ===== */
 button {
   font-family: inherit;
-  border: none;
+  /* border: none; */
   outline: none;
 }
 
