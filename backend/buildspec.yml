@@ -5,12 +5,21 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
-      - npm ci
+      - echo "Checking lock file..."
+      - |
+        if [ ! -f package-lock.json ]; then
+          echo "package-lock.json not found, running npm install"
+          npm install
+        else
+          npm ci
+        fi
 
   build:
     commands:
       - npm run build
+      - echo "Build completed"
 
 artifacts:
   files:
     - '**/*'
+  discard-paths: no
