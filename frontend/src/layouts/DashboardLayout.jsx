@@ -62,8 +62,11 @@ const DashboardLayout = ({ children }) => {
             </NavLink>
           </nav>
 
-          <div className="sidebar-footer text-center border-2 border-red-500 rounded-md p-2 text-red-500 cursor-pointer">
-            <button onClick={() => navigate("/")}>Logout</button>
+          <div
+            className="sidebar-footer text-center cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            <button className="font-bold text-gray-400">Logout</button>
           </div>
         </aside>
 

@@ -48,8 +48,8 @@ body,
 } */
 
 /* LEFT */
-.left-card {
-  flex: 1.3; /* larger left area */
+/* .left-card {
+  flex: 1.3; 
   background: var(--card-bg);
   border-radius: 166px;
   padding: 40px 30px;
@@ -60,10 +60,10 @@ body,
   min-height: 490px;
   min-width: 200px;
   box-shadow: inset 0 0 0 1px rgba(20, 40, 80, 0.02);
-}
+} */
 
 /* center the art inside left area */
-.art-wrap {
+/* .art-wrap {
   height: 100%;
   width: 100%;
   display: flex;
@@ -71,31 +71,31 @@ body,
   justify-content: center;
   padding-top: 6px;
   padding-bottom: 8px;
-}
+} */
 
-.left-card img {
+/* .left-card img {
   width: 100%;
   max-width: 400px;
   max-height: 100%;
   margin-top: contain;
-}
+} */
 
 /* floating animation */
-.float {
+/* .float {
   animation: float 3s ease-in-out infinite;
-}
+} */
 
-@keyframes float {
+/* @keyframes float {
   0% {
-    transform: translateY(0);
+    transform: translateY(12px);
   }
   50% {
-    transform: translateY(-12px);
+    transform: translateY(8px);
   }
   100% {
-    transform: translateY(0);
+    transform: translateY(12px);
   }
-}
+} */
 
 /* .right-card1 {
   flex: 0 0 360px;
@@ -147,7 +147,7 @@ body,
 } */
 
 /* button */
-.btn {
+/* .btn {
   width: 100%;
   padding: 12px 16px;
   border-radius: 26px;
@@ -159,24 +159,24 @@ body,
   font-size: 28px;
   margin-top: 6px;
   transition: all 0.3s ease;
-}
+} */
 
-.btn:not(:disabled) {
+/* .btn:not(:disabled) {
   background: #0a84ff;
   color: white;
   cursor: pointer;
-}
+} */
 
-.btn:not(:disabled):hover {
+/* .btn:not(:disabled):hover {
   background: #006fdf;
-}
+} */
 
 /* disabled button */
-.btn:disabled {
-  background: #d1d5db; /* light gray */
+/* .btn:disabled {
+  background: #d1d5db; 
   cursor: not-allowed;
   opacity: 0.9;
-}
+} */
 
 /* links row */
 /* .links {
