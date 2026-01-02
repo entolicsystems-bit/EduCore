@@ -5,7 +5,7 @@ const ProtectedRoute = ({ children }) => {
 
   // if user is NOT logged in
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // if logged in → allow page

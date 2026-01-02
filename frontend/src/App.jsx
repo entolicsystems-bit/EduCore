@@ -13,13 +13,12 @@ import LeadDetails from "./pages/LeadDetails";
 import ImportLeads from "./pages/ImportLeads";
 import UsersRoles from "./pages/UsersRoles";
 
-import ProtectedRoute from "./routes/ProtectedRoute";
+import ProtectedRoute from "../routes/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -72,7 +71,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
       </Routes>
     </BrowserRouter>
   );
