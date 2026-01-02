@@ -26,9 +26,7 @@ const Leads = () => {
       setLeads(storedLeads);
 
       const uniqueOwners = [
-        ...new Set(
-          storedLeads.map((lead) => lead.owner).filter(Boolean)
-        ),
+        ...new Set(storedLeads.map((lead) => lead.owner).filter(Boolean)),
       ];
       setOwners(uniqueOwners);
     };
@@ -41,20 +39,15 @@ const Leads = () => {
   /* RESET PAGE ON FILTER CHANGE */
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, sourceFilter,ownerFilter, search]);
+  }, [statusFilter, sourceFilter, ownerFilter, search]);
 
   /* FILTER */
   const filteredLeads = leads.filter((lead) => {
-    const statusMatch =
-      statusFilter === "ALL" || lead.status === statusFilter;
+    const statusMatch = statusFilter === "ALL" || lead.status === statusFilter;
 
-    const sourceMatch =
-      sourceFilter === "ALL" || lead.source === sourceFilter;
+    const sourceMatch = sourceFilter === "ALL" || lead.source === sourceFilter;
 
-    const ownerMatch =
-      ownerFilter === "ALL" || lead.owner === ownerFilter;
-
-     
+    const ownerMatch = ownerFilter === "ALL" || lead.owner === ownerFilter;
 
     const searchText = search.toLowerCase();
     const searchMatch =
@@ -91,19 +84,18 @@ const Leads = () => {
   return (
     <DashboardLayout>
       <div className="leads-page">
-
         {/* HEADER */}
         <div className="leads-header">
-          <h2>Leads</h2>
+          <h2 className="font-bold">Leads</h2>
           <div className="header-actions">
             <button
-              className="btn-outline"
+              className="border-2 border-[#0d99ff] text-[#0d99ff] px-6 py-2 rounded-md cursor-pointer"
               onClick={() => navigate("/leads/import")}
             >
               Import CSV
             </button>
             <button
-              className="btn-primary"
+              className=" bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
               onClick={() => navigate("/leads/create")}
             >
               Create Lead
@@ -128,9 +120,10 @@ const Leads = () => {
             <option value="Email Campaign">Email Campaign</option>
           </select>
 
-          <select 
-             value={ownerFilter}
-             onChange={(e) => setSourceFilter(e.target.value)}>
+          <select
+            value={ownerFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+          >
             <option value="ALL">All Owner</option>
             {owner.map((owner, index) => (
               <option key={index} value={owner}>
@@ -203,39 +196,38 @@ const Leads = () => {
         </div>
 
         {/* PAGINATION */}
-        
-          <div className="pagination">
-            <span>
-              Showing {showingFrom} to {showingTo} of {totalItems} results
-            </span>
 
-            <div className="pages">
+        <div className="pagination">
+          <span>
+            Showing {showingFrom} to {showingTo} of {totalItems} results
+          </span>
+
+          <div className="pages">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              ‹
+            </button>
+
+            {getVisiblePages().map((page) => (
               <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
+                key={page}
+                className={currentPage === page ? "active" : ""}
+                onClick={() => setCurrentPage(page)}
               >
-                ‹
+                {page}
               </button>
+            ))}
 
-              {getVisiblePages().map((page) => (
-                <button
-                  key={page}
-                  className={currentPage === page ? "active" : ""}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(currentPage + 1)}
-              >
-                ›
-              </button>
-            </div>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              ›
+            </button>
           </div>
-        
+        </div>
       </div>
     </DashboardLayout>
   );
