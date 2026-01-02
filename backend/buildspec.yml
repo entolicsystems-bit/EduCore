@@ -5,23 +5,14 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
-      - echo "Entering backend directory"
       - cd backend
-      - echo "Checking lock file..."
-      - |
-        if [ ! -f package-lock.json ]; then
-          echo "package-lock.json not found, running npm install"
-          npm install
-        else
-          npm ci
-        fi
+      - npm ci
+      - npx prisma generate
 
   build:
     commands:
       - npm run build
-      - echo "Backend build completed"
 
 artifacts:
   files:
     - '**/*'
-  discard-paths: no
