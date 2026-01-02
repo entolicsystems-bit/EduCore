@@ -5,6 +5,8 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
+      - echo "Entering backend directory"
+      - cd backend
       - echo "Checking lock file..."
       - |
         if [ ! -f package-lock.json ]; then
@@ -17,7 +19,7 @@ phases:
   build:
     commands:
       - npm run build
-      - echo "Build completed"
+      - echo "Backend build completed"
 
 artifacts:
   files:
