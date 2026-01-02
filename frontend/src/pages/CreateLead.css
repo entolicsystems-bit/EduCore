@@ -1,8 +1,15 @@
 .create-lead-page {
+<<<<<<< HEAD
   height: 100%;          /* ✔ fill parent */
   background: #f3f7ff;
   padding: 40px;
   overflow: hidden;     /* ✔ stop page scroll */
+=======
+  height: 100%; /* ✔ fill parent */
+  background: #f3f7ff;
+  padding: 40px;
+  overflow: hidden; /* ✔ stop page scroll */
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 /* BACK */
@@ -24,7 +31,11 @@
 
 .create-lead-card h2 {
   text-align: center;
+<<<<<<< HEAD
   color: #0D99FF;
+=======
+  color: #0d99ff;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   margin-bottom: 24px;
 }
 
@@ -52,6 +63,10 @@
   border-radius: 8px;
   border: 1px solid #d1d5db;
   padding: 0 12px;
+<<<<<<< HEAD
+=======
+  font-size: 15px;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 .full-width {
@@ -60,10 +75,16 @@
 
 /* BUTTONS */
 .actions {
+<<<<<<< HEAD
 
   gap: 8px;
   width: 100%;
   margin-top: 20px;              /* ✅ IMPORTANT */
+=======
+  gap: 8px;
+  width: 100%;
+  margin-top: 20px; /* ✅ IMPORTANT */
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 .btn-cancel {
@@ -75,11 +96,18 @@
   text-transform: lowercase;
   text-align: right;
   margin: auto;
+<<<<<<< HEAD
   
 }
 
 .btn-save {
   background: #0D99FF;
+=======
+}
+
+.btn-save {
+  background: #0d99ff;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   color: #fff;
   border: none;
   padding: 10px 28px;
@@ -88,7 +116,19 @@
   margin: auto;
 }
 
+<<<<<<< HEAD
 .form-group label{
   text-align: left;
   
+=======
+.form-group label {
+  text-align: left;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }

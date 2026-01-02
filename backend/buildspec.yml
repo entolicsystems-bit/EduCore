@@ -5,21 +5,15 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
-      - echo "Installing backend dependencies"
+      - cd backend
       - npm ci
       - npx prisma generate
 
   build:
     commands:
-      - echo "Building backend"
       - npm run build
 
 artifacts:
   files:
-    - dist/**
-    - package.json
-    - package-lock.json
-    - prisma/**
-    - appspec.yml
-    - install/**
+    - '**/*'
 

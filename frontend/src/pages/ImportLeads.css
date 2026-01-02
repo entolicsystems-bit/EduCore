@@ -1,4 +1,5 @@
 /* --- PAGE WRAPPER --- */
+<<<<<<< HEAD
 .import-page {
   width: 100%;
   height: 100%;
@@ -9,21 +10,41 @@
 }
 
 .import-header {
+=======
+/* .import-page {
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  background-color: #f3f4f6;
+  border: none;
+  box-sizing: border-box;
+} */
+
+/* .import-header {
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+<<<<<<< HEAD
   color: #B5B5B5;
 }
 
 
 .back-btn {
+=======
+  color: #b5b5b5;
+} */
+
+/* .back-btn {
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   background: none;
   border: none;
   font-size: 1.25rem;
   cursor: pointer;
   color: #4b5563;
   padding: 0;
+<<<<<<< HEAD
 }
 
 .import-header h2 {
@@ -36,17 +57,39 @@
 .import-card {
   background: white;
   max-width: 700px; 
+=======
+} */
+
+/* .import-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #b5b5b5;
+} */
+
+/* --- MAIN CARD (The white box) --- */
+/* .import-card {
+  background: white;
+  max-width: 700px;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   width: 100%;
   height: 350px;
   margin: 0 auto;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   overflow: hidden;
+<<<<<<< HEAD
   border: none; 
 }
 
 /* --- UPLOAD BOX --- */
 .upload-box {
+=======
+  border: none;
+} */
+
+/* --- UPLOAD BOX --- */
+/* .upload-box {
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   padding: 3rem;
   text-align: center;
   border: 2px;
@@ -54,6 +97,7 @@
   margin: 1rem;
   cursor: pointer;
   transition: border-color 0.2s;
+<<<<<<< HEAD
 }
 
 .upload-box:hover {
@@ -64,10 +108,21 @@
 
 
 .browse-link {
+=======
+} */
+
+/* .upload-box:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+} */
+
+/* .browse-link {
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   color: #3b82f6;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
+<<<<<<< HEAD
 }
 
 .upload-hint {
@@ -75,6 +130,15 @@
   color: #6b7280;
   margin-top: 0.5rem;
 }
+=======
+} */
+
+/* .upload-hint {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+} */
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 
 /* --- IMPORT SUMMARY DIV (The separate box you requested) --- */
 .import-summary-container {
@@ -82,13 +146,20 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+<<<<<<< HEAD
   height: 110px;
+=======
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   box-sizing: border-box;
 }
 
 .summary-header h3 {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
+<<<<<<< HEAD
+=======
+  font-weight: bold;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   color: #111827;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 0.75rem;
@@ -97,7 +168,10 @@
 .summary-list {
   display: flex;
   flex-direction: column;
+<<<<<<< HEAD
   gap: 0; 
+=======
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 .summary-row {
@@ -115,11 +189,19 @@
 }
 
 .summary-row .label {
+<<<<<<< HEAD
   font-weight: 500;
+=======
+  font-size: 16px;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 .summary-row .value {
   font-weight: 600;
+<<<<<<< HEAD
+=======
+  font-size: 17px;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 /* Specific Colors */
@@ -132,16 +214,26 @@
 }
 
 /* --- BUTTONS AREA --- */
+<<<<<<< HEAD
 .summary-actions {
+=======
+/* .summary-actions {
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   margin-top: 2rem;
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
+<<<<<<< HEAD
 }
 
 .btn-download {
+=======
+} */
+
+/* .btn-download {
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   padding: 0.5rem 1rem;
   background: white;
   border: 1px solid #d1d5db;
@@ -149,11 +241,19 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
+<<<<<<< HEAD
 }
 
 .btn-download:hover {
   background-color: #f9fafb;
 }
+=======
+} */
+
+/* .btn-download:hover {
+  background-color: #f9fafb;
+} */
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 
 .btn-done {
   padding: 0.5rem 1.5rem;
@@ -168,4 +268,8 @@
 
 .btn-done:hover {
   background: #1d4ed8;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
