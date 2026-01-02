@@ -1,11 +1,8 @@
 #!/bin/bash
 set -e
 
-cd /home/ec2-user/EduCore/backend
+cd /home/ec2-user/educore-backend
 
-git pull origin feature
-
-npm install
-npm run build
-
-pm2 restart educore-backend || pm2 start dist/main.js --name educore-backend
+npm install --omit=dev
+npx prisma generate
+npm run start:prod
