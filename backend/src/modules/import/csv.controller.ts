@@ -4,6 +4,8 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  UseGuards,
+  Req,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
@@ -14,6 +16,9 @@ import { validateSync } from "class-validator";
 
 import { CsvService } from "./csv.service";
 import { CreateStudentCsvDto } from "src/dto/csv-import-dto";
+import { Roles } from "src/common/decorator/roles.decorator";
+import { JwtAuthGuard } from "src/guards/jwt-auth.guard";
+import { RolesGuard } from "src/guards/roles.guard";
 
 const BATCH_SIZE = 1000;
 
@@ -21,6 +26,8 @@ const BATCH_SIZE = 1000;
 export class CsvController {
   constructor(private readonly csvService: CsvService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR")
   @Post("import")
   @UseInterceptors(
     FileInterceptor("file", {
@@ -35,7 +42,7 @@ export class CsvController {
       },
     })
   )
-  async importCsv(@UploadedFile() file: Express.Multer.File) {
+  async importCsv(@UploadedFile() file: Express.Multer.File, @Req() req) {
     if (!file) {
       throw new BadRequestException("CSV file is required");
     }
@@ -56,10 +63,6 @@ export class CsvController {
           rowNumber++;
 
           const rowErrors: string[] = [];
-
-          if (!row.email) rowErrors.push("Email is required");
-          if (!row.name) rowErrors.push("Name is required");
-          if (!row.phone) rowErrors.push("Phone is required");
 
           if (rowErrors.length) {
             errors.push({ row: rowNumber, errors: rowErrors, data: row });
@@ -96,7 +99,7 @@ export class CsvController {
           batch.push(dto);
 
           if (batch.length === BATCH_SIZE) {
-            const result = await this.csvService.bulkCreate(batch);
+            const result = await this.csvService.bulkCreate(batch, req.user.id);
             importedCount += result.insertedCount;
             skippedCount += result.skippedCount;
 
@@ -116,7 +119,7 @@ export class CsvController {
         })
         .on("end", async () => {
           if (batch.length) {
-            const result = await this.csvService.bulkCreate(batch);
+            const result = await this.csvService.bulkCreate(batch, req.user.id);
             importedCount += result.insertedCount;
             skippedCount += result.skippedCount;
 
