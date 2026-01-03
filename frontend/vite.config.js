@@ -7,11 +7,13 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
 
   server: {
+    port: 3000, 
+
     proxy: {
       "/api": {
-        target: "http://reqres.in",
+        target: "http://3.7.212.22:3000", 
         changeOrigin: true,
-        // secure: false,
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
