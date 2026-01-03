@@ -9,10 +9,10 @@ const ForgotPassword = () => {
   const [isValid, setIsValid] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
-  
+
   useEffect(() => {
     validateForm();
-  } , [email]);
+  }, [email]);
 
   const validateForm = () => {
     if (!email.trim()) {
@@ -24,39 +24,45 @@ const ForgotPassword = () => {
     return true;
   };
 
-
   const handleSendOtp = (e) => {
-    e.preventDefault(); 
-    setSubmitted(true);// stop page reload
+    e.preventDefault();
+    setSubmitted(true); // stop page reload
 
-    if (!validateForm()){
+    if (!validateForm()) {
       setError("Please enter your email.");
       return;
     }
 
     // later: API call to send OTP
-    navigate("/otp");  // open OTP page
+    navigate("/otp"); // open OTP page
   };
 
   return (
     <div className="page">
       <div className="outer-card">
-        <div className="container">
-
+        <div className="grid grid-cols-2">
           {/* LEFT */}
-          <div className="left-card">
-            <div className="art-wrap">
-              <img src="/forgetpass.png" alt="forgot password" className="float" />
+          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center">
+            <div className="w-150 h-160 flex justify-center items-center">
+              <img
+                src="/forgetpass.png"
+                alt="forgot password"
+                className="float"
+              />
             </div>
           </div>
 
           {/* RIGHT */}
-          <div className="right-card forgot-card">
-            <form className="form" onSubmit={handleSendOtp}>
-              <h2>Forgot<br />Password</h2>
+          <div className="flex justify-end items-center">
+            <form
+              className="bg-[#ffffff] px-5 py-5 flex flex-col gap-7 border-2 border-gray-300 rounded-2xl w-90"
+              onSubmit={handleSendOtp}
+            >
+              <h2 className="text-2xl font-bold">Forgot Password</h2>
 
               <input
                 type="email"
+                className="border-2 border-gray-300 px-3 py-3 rounded-2xl"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -66,13 +72,8 @@ const ForgotPassword = () => {
               <button className="btn" type="submit" disabled={!isValid}>
                 Send OTP
               </button>
-
-              <p className="back-link" onClick={() => navigate("/")}>
-                Go back to login
-              </p>
             </form>
           </div>
-
         </div>
       </div>
     </div>

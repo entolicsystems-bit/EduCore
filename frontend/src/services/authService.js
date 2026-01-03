@@ -1,29 +1,41 @@
-export const loginUser = async ( { email, password }) => {
-    const response = await fetch(
-        "https:/api/login",
-         {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
+import API from "./api";
 
-        },
-        body: JSON.stringify({ 
-            email, 
-            password,
-         }),
-      });
+// LOGIN
+export const loginUser = async ({ email, password }) => {
+  const res = await API.post("/v1/auth/login", {
+    email,
+    password,
+  });
 
-    const data = await response.json();
- 
-    if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-    }
+  localStorage.setItem("accessToken", res.data.accessToken);
+  localStorage.setItem("refreshToken", res.data.refreshToken);
 
-    return {
-         token: data.token,
-         user: { email },
-    };
+  return res.data;
 };
 
+// REFRESH TOKEN
+export const refreshToken = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+  const refreshToken = localStorage.getItem("refreshToken");
 
+  const res = await API.post("/v1/auth/refresh", {
+    accessToken,
+    refreshToken,
+  });
 
+  localStorage.setItem("accessToken", res.data.accessToken);
+  localStorage.setItem("refreshToken", res.data.refreshToken);
+
+  return res.data;
+};
+
+// LOGOUT
+export const logoutUser = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  await API.post("/v1/auth/logout", {
+    refreshToken,
+  });
+
+  localStorage.clear();
+};

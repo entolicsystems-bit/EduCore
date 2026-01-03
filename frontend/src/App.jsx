@@ -1,26 +1,83 @@
-import { useState } from 'react'
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
-import './App.css'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import ForgotPassword from './pages/ForgotPassword'
-import Otp from './pages/Otp'
-import ResetPassword from './pages/ResetPassword'
-// import VerifyOtp from "./pages/VerifyOtp"
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./App.css";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import Otp from "./pages/Otp";
+import ResetPassword from "./pages/ResetPassword";
+
+import Leads from "./pages/LeadsList";
+import CreateLead from "./pages/CreateLead";
+import LeadDetails from "./pages/LeadDetails";
+import ImportLeads from "./pages/ImportLeads";
+import UsersRoles from "./pages/UsersRoles";
+
+<<<<<<< HEAD
+import ProtectedRoute from "../routes/ProtectedRoute";
+=======
+// import ProtectedRoute from "../routes/ProtectedRoute";
+>>>>>>> 4abeb698185233caddf91cfc03b4dfbe11b97a16
 
 function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot" element={<ForgotPassword />} />
-                <Route path="/otp" element={<Otp />} />
-                <Route path="/reset" element={<ResetPassword />} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* PUBLIC ROUTES */}
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/otp" element={<Otp />} />
+        <Route path="/reset" element={<ResetPassword />} />
 
-            </Routes>
-        </BrowserRouter>
-    )
+        {/* PROTECTED ROUTES */}
+        <Route
+          path="/leads"
+          element={
+            // <ProtectedRoute>
+            <Leads />
+            // </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/leads/create"
+          element={
+            // <ProtectedRoute>
+            <CreateLead />
+            // </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/leads/:id"
+          element={
+            // <ProtectedRoute>
+            <LeadDetails />
+            // </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/leads/import"
+          element={
+            // <ProtectedRoute>
+            <ImportLeads />
+            // </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users-roles"
+          element={
+            // <ProtectedRoute>
+            <UsersRoles />
+            // </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
