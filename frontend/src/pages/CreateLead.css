@@ -43,28 +43,33 @@
 .form-group label {
   font-size: 13px;
   margin-bottom: 6px;
-  color: #6b7280;
+  color: #7b818e;
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   height: 42px;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
+  border: 2px solid #adafb2;
   padding: 0 12px;
   font-size: 15px;
 }
+.form-group select {
+  color: #232424;
+  height: 42px;
+  font-size: 15px;
+  outline: none;
+}
 
 .full-width {
-  width: 150px;
+  width: 40%;
 }
 
 /* BUTTONS */
-.actions {
+/* .actions {
   gap: 8px;
   width: 100%;
-  margin-top: 20px; /* ✅ IMPORTANT */
-}
+  margin-top: 20px;
+} */
 
 .btn-cancel {
   background: #ff7d2d;
@@ -74,7 +79,6 @@
   border-radius: 10px;
   text-transform: lowercase;
   text-align: right;
-  margin: auto;
 }
 
 .btn-save {
@@ -84,7 +88,6 @@
   padding: 10px 28px;
   border-radius: 10px;
   text-transform: lowercase;
-  margin: auto;
 }
 
 .form-group label {
