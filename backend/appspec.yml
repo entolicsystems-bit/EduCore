@@ -3,10 +3,11 @@ os: linux
 
 files:
   - source: backend
-    destination: /home/ec2-user/backend
+    destination: /home/ec2-user/EduCore/backend
 
 hooks:
   AfterDeploy:
-    - location: backend/backend-deploy.sh
+    - location: backend-deploy.sh
       timeout: 300
       runas: ec2-user
+

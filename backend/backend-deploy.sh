@@ -1,8 +1,19 @@
 #!/bin/bash
 set -e
 
-cd /home/ec2-user/educore-backend
+echo "🚀 Backend deployment started"
 
+cd /home/ec2-user/EduCore/backend
+
+echo "📦 Installing dependencies"
 npm install --omit=dev
+
+echo "🧬 Generating Prisma client"
 npx prisma generate
-npm run start:prod
+
+echo "♻️ Restarting backend service"
+pm2 restart backend || pm2 start dist/main.js --name backend
+
+echo "✅ Backend deployment completed"
+exit 0
+
