@@ -114,8 +114,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Logo Container
                   Container(
-                    height: 20.h,
-                    width: 90.w,
+                    height: 10.h,
+                    width: 40.w,
                     margin: EdgeInsets.only(bottom: 3.h),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
@@ -214,8 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 hintText: 'Enter your email',
                                 hintStyle: TextStyle(
                                   color: AppColors.textHint,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w400,
+                                  fontSize: 15.sp,
                                 ),
                                 filled: true,
                                 fillColor: AppColors.surface,
@@ -269,8 +268,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 hintText: 'Enter Password',
                                 hintStyle: TextStyle(
                                   color: AppColors.textHint,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w400,
+                                  fontSize: 15.sp,
                                 ),
                                 filled: true,
                                 fillColor: AppColors.surface,
@@ -389,7 +387,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               'forgot password',
                               style: TextStyle(
                                 color: AppColors.primary,
-                                fontSize: 13.sp,
+                                fontSize: 15.sp,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -399,7 +397,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 14.h),
 
                   // Footer
                   Column(
@@ -408,36 +406,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         'version : v1.0',
                         style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
+                          fontSize: 14.sp,
                         ),
                       ),
                       SizedBox(height: 1.h),
-                      TextButton(
-                        onPressed: () {
-                          _showSnackBar(
-                            'Get help - Coming soon',
-                            AppColors.info,
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 2.w,
-                            vertical: 0.5.h,
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          'Get help',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
-                          ),
+                      Text(
+                        'Get help',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14.sp,
                         ),
                       ),
+
                     ],
                   ),
                 ],

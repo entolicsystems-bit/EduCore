@@ -160,7 +160,7 @@ class _OtpViewState extends State<OtpView> {
               SnackBar(
                 content: Text(
                   'OTP resent successfully',
-                  style: TextStyle(fontSize: 14.sp),
+                  style: TextStyle(fontSize: 15.sp),
                 ),
                 backgroundColor: AppColors.success,
                 behavior: SnackBarBehavior.floating,
@@ -209,7 +209,7 @@ class _OtpViewState extends State<OtpView> {
                     Text(
                       'Enter Otp',
                       style: TextStyle(
-                        fontSize: 20.sp,
+                        fontSize: 21.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
@@ -245,7 +245,7 @@ class _OtpViewState extends State<OtpView> {
                         'OTP expired. Please resend.',
                         style: TextStyle(
                           color: AppColors.error,
-                          fontSize: 12.sp,
+                          fontSize: 13.sp,
                         ),
                       ),
 
@@ -285,7 +285,7 @@ class _OtpViewState extends State<OtpView> {
                             : Text(
                           'Verify',
                           style: TextStyle(
-                            fontSize: 16.sp,
+                            fontSize: 17.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -309,7 +309,7 @@ class _OtpViewState extends State<OtpView> {
                           text: 'Resend OTP in : ',
                           style: TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 13.sp,
+                            fontSize: 15.sp,
                           ),
                           children: [
                             TextSpan(
@@ -319,7 +319,7 @@ class _OtpViewState extends State<OtpView> {
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13.sp,
+                                fontSize: 15.sp,
                               ),
                             ),
                           ],

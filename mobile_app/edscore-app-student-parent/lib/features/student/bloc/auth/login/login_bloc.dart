@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -40,28 +42,52 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(state.copyWith(isLoading: true, errorMessage: null));
 
       try {
-        // API Call
-        final response = await http.post(
+        // API Call with timeout
+        final response = await http
+            .post(
           Uri.parse('http://3.7.212.22:3000/v1/auth/login'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-            'email': state.email,
+            'email': state.email.trim(),
             'password': state.password,
           }),
+        )
+            .timeout(
+          const Duration(seconds: 15),
+          onTimeout: () {
+            throw TimeoutException('Request timeout');
+          },
         );
+
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           final data = jsonDecode(response.body);
 
+          // Validate response data
+          if (data['accessToken'] == null || data['refreshToken'] == null) {
+            emit(state.copyWith(
+              isLoading: false,
+              errorMessage: 'Invalid response from server',
+            ));
+            return;
+          }
+
           // Save tokens securely
           await _storage.write(key: 'access_token', value: data['accessToken']);
           await _storage.write(key: 'refresh_token', value: data['refreshToken']);
-          await _storage.write(key: 'user_email', value: state.email);
+          await _storage.write(key: 'user_email', value: state.email.trim());
           await _storage.write(key: 'user_type', value: 'student');
 
           // Set token expiry (15 minutes from now)
           final expiryTime = DateTime.now().add(const Duration(minutes: 15));
-          await _storage.write(key: 'token_expiry', value: expiryTime.toIso8601String());
+          await _storage.write(
+            key: 'token_expiry',
+            value: expiryTime.toIso8601String(),
+          );
+
+          print('✅ Login successful - Tokens saved');
 
           emit(state.copyWith(
             isLoading: false,
@@ -74,24 +100,64 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           // Reset success state after delay
           await Future.delayed(const Duration(milliseconds: 500));
           emit(state.copyWith(isSuccess: false));
-        } else {
-          final error = jsonDecode(response.body);
+        } else if (response.statusCode == 401) {
           emit(state.copyWith(
             isLoading: false,
-            errorMessage: error['message'] ?? 'Invalid email or password',
+            errorMessage: 'Invalid email or password',
+          ));
+        } else if (response.statusCode == 400) {
+          try {
+            final error = jsonDecode(response.body);
+            emit(state.copyWith(
+              isLoading: false,
+              errorMessage: error['message'] ?? 'Bad request',
+            ));
+          } catch (_) {
+            emit(state.copyWith(
+              isLoading: false,
+              errorMessage: 'Invalid request',
+            ));
+          }
+        } else if (response.statusCode >= 500) {
+          emit(state.copyWith(
+            isLoading: false,
+            errorMessage: 'Server error. Please try again later.',
+          ));
+        } else {
+          emit(state.copyWith(
+            isLoading: false,
+            errorMessage: 'Login failed. Please try again.',
           ));
         }
-      } catch (e) {
-        String errorMsg = 'Login failed. Please try again.';
-
-        if (e.toString().contains('SocketException') ||
-            e.toString().contains('Failed host lookup')) {
-          errorMsg = 'Network error. Please check your connection.';
-        }
-
+      } on TimeoutException catch (_) {
+        print('❌ Timeout exception');
         emit(state.copyWith(
           isLoading: false,
-          errorMessage: errorMsg,
+          errorMessage: 'Connection timeout. Please check your internet.',
+        ));
+      } on SocketException catch (_) {
+        print('❌ Socket exception');
+        emit(state.copyWith(
+          isLoading: false,
+          errorMessage: 'No internet connection.',
+        ));
+      } on FormatException catch (_) {
+        print('❌ Format exception');
+        emit(state.copyWith(
+          isLoading: false,
+          errorMessage: 'Invalid response format from server.',
+        ));
+      } on http.ClientException catch (_) {
+        print('❌ Client exception');
+        emit(state.copyWith(
+          isLoading: false,
+          errorMessage: 'Network error. Please try again.',
+        ));
+      } catch (e) {
+        print('❌ Unknown error: $e');
+        emit(state.copyWith(
+          isLoading: false,
+          errorMessage: 'Login failed: ${e.toString()}',
         ));
       }
     });
@@ -106,8 +172,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         bool isExpired = true;
 
         if (expiryString != null) {
-          final expiryTime = DateTime.parse(expiryString);
-          isExpired = DateTime.now().isAfter(expiryTime);
+          try {
+            final expiryTime = DateTime.parse(expiryString);
+            isExpired = DateTime.now().isAfter(expiryTime);
+          } catch (_) {
+            isExpired = true;
+          }
         }
 
         if (!isExpired) {
@@ -125,12 +195,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         final refreshToken = await _storage.read(key: 'refresh_token');
 
         if (refreshToken != null) {
-          // Call logout API
-          await http.post(
+          // Call logout API with timeout
+          await http
+              .post(
             Uri.parse('http://3.7.212.22:3000/v1/auth/logout'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'refreshToken': refreshToken}),
-          );
+          )
+              .timeout(const Duration(seconds: 10));
         }
       } catch (e) {
         print('Logout API error: $e');

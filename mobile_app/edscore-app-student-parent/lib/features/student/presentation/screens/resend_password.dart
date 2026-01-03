@@ -291,14 +291,14 @@ class _PasswordField extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 16.sp,
         color: AppColors.textPrimary,
       ),
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
           color: AppColors.textHint,
-          fontSize: 13.sp,
+          fontSize: 15.sp,
         ),
         errorText: errorText,
         filled: true,

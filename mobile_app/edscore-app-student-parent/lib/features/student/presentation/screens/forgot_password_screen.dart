@@ -186,8 +186,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                           hintText: 'Enter your email',
                           hintStyle: TextStyle(
                             color: AppColors.textHint,
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
+                            fontSize: 15.sp,
                           ),
                           filled: true,
                           fillColor: AppColors.surface,
@@ -231,7 +230,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                             ),
                           ),
                           errorStyle: TextStyle(
-                            fontSize: 11.sp,
+                            fontSize: 13.sp,
                             color: AppColors.error,
                           ),
                         ),
