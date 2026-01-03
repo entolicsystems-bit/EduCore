@@ -27,7 +27,13 @@ const Leads = () => {
       setLeads(storedLeads);
 
       const uniqueOwners = [
+<<<<<<< HEAD
+        ...new Set(
+          storedLeads.map((lead) => lead.owner).filter(Boolean)
+        ),
+=======
         ...new Set(storedLeads.map((lead) => lead.owner).filter(Boolean)),
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
       ];
       setOwners(uniqueOwners);
     };
@@ -48,6 +54,22 @@ const Leads = () => {
   /* RESET PAGE ON FILTER CHANGE */
   useEffect(() => {
     setCurrentPage(1);
+<<<<<<< HEAD
+  }, [statusFilter, sourceFilter,ownerFilter, search]);
+
+  /* FILTER */
+  const filteredLeads = leads.filter((lead) => {
+    const statusMatch =
+      statusFilter === "ALL" || lead.status === statusFilter;
+
+    const sourceMatch =
+      sourceFilter === "ALL" || lead.source === sourceFilter;
+
+    const ownerMatch =
+      ownerFilter === "ALL" || lead.owner === ownerFilter;
+
+     
+=======
   }, [statusFilter, sourceFilter, ownerFilter, search]);
 
   /* FILTER */
@@ -57,6 +79,7 @@ const Leads = () => {
     const sourceMatch = sourceFilter === "ALL" || lead.source === sourceFilter;
 
     const ownerMatch = ownerFilter === "ALL" || lead.owner === ownerFilter;
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 
     const searchText = search.toLowerCase();
     const searchMatch =
@@ -93,18 +116,32 @@ const Leads = () => {
   return (
     <DashboardLayout>
       <div className="leads-page">
+<<<<<<< HEAD
+
+        {/* HEADER */}
+        <div className="leads-header">
+          <h2>Leads</h2>
+          <div className="header-actions">
+            <button
+              className="btn-outline"
+=======
         {/* HEADER */}
         <div className="leads-header">
           <h2 className="font-bold">Leads</h2>
           <div className="header-actions">
             <button
               className="border-2 border-[#0d99ff] text-[#0d99ff] px-6 py-2 rounded-md cursor-pointer"
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
               onClick={() => navigate("/leads/import")}
             >
               Import CSV
             </button>
             <button
+<<<<<<< HEAD
+              className="btn-primary"
+=======
               className=" bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
               onClick={() => navigate("/leads/create")}
             >
               Create Lead
@@ -129,10 +166,16 @@ const Leads = () => {
             <option value="Email Campaign">Email Campaign</option>
           </select>
 
+<<<<<<< HEAD
+          <select 
+             value={ownerFilter}
+             onChange={(e) => setSourceFilter(e.target.value)}>
+=======
           <select
             value={ownerFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
           >
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
             <option value="ALL">All Owner</option>
             {owner.map((owner, index) => (
               <option key={index} value={owner}>
@@ -249,6 +292,41 @@ const Leads = () => {
         </div>
 
         {/* PAGINATION */}
+<<<<<<< HEAD
+        
+          <div className="pagination">
+            <span>
+              Showing {showingFrom} to {showingTo} of {totalItems} results
+            </span>
+
+            <div className="pages">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+              >
+                ‹
+              </button>
+
+              {getVisiblePages().map((page) => (
+                <button
+                  key={page}
+                  className={currentPage === page ? "active" : ""}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        
+=======
 
         <div className="pagination">
           <span>
@@ -281,6 +359,7 @@ const Leads = () => {
             </button>
           </div>
         </div>
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
       </div>
     </DashboardLayout>
   );

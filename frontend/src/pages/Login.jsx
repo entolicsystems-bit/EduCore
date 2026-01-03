@@ -113,16 +113,26 @@ const Login = () => {
                 {loading ? "Logging in..." : "Log In"}
               </button>
 
+<<<<<<< HEAD
+              <div className="links">
+                {/* <span
+                  className="link"
+=======
               <div className="flex justify-between">
                 {/* <span
                   className="link hover:text-orange-500 text-[#0a84ff] cursor-pointer"
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
                   onClick={() => navigate("/register")}
                 >
                   Register
                 </span> */}
 
                 <span
+<<<<<<< HEAD
+                  className="link2"
+=======
                   className="link2 hover:text-orange-500 text-[#0a84ff] cursor-pointer"
+>>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
                   onClick={() => navigate("/forgot")}
                 >
                   Forgot Password

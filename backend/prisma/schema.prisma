@@ -3,14 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  // Prisma 7 does not support `url` in schema. 
-  // Connection string should be defined in prisma.config.ts or environment variable.
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+ 
 }
-
-//////////////////////////
-// Leads and Activities //
-//////////////////////////
 
 model Lead {
   id         String         @id @default(uuid())
@@ -36,10 +32,6 @@ model LeadActivity {
   @@index([lead_id])
 }
 
-/////////////////////
-// Users & Auth    //
-/////////////////////
-
 model User {
   id            String        @id @default(uuid()) @db.VarChar(250)
   name          String?       @db.VarChar(250)
@@ -47,8 +39,8 @@ model User {
   role          String?       @db.VarChar(250)
   passwordHash  String?       @db.VarChar(250)
   phone         String?       @db.VarChar(250)
-  refreshTokens RefreshToken[]  // Changed from single RefreshToken to array for 1:N relation
-  roles         UserRole[]      // No change, kept 1:N relation with UserRole
+  refreshTokens RefreshToken[]  
+  roles         UserRole[]      
   createdAt DateTime @default(now())
 }
 
@@ -61,13 +53,9 @@ model RefreshToken {
   jti       String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])   // Added index for better query performance
+  @@index([userId])   
   
 }
-
-/////////////////////
-// Audit Logging   //
-/////////////////////
 
 model AuditLog {
   id        Int      @id @default(autoincrement())
@@ -79,9 +67,6 @@ model AuditLog {
   createdAt DateTime @default(now())
 }
 
-/////////////////////
-// Roles & Permissions //
-/////////////////////
 
 model Role {
   id          Int              @id @default(autoincrement())
