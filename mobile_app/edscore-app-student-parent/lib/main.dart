@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:student/features/student/presentation/screens/forgot_password_screen.dart';
-import 'package:student/features/student/presentation/screens/login_screen.dart';
-import 'package:student/features/student/presentation/screens/otp_screen.dart';
-import 'package:student/features/student/presentation/screens/resend_password.dart';
-
-import 'features/student/bloc/student_bloc.dart';
-import 'features/student/presentation/screens/student_list_screeen.dart';
-
+import 'package:flutter/services.dart';
+import 'package:sizer/sizer.dart';
+import 'core/theme/app_colours.dart';
+import 'features/student/presentation/screens/login_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Set system UI overlay style for status bar
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+
   runApp(const MyApp());
 }
 
@@ -18,15 +25,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: LoginPage(),
+    return Sizer(
+      builder: (context, orientation, deviceType) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Student App',
+
+          // Apply the custom theme
+          theme: AppTheme.lightTheme,
+
+          home: const LoginScreen(),
+        );
+      },
     );
   }
 }
-

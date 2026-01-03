@@ -1,417 +1,490 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:sizer/sizer.dart';
 import '../../bloc/auth/login/login_bloc.dart';
 import '../../bloc/auth/login/login_event.dart';
 import '../../bloc/auth/login/login_state.dart';
+import '../../../../core/theme/app_colours.dart';
 import 'forgot_password_screen.dart';
+import 'student_details_screen.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  bool isStudentSelected = true;
+
+  // Cache computed values for better performance
+  late final double screenHeight;
+  late final BoxDecoration cardDecoration;
+  late final BorderRadius inputBorderRadius;
+  late final BorderRadius tabBorderRadiusLeft;
+  late final BorderRadius tabBorderRadiusRight;
+  late final BorderRadius buttonBorderRadius;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    screenHeight = MediaQuery.of(context).size.height;
+    inputBorderRadius = BorderRadius.circular(1.5.h);
+    tabBorderRadiusLeft = BorderRadius.only(
+      topLeft: Radius.circular(1.5.h),
+      bottomLeft: Radius.circular(1.5.h),
+    );
+    tabBorderRadiusRight = BorderRadius.only(
+      topRight: Radius.circular(1.5.h),
+      bottomRight: Radius.circular(1.5.h),
+    );
+    buttonBorderRadius = BorderRadius.circular(1.5.h);
+    cardDecoration = BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(2.h),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x0D000000),
+          blurRadius: 10,
+          offset: Offset(0, 2),
+        ),
+      ],
+    );
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(fontSize: 14.sp),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          top: 5.h,
+          left: 4.w,
+          right: 4.w,
+          bottom: screenHeight - 15.h,
+        ),
+        duration: Duration(seconds: message.contains('Error') ? 3 : 2),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AuthBloc(),
-      child: BlocListener<AuthBloc, AuthState>(
+      create: (_) => LoginBloc()..add(CheckAuthStatus()),
+      child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
-          if (state.isSuccess) {
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Login successful as ${state.isStudent ? "Student" : "Parent"}',
-                ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.only(
-                  top: 20,
-                  left: 16,
-                  right: 16,
-                ),
-                duration: const Duration(seconds: 2),
+          if (state.isAuthenticated && state.isSuccess) {
+            _showSnackBar(
+              isStudentSelected
+                  ? 'Login successful! Welcome Student'
+                  : 'Login successful! Welcome Parent',
+              AppColors.success,
+            );
+
+            // Navigate to Student Details Screen
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const StudentDetailsScreen(),
               ),
             );
           }
 
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.only(
-                  top: 20,
-                  left: 16,
-                  right: 16,
-                ),
-                duration: const Duration(seconds: 2),
-              ),
+            _showSnackBar(
+              state.errorMessage ?? 'An error occurred',
+              AppColors.error,
             );
           }
         },
         child: Scaffold(
-          backgroundColor: const Color(0xFFE8EAF6),
+          backgroundColor: AppColors.background,
           body: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 340),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Logo Container
-                    Container(
-                      height: 100,
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.grey.shade300,
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo Container
+                  Container(
+                    height: 20.h,
+                    width: 90.w,
+                    margin: EdgeInsets.only(bottom: 3.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(2.h),
+                      border: const Border.fromBorderSide(
+                        BorderSide(
+                          color: AppColors.border,
                           width: 1,
                         ),
                       ),
-                      child: Center(
-                        child: Text(
-                          'logo',
-                          style: TextStyle(
-                            color: Colors.grey.shade400,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'logo',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
+                  ),
 
-
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-
-                          BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          if (!state.isStudent) {
-                                            context.read<AuthBloc>().add(
-                                              ToggleUserType(),
-                                            );
-                                          }
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: state.isStudent
-                                                ? const Color(0xFFE3F2FD)
-                                                : Colors.transparent,
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Text(
-                                            'Students',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: state.isStudent
-                                                  ? const Color(0xFF2196F3)
-                                                  : Colors.grey.shade600,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          if (state.isStudent) {
-                                            context.read<AuthBloc>().add(
-                                              ToggleUserType(),
-                                            );
-                                          }
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: !state.isStudent
-                                                ? const Color(0xFF2196F3)
-                                                : Colors.transparent,
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Text(
-                                            'Parents',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: !state.isStudent
-                                                  ? Colors.white
-                                                  : Colors.grey.shade600,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          const Text(
-                            'Log In',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
-                              return TextField(
-                                onChanged: (value) {
-                                  context.read<AuthBloc>().add(EmailChanged(value));
+                  // Main Card Container
+                  Container(
+                    width: 90.w,
+                    padding: EdgeInsets.all(2.5.h),
+                    decoration: cardDecoration,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Tab Buttons (Students / Parent)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _TabButton(
+                                label: 'Students',
+                                isSelected: isStudentSelected,
+                                onTap: () {
+                                  if (!isStudentSelected) {
+                                    setState(() {
+                                      isStudentSelected = true;
+                                    });
+                                  }
                                 },
-                                decoration: InputDecoration(
-                                  hintText: 'Enter your email',
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey.shade400,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey.shade50,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF2196F3),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
-                              return TextField(
-                                obscureText: !state.isPasswordVisible,
-                                onChanged: (value) {
-                                  context.read<AuthBloc>().add(PasswordChanged(value));
-                                },
-                                decoration: InputDecoration(
-                                  hintText: 'Enter Password',
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey.shade400,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey.shade50,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF2196F3),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      state.isPasswordVisible
-                                          ? Icons.visibility_outlined
-                                          : Icons.visibility_off_outlined,
-                                      color: const Color(0xFF2196F3),
-                                      size: 18,
-                                    ),
-                                    onPressed: () {
-                                      context.read<AuthBloc>().add(TogglePasswordVisibility());
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 12),
-
-
-                          BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
-                              return SizedBox(
-                                width: double.infinity,
-                                height: 44,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    if (!state.isLoading) {
-                                      context.read<AuthBloc>().add(LoginSubmitted());
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2196F3),
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                  ),
-                                  child: state.isLoading
-                                      ? const SizedBox(
-                                    height: 18,
-                                    width: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                      : const Text(
-                                    'Log In',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 6),
-
-
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const ForgotPasswordScreen(),
-                                  ),
-                                );
-                              },
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                borderRadius: tabBorderRadiusLeft,
                               ),
-                              child: const Text(
-                                'forgot password?',
-                                style: TextStyle(
-                                  color: Color(0xFF2196F3),
-                                  fontSize: 12,
+                            ),
+                            Expanded(
+                              child: _TabButton(
+                                label: 'Parent',
+                                isSelected: !isStudentSelected,
+                                onTap: () {
+                                  if (isStudentSelected) {
+                                    setState(() {
+                                      isStudentSelected = false;
+                                    });
+                                  }
+                                },
+                                borderRadius: tabBorderRadiusRight,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 3.5.h),
+
+                        // Log In Title
+                        Text(
+                          'Log In',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+
+                        SizedBox(height: 2.5.h),
+
+                        // Email Field
+                        BlocBuilder<LoginBloc, LoginState>(
+                          buildWhen: (previous, current) =>
+                          previous.isLoading != current.isLoading,
+                          builder: (context, state) {
+                            return TextField(
+                              enabled: !state.isLoading,
+                              onChanged: (value) {
+                                context.read<LoginBloc>().add(EmailChanged(value));
+                              },
+                              keyboardType: TextInputType.emailAddress,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColors.textPrimary,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Enter your email',
+                                hintStyle: TextStyle(
+                                  color: AppColors.textHint,
+                                  fontSize: 13.sp,
                                   fontWeight: FontWeight.w400,
                                 ),
+                                filled: true,
+                                fillColor: AppColors.surface,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.h,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primary,
+                                    width: 1.5,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 60),
-
-
-                    Column(
-                      children: [
-                        Text(
-                          'version - v1.0',
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w400,
-                          ),
+                            );
+                          },
                         ),
-                        const SizedBox(height: 6),
-                        TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+
+                        SizedBox(height: 2.h),
+
+                        // Password Field
+                        BlocBuilder<LoginBloc, LoginState>(
+                          buildWhen: (previous, current) =>
+                          previous.isLoading != current.isLoading ||
+                              previous.isPasswordVisible != current.isPasswordVisible,
+                          builder: (context, state) {
+                            return TextField(
+                              enabled: !state.isLoading,
+                              obscureText: !state.isPasswordVisible,
+                              onChanged: (value) {
+                                context.read<LoginBloc>().add(PasswordChanged(value));
+                              },
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColors.textPrimary,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Enter Password',
+                                hintStyle: TextStyle(
+                                  color: AppColors.textHint,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                filled: true,
+                                fillColor: AppColors.surface,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.h,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primary,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    state.isPasswordVisible
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    color: AppColors.primary,
+                                    size: 22.sp,
+                                  ),
+                                  onPressed: () {
+                                    context
+                                        .read<LoginBloc>()
+                                        .add(TogglePasswordVisibility());
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: 3.h),
+
+                        // Login Button
+                        BlocBuilder<LoginBloc, LoginState>(
+                          buildWhen: (previous, current) =>
+                          previous.isLoading != current.isLoading,
+                          builder: (context, state) {
+                            return SizedBox(
+                              width: double.infinity,
+                              height: 6.5.h,
+                              child: ElevatedButton(
+                                onPressed: state.isLoading
+                                    ? null
+                                    : () {
+                                  context.read<LoginBloc>().add(LoginSubmitted());
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  disabledBackgroundColor: AppColors.disabled,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: buttonBorderRadius,
+                                  ),
+                                ),
+                                child: state.isLoading
+                                    ? SizedBox(
+                                  height: 2.5.h,
+                                  width: 2.5.h,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                    : Text(
+                                  'Log In',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: 1.h),
+
+                        // Forgot Password
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ForgotPasswordScreen(),
+                                ),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 2.w,
+                                vertical: 0.5.h,
+                              ),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'Get help',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
+                            child: Text(
+                              'forgot password',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+
+                  SizedBox(height: 8.h),
+
+                  // Footer
+                  Column(
+                    children: [
+                      Text(
+                        'version : v1.0',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      SizedBox(height: 1.h),
+                      TextButton(
+                        onPressed: () {
+                          _showSnackBar(
+                            'Get help - Coming soon',
+                            AppColors.info,
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 2.w,
+                            vertical: 0.5.h,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Get help',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Extracted Tab Button Widget for better performance
+class _TabButton extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final BorderRadius borderRadius;
+
+  const _TabButton({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    required this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 1.8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          borderRadius: borderRadius,
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : AppColors.textSecondary,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
