@@ -3,13 +3,12 @@ generator client {
 }
 
 datasource db {
-<<<<<<< HEAD
+
   provider = "postgresql"
-=======
+
   provider  = "postgresql"
   url       = env("DATABASE_URL")
  
->>>>>>> 122379ff3a55021320a17f1d58adaf55885461ad
 }
 
 model Lead {
@@ -37,7 +36,7 @@ model LeadActivity {
 }
 
 model User {
-<<<<<<< HEAD
+
   id            String         @id @default(uuid()) @db.VarChar(250)
   name          String?        @db.VarChar(250)
   email         String         @unique @db.VarChar(250)
@@ -47,7 +46,7 @@ model User {
   phone         String?        @db.VarChar(250)
   refreshTokens RefreshToken[]
   roles         UserRole[]
-=======
+
   id            String        @id @default(uuid()) @db.VarChar(250)
   name          String?       @db.VarChar(250)
   email         String        @unique @db.VarChar(250)
@@ -57,7 +56,6 @@ model User {
   refreshTokens RefreshToken[]  
   roles         UserRole[]      
   createdAt DateTime @default(now())
->>>>>>> 122379ff3a55021320a17f1d58adaf55885461ad
 }
 
 model RefreshToken {
@@ -69,12 +67,7 @@ model RefreshToken {
   jti       String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-<<<<<<< HEAD
   @@index([userId])
-=======
-  @@index([userId])   
-  
->>>>>>> 122379ff3a55021320a17f1d58adaf55885461ad
 }
 
 model AuditLog {
@@ -87,10 +80,6 @@ model AuditLog {
   createdAt DateTime @default(now())
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 122379ff3a55021320a17f1d58adaf55885461ad
 model Role {
   id          Int              @id @default(autoincrement())
   name        String           @unique
