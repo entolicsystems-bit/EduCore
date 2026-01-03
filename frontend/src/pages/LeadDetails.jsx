@@ -10,23 +10,17 @@ const LeadDetails = () => {
 
   useEffect(() => {
     const storedLeads = JSON.parse(localStorage.getItem("leads")) || [];
-    const selectedLead = storedLeads.find(
-      (l) => String(l.id) === id
-    );
+    const selectedLead = storedLeads.find((l) => String(l.id) === id);
     setLead(selectedLead);
   }, [id]);
 
-  if (!lead)
-     return null;
+  if (!lead) return null;
 
   return (
     <DashboardLayout>
       <div className="lead-details-page">
-
         {/* BACK */}
-        <div className="back-row" onClick={() => navigate(-1)}>
-          
-        </div>
+        <div className="back-row" onClick={() => navigate(-1)}></div>
 
         {/* TOP CARD */}
         <div className="lead-info-card">
@@ -38,7 +32,7 @@ const LeadDetails = () => {
 
           <div className="lead-right">
             <div className="owner-box">
-            <p>Owner: {lead.owner}</p>
+              <p>Owner: {lead.owner}</p>
             </div>
 
             <span class="status-label">Status:</span>
@@ -52,7 +46,6 @@ const LeadDetails = () => {
 
         {/* BOTTOM GRID */}
         <div className="details-grid">
-
           {/* NOTES */}
           <div className="card notes-card">
             <h3>Notes</h3>
@@ -66,25 +59,22 @@ const LeadDetails = () => {
 
             <div className="timeline">
               <div className="timeline-item">
-                <span className="dot"></span>
+                <span className="dot z-10"></span>
                 <div>
                   Lead Created
                   <p>Lead was created from website form</p>
                   <p className="muted">System • Dec 10, 2025, 09:00 AM</p>
                 </div>
               </div>
-
+              <div className="border-l-2 h-20 absolute top-8.5 left-3.5 border-gray-300"></div>
               <div className="timeline-item">
-                <span className="dot"></span>
+                <span className="dot z-10"></span>
                 <div>
-                 STATUS CHANGED: NEW → FOLLOW_UP
-                  <p className="muted">
-                    {lead.name} • Dec 10, 2025, 10:30 AM
-                  </p>
+                  STATUS CHANGED: NEW → FOLLOW_UP
+                  <p className="muted">{lead.name} • Dec 10, 2025, 10:30 AM</p>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
