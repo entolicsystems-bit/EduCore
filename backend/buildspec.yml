@@ -5,6 +5,7 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
+      - cd backend
       - npm ci
 
   build:
@@ -13,7 +14,4 @@ phases:
 
 artifacts:
   files:
-    - '**/*'
-
-
-
+    - backend/**/*
