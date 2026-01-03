@@ -1,5 +1,6 @@
-import { WinstonModuleOptions } from 'nest-winston';
-import * as winston from 'winston';
+import { WinstonModuleOptions } from "nest-winston";
+import * as winston from "winston";
+
 
 export const winstonOpions: WinstonModuleOptions = {
   transports: [
@@ -7,7 +8,7 @@ export const winstonOpions: WinstonModuleOptions = {
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp(),
-        winston.format.simple(),
+        winston.format.simple()
       ),
     }),
   ],

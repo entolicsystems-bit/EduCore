@@ -8,7 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [
     DatabaseModule,
-    AuthModule, // 👈 THIS FIXES 401
+    AuthModule, 
   ],
   controllers: [LeadsController],
   providers: [LeadsService, LeadsRepository],

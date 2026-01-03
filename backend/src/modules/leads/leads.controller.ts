@@ -66,7 +66,7 @@ export class LeadsController {
   //counsellor and admin creates lead
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR")
-  @Post("counsellor")
+  @Post("add")
   createByCounsellor(@Body() dto: CreateLeadDto, @Req() req) {
     return this.service.createCounsellorLead(dto, req.user.id);
   }

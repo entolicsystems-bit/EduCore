@@ -54,6 +54,7 @@ export class LeadsService {
         ...dto,
         owner_id: null, //new lead has no owner id
         status: "NEW",
+        
       });
 
       await Promise.all([
@@ -73,7 +74,7 @@ export class LeadsService {
     } catch (error) {
       if (error.code === "P2002") {
         const field = error.meta?.target?.[0];
-        throw new BadRequestException(`${field} already exists`);
+        throw new BadRequestException("Existing email or phone number");
       }
       throw error;
     }
