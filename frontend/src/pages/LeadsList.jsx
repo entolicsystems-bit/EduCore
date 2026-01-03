@@ -16,6 +16,7 @@ const Leads = () => {
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [ownerFilter, setOwnersFilter] = useState("ALL");
   const [search, setSearch] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   const [owner, setOwners] = useState([]);
 
@@ -35,6 +36,14 @@ const Leads = () => {
     window.addEventListener("focus", loadLeads);
     return () => window.removeEventListener("focus", loadLeads);
   }, []);
+
+  // delete lead
+  // const handleDelete = (id) => {
+  //   if (!window.confirm("Are you sure you want to delete?")) return;
+
+  //   setLeads((prev) => prev.filter((u) => u.id !== id));
+  //   setOpenMenuId(null);
+  // };
 
   /* RESET PAGE ON FILTER CHANGE */
   useEffect(() => {
@@ -104,7 +113,7 @@ const Leads = () => {
         </div>
 
         {/* FILTERS */}
-        <div className="filters">
+        <div className="filters bg-white">
           <select onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="ALL">All Status</option>
             <option value="NEW">New</option>
@@ -151,6 +160,7 @@ const Leads = () => {
                 <th>SOURCE</th>
                 <th>OWNER</th>
                 <th>STATUS</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -161,7 +171,7 @@ const Leads = () => {
                   onClick={() => navigate(`/leads/${lead.id}`)}
                 >
                   <td>
-                    <div className="name-cell">
+                    <div className="name-cell hover:underline">
                       <strong>{lead.name}</strong>
                       <span>{lead.email}</span>
                     </div>
@@ -180,6 +190,49 @@ const Leads = () => {
                     <span className={`status ${lead.status.toLowerCase()}`}>
                       {lead.status}
                     </span>
+                  </td>
+                  {/* <td>
+                    <button
+                      className="cursor-pointer hover:bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/register");
+                      }}
+                    >
+                      <i className="ri-more-2-fill"></i>
+                    </button>
+                  </td> */}
+                  <td className="relative">
+                    <button
+                      className="cursor-pointer hover:bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuId(openMenuId === lead.id ? null : lead.id);
+                      }}
+                    >
+                      <i className="ri-more-2-fill"></i>
+                    </button>
+
+                    {openMenuId === lead.id && (
+                      <div
+                        className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => navigate(`/users/edit/${lead.id}`)}
+                        >
+                          ✏️ Edit
+                        </button>
+
+                        {/* <button
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                          onClick={() => handleDelete(lead.id)}
+                        >
+                          🗑 Delete
+                        </button> */}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -118,10 +118,9 @@ const CreateLead = () => {
             </div>
 
             <div className="form-group full-width">
-              <label>Source</label>
               <select name="source" value={form.source} onChange={handleChange}>
                 <option value="" className="text-sm">
-                  Select source
+                  Source
                 </option>
                 <option>Website</option>
                 <option>Referral</option>
@@ -134,7 +133,7 @@ const CreateLead = () => {
           </div>
 
           {/* ACTIONS */}
-          <div className="actions">
+          <div className=" flex justify-center gap-8 mt-6">
             <button
               className="btn-cancel cursor-pointer"
               onClick={() => navigate("/leads")}

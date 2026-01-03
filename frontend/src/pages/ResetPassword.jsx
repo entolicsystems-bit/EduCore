@@ -53,29 +53,26 @@ const ResetPassword = () => {
   };
 
   return (
-    
     <div className="page">
       <div className="outer-card">
-        <div className="container">
-
+        <div className="grid grid-cols-2">
           {/* LEFT IMAGE */}
-          <div className="left-card">
-            <div className="art-wrap">
-              <img
-                src="reset.png" 
-                alt="Reset Password"
-                className="float"
-              />
+          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center">
+            <div className="w-150 h-160 flex justify-center items-center">
+              <img src="reset.png" alt="Reset Password" className="float" />
             </div>
           </div>
 
           {/* RIGHT RESET CARD */}
-          <div className="reset-card">
-            <h2>Reset Password</h2>
-
-            <form onSubmit={handleReset}>
+          <div className="flex justify-end items-center">
+            <form
+              onSubmit={handleReset}
+              className="bg-[#ffffff] px-5 py-5 flex flex-col gap-7 border-2 border-gray-300 rounded-2xl w-90"
+            >
+              <h2 className="text-2xl font-bold">Reset Password</h2>
               <input
                 type="password"
+                className="border-2 border-gray-300 px-3 py-3 rounded-2xl"
                 placeholder="Enter New Password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -83,6 +80,7 @@ const ResetPassword = () => {
 
               <input
                 type="password"
+                className="border-2 border-gray-300 px-3 py-3 rounded-2xl"
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -90,21 +88,17 @@ const ResetPassword = () => {
 
               {error && <p className="error-text">{error}</p>}
 
-              <button className="reset-btn" type="submit" disabled={!isValid}>
+              <button className="btn" type="submit" disabled={!isValid}>
                 Reset
               </button>
+              <p className="back-login" onClick={() => navigate("/")}>
+                Go Back to Login
+              </p>
             </form>
-
-            <p className="back-login" onClick={() => navigate("/")}>
-              Go Back to Login
-            </p>
           </div>
-
         </div>
       </div>
     </div>
-  
-
   );
 };
 
