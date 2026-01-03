@@ -16,4 +16,3 @@ pm2 restart backend || pm2 start dist/main.js --name backend
 
 echo "✅ Backend deployment completed"
 exit 0
-

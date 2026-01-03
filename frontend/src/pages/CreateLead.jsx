@@ -14,15 +14,6 @@ const CreateLead = () => {
     source: "",
   });
 
-<<<<<<< HEAD
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = () => {
-    const existingLeads =
-      JSON.parse(localStorage.getItem("leads")) || [];
-=======
   const [errors, setErrors] = useState({});
 
   // HANDLE CHANGE (phone digits only)
@@ -72,7 +63,6 @@ const CreateLead = () => {
     if (!validateForm()) return;
 
     const existingLeads = JSON.parse(localStorage.getItem("leads")) || [];
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 
     const newLead = {
       id: Date.now().toString(),
@@ -80,14 +70,7 @@ const CreateLead = () => {
       status: "NEW",
     };
 
-<<<<<<< HEAD
-    localStorage.setItem(
-      "leads",
-      JSON.stringify([...existingLeads, newLead])
-    );
-=======
     localStorage.setItem("leads", JSON.stringify([...existingLeads, newLead]));
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 
     navigate("/leads");
   };
@@ -95,34 +78,15 @@ const CreateLead = () => {
   return (
     <DashboardLayout>
       <div className="create-lead-page">
-<<<<<<< HEAD
-        {/* BACK */}
-        <div className="back-btn" onClick={() => navigate("/leads")}>
-          
-        </div>
-
-        {/* CARD */}
-        <div className="create-lead-card">
-          <h2>Create Lead</h2>
-=======
         <div className="create-lead-card">
           <h2 className="font-bold text-2xl">Create Lead</h2>
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 
           {/* FORM */}
           <div className="form-grid">
             <div className="form-group">
               <label>Name</label>
-<<<<<<< HEAD
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-              />
-=======
               <input name="name" value={form.name} onChange={handleChange} />
               {errors.name && <small className="error">{errors.name}</small>}
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
             </div>
 
             <div className="form-group">
@@ -131,13 +95,9 @@ const CreateLead = () => {
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
-<<<<<<< HEAD
-              />
-=======
                 maxLength={10}
               />
               {errors.phone && <small className="error">{errors.phone}</small>}
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
             </div>
 
             <div className="form-group">
@@ -148,70 +108,33 @@ const CreateLead = () => {
                 value={form.email}
                 onChange={handleChange}
               />
-<<<<<<< HEAD
-=======
               {errors.email && <small className="error">{errors.email}</small>}
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
             </div>
 
             <div className="form-group">
               <label>Owner</label>
-<<<<<<< HEAD
-              <input
-                name="owner"
-                value={form.owner}
-                onChange={handleChange}
-              />
-=======
               <input name="owner" value={form.owner} onChange={handleChange} />
               {errors.owner && <small className="error">{errors.owner}</small>}
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
             </div>
 
             <div className="form-group full-width">
-              <label>Source</label>
-<<<<<<< HEAD
-              <select
-                name="source"
-                value={form.source}
-                onChange={handleChange}
-              >
-                <option value="">Select source</option>
-=======
               <select name="source" value={form.source} onChange={handleChange}>
                 <option value="" className="text-sm">
-                  Select source
+                  Source
                 </option>
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
                 <option>Website</option>
                 <option>Referral</option>
                 <option>Social Media</option>
               </select>
-<<<<<<< HEAD
-=======
               {errors.source && (
                 <small className="error">{errors.source}</small>
               )}
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
             </div>
           </div>
 
           {/* ACTIONS */}
-          <div className="actions">
+          <div className=" flex justify-center gap-8 mt-6">
             <button
-<<<<<<< HEAD
-              className="btn-cancel"
-              onClick={() => navigate("/leads")}
-            >
-              cancel
-            </button>
-
-            <button
-              className="btn-save"
-              onClick={handleSave}
-            >
-              save
-=======
               className="btn-cancel cursor-pointer"
               onClick={() => navigate("/leads")}
             >
@@ -220,7 +143,6 @@ const CreateLead = () => {
 
             <button className="btn-save cursor-pointer" onClick={handleSave}>
               Save
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
             </button>
           </div>
         </div>

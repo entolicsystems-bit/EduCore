@@ -89,14 +89,14 @@
   align-items: center;
 }
 
-.form h2 {
+/* .form h2 {
   text-align: center;
   align-self: flex-start;
   text-align: left;
   margin-bottom: 22px;
   font-size: 22px;
   font-weight: 700;
-}
+} */
 
 
 /* INPUTS */
@@ -143,8 +143,8 @@
 .back-link {
 >>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   text-align: right;
-  margin-top: 14px;
-  padding-left: 220px;
+  /* margin-top: 14px; */
+  /* padding-left: 220px; */
   color: #1677ff;
   font-size: 14px;
   cursor: pointer;

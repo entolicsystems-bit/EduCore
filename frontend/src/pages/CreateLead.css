@@ -1,15 +1,8 @@
 .create-lead-page {
-<<<<<<< HEAD
-  height: 100%;          /* ✔ fill parent */
-  background: #f3f7ff;
-  padding: 40px;
-  overflow: hidden;     /* ✔ stop page scroll */
-=======
   height: 100%; /* ✔ fill parent */
   background: #f3f7ff;
   padding: 40px;
   overflow: hidden; /* ✔ stop page scroll */
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 /* BACK */
@@ -31,11 +24,7 @@
 
 .create-lead-card h2 {
   text-align: center;
-<<<<<<< HEAD
-  color: #0D99FF;
-=======
   color: #0d99ff;
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   margin-bottom: 24px;
 }
 
@@ -54,38 +43,33 @@
 .form-group label {
   font-size: 13px;
   margin-bottom: 6px;
-  color: #6b7280;
+  color: #7b818e;
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   height: 42px;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
+  border: 2px solid #adafb2;
   padding: 0 12px;
-<<<<<<< HEAD
-=======
   font-size: 15px;
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
+}
+.form-group select {
+  color: #232424;
+  height: 42px;
+  font-size: 15px;
+  outline: none;
 }
 
 .full-width {
-  width: 150px;
+  width: 90px;
 }
 
 /* BUTTONS */
-.actions {
-<<<<<<< HEAD
-
+/* .actions {
   gap: 8px;
   width: 100%;
-  margin-top: 20px;              /* ✅ IMPORTANT */
-=======
-  gap: 8px;
-  width: 100%;
-  margin-top: 20px; /* ✅ IMPORTANT */
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
-}
+  margin-top: 20px;
+} */
 
 .btn-cancel {
   background: #ff7d2d;
@@ -95,32 +79,17 @@
   border-radius: 10px;
   text-transform: lowercase;
   text-align: right;
-  margin: auto;
-<<<<<<< HEAD
-  
-}
-
-.btn-save {
-  background: #0D99FF;
-=======
 }
 
 .btn-save {
   background: #0d99ff;
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   color: #fff;
   border: none;
   padding: 10px 28px;
   border-radius: 10px;
   text-transform: lowercase;
-  margin: auto;
 }
 
-<<<<<<< HEAD
-.form-group label{
-  text-align: left;
-  
-=======
 .form-group label {
   text-align: left;
 }
@@ -130,5 +99,4 @@
   font-size: 12px;
   margin-top: 4px;
   display: block;
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }

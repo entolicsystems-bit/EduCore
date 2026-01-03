@@ -7,7 +7,7 @@ const Otp = () => {
 
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [error, setError] = useState("");
-  const [timeLeft, setTimeLeft]= useState(30);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [canResend, setCanResend] = useState(false);
 
   const inputRefs = useRef([]);
@@ -23,8 +23,7 @@ const Otp = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-    }, [timeLeft]);
-
+  }, [timeLeft]);
 
   const handleChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
@@ -66,60 +65,65 @@ const Otp = () => {
 
   const isOtpComplete = otp.every((digit) => digit !== "");
 
-
   return (
     <div className="page">
       <div className="outer-card">
-        <div className="container">
-
+        <div className="grid grid-cols-2">
           {/* LEFT IMAGE */}
-          <div className="left-card">
-            <div className="art-wrap">
+          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center">
+            <div className="w-150 h-160 flex justify-center items-center">
               <img src="/otp.png" alt="OTP illustration" className="float" />
             </div>
           </div>
 
           {/* RIGHT OTP CARD */}
-          <div className="otp-card">
-            <h2>Enter OTP</h2>
+          <div className="flex justify-end items-center">
+            <div className="w-90 bg-white px-5 py-8 rounded-2xl border-2 border-gray-300 flex flex-col gap-5">
+              <h2 className="text-2xl font-bold">Enter OTP</h2>
 
-            {/* OTP INPUTS */}
-            <div className="otp-inputs">
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  maxLength="1"
-                  value={digit}
-                  ref={(el) => (inputRefs.current[index] = el)}
-                  onChange={(e) => handleChange(e.target.value, index)}
-                />
-              ))}
-            </div>
+              {/* OTP INPUTS */}
+              <div className="otp-inputs flex gap-4 justify-center items-center">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    maxLength="1"
+                    value={digit}
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    onChange={(e) => handleChange(e.target.value, index)}
+                  />
+                ))}
+              </div>
 
-            {error && <p className="error-text">{error}</p>}
+              {error && <p className="error-text">{error}</p>}
 
-            {/* VERIFY BUTTON */}
-            <button className="verify-btn"
-             onClick={handleVerify}
-             disabled={!isOtpComplete}
-             >
-              Verify
-            </button>
-
-            {/* RESEND BUTTON */}
-            {!canResend ? (
-              <p className="resend-text">Resend OTP in : 00:{timeLeft.toString().padStart(2, "0")}
-              </p>
-            ) : (
-              <button className="resend-btn" onClick={handleResendOtp}>
-                Resend OTP
+              {/* VERIFY BUTTON */}
+              <button
+                className="btn"
+                onClick={handleVerify}
+                disabled={!isOtpComplete}
+              >
+                Verify
               </button>
-            )}
 
-          
+              {/* RESEND BUTTON */}
+              {!canResend ? (
+                <p className="text-sm text-right">
+                  Resend OTP in:{" "}
+                  <span className="text-[#0a84ff]">
+                    00:{timeLeft.toString().padStart(2, "0")}
+                  </span>
+                </p>
+              ) : (
+                <button
+                  className="resend-btn text-[#0a84ff] cursor-pointer text-right"
+                  onClick={handleResendOtp}
+                >
+                  Resend OTP
+                </button>
+              )}
+            </div>
           </div>
-
         </div>
       </div>
     </div>
