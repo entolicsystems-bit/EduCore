@@ -1,7 +1,6 @@
 // src/prisma/prisma.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import * as config from 'config';
 
 @Injectable()
 export class PrismaService
@@ -12,10 +11,10 @@ export class PrismaService
     super({
       datasources: {
         db: {
-          url: config.get<string>('DATABASE_URL'), 
+          url: process.env.DATABASE_URL, // Use env var directly
         },
       },
-      log: ['error', 'warn'], 
+      log: ['error', 'warn'],
     });
   }
 
