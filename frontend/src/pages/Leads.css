@@ -23,12 +23,9 @@
 }
 
 .btn-outline {
-<<<<<<< HEAD
   height: 40px;
   padding: 0 22px;
-=======
   padding: 10px 22px;
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   border-radius: 8px;
   border: 1px solid #0d99ff;
   background: transparent;
@@ -36,16 +33,16 @@
   font-size: 13px;
 }
 
-<<<<<<< HEAD
+
 .btn-primary {
   padding: 0 22px;
  margin-bottom: 10px;
  height: 40px;
-=======
+  
 .btn-create-lead {
   margin-top: 0 !important;
   padding: 10px 20px !important;
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
+
 }
 
 /* FILTERS */
@@ -89,12 +86,10 @@ thead {
   background: #f9fafb;
 }
 
-<<<<<<< HEAD
 th, td {
-=======
+
 th,
 td {
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   padding: 12px;
   border-bottom: 1px solid #eef2f7;
   font-size: 13px;
@@ -155,23 +150,20 @@ th {
 /* PAGINATION */
 .pagination {
   display: flex;
-<<<<<<< HEAD
   justify-content: space-between;
   align-items: center;
-=======
   position: relative;
   /* justify-content: space-between;
   align-items: center; */
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   margin-top: 14px;
   font-size: 13px;
 }
 
-<<<<<<< HEAD
+
 .pages {
   display: flex;
   gap: 6px;
-=======
+
 /* .pagination span {
   width: 15%;
 } */
@@ -182,20 +174,20 @@ th {
   display: flex;
   gap: 6px;
   transform: translate(-50%, 0);
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
+
 }
 
 .pages button {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-<<<<<<< HEAD
+
   border: 1px solid #E5E7EB;
   background: #E5E7EB;
-=======
+
   border: 1px solid #e5e7eb;
   background: #e5e7eb;
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
+
   cursor: pointer;
 }
 
