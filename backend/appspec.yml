@@ -1,44 +1,5 @@
-version: 0.2
-
-env:
-  variables:
-    NODE_VERSION: "20"
-    DATABASE_URL: "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19aSjV3QzMzZVBGdWc2UzJ5SlNQLWMiLCJhcGlfa2V5IjoiMDFLRFNUWlpWSktCWEE4MlMxWTNBVEdTTjQiLCJ0ZW5hbnRfaWQiOiIzNDZhYzFkOTJlYjc5Njg4NThhNzZjODFkMTgyMzgwOTRjMGZjODRiY2Q4MDQ0YjdlNWFmMGRiNDVlYjljYzQ4IiwiaW50ZXJuYWxfc2VjcmV0IjoiYjFmYTA2OWEtZWY4Ni00YmIxLWEzZDQtNDc1OGNlZTJkNDdkIn0.8Jkv1cpOdY05HaGdfYnUH3NTVipDiRx-LCqShKS0e1M"
-
-phases:
-  install:
-    runtime-versions:
-      nodejs: $NODE_VERSION
-    commands:
-      - echo "Installing root dependencies..."
-      - npm install -g npm@9
-      - echo "Installing backend dependencies..."
-      - cd backend
-      - npm ci
-      - npx prisma generate
-      - cd ..
-      - echo "Installing frontend dependencies..."
-      - cd frontend
-      - npm ci
-      - cd ..
-
-  pre_build:
-    commands:
-      - echo "Pre-build phase complete"
-
-  build:
-    commands:
-      - echo "Building backend..."
-      - cd backend
-      - npm run build
-      - cd ..
-      - echo "Building frontend..."
-      - cd frontend
-      - npm run build
-      - cd ..
-
-artifacts:
-  files:
-    - backend/dist/**/*   # backend build artifacts
-    - frontend/dist/**/*  # frontend build artifacts
-  base-directory: ./   # base directory for artifacts
+hooks:
+  AfterInstall:
+    - location: scripts/install-deps.sh
+      timeout: 300
+      runas: ec2-user
