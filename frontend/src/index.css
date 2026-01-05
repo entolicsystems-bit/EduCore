@@ -1,11 +1,4 @@
 /* ===== RESET ===== */
-<<<<<<< HEAD
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-=======
 @import "tailwindcss";
 
 /* * {
@@ -13,7 +6,6 @@
   padding: 0;
   box-sizing: border-box;
 } */
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 
 *,
 *::before,
@@ -41,16 +33,12 @@ body {
 body {
   width: 100%;
   font-family: "Poppins", sans-serif;
-<<<<<<< HEAD
-  background: rgba(10, 132, 255, 0.08); /* Moved background here to ensure full coverage */
-=======
   background: rgba(
     10,
     132,
     255,
     0.08
   ); /* Moved background here to ensure full coverage */
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 /* ===== CSS VARIABLES ===== */
@@ -72,11 +60,7 @@ a {
 /* ===== SAFE BUTTON BASE ===== */
 button {
   font-family: inherit;
-<<<<<<< HEAD
-  border: none;
-=======
   /* border: none; */
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
   outline: none;
 }
 
@@ -89,8 +73,6 @@ button {
   align-items: center;
   justify-content: center;
   flex: 1;
-<<<<<<< HEAD
-=======
 }
 
 .auth-outer {
@@ -145,7 +127,6 @@ button {
     width: 100%;
     max-width: 380px;
   }
->>>>>>> 5aac09e3570f67aa3f52c483ad0569c079da4515
 }
 
 .auth-outer {
