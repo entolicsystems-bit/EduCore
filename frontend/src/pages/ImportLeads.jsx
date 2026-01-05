@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import "./ImportLeads.css";
-import uploadImage from "/uploadFile.png";
+import uploadImage from "./uploadFile.png";
 
 const ImportLeads = () => {
   const navigate = useNavigate();
