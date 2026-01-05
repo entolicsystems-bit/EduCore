@@ -14,7 +14,7 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
-   justify-content: center; 
+  justify-content: center;
   background: #eef4ff;
   padding: 0px 0px 18px 20px;
 }
@@ -54,28 +54,15 @@
   max-width: 100%;
 }
 
-/* FLOAT */
-/* .float{
-  animation: float 3s ease-in-out infinite;
-}
-@keyframes float{
-  0%{transform: translateY(0)}
-  50%{transform: translateY(-12px)}
-  100%{transform: translateY(0)}
-} */
-
 /* RIGHT */
 .right-card {
   flex: 0 0 380px;
   background: var(--card-bg);
   border-radius: 18px;
   padding: 24px;
-  /* display: flex; */
-  /* align-items: center; */
-  /* justify-content: center; */
 }
 
-.form{
+/* FORM */
 .form {
   width: 100%;
   margin-bottom: 100px;
@@ -83,16 +70,6 @@
   flex-direction: column;
   align-items: center;
 }
-
-/* .form h2 {
-  text-align: center;
-  align-self: flex-start;
-  text-align: left;
-  margin-bottom: 22px;
-  font-size: 22px;
-  font-weight: 700;
-} */
-
 
 /* INPUTS */
 .form input {
@@ -111,7 +88,6 @@
   padding: 14px;
   border-radius: 30px;
   border: none;
-  background: #0D99FF;
   background: #0d99ff;
   color: #fff;
   font-size: 16px;
@@ -124,22 +100,20 @@
 .btn:not(:disabled):hover {
   background-color: #0f66d6;
 }
+
 .btn:disabled {
   background: #a0c4ff;
   cursor: not-allowed;
 }
+
 /* BACK LINK */
-.back-link{
 .back-link {
   text-align: right;
-  /* margin-top: 14px; */
-  /* padding-left: 220px; */
   color: #1677ff;
   font-size: 14px;
   cursor: pointer;
 }
 
-.back-link:hover{
 .back-link:hover {
   color: orangered;
 }
@@ -168,4 +142,3 @@
   background-color: #ffffff !important;
   color: #111827;
 }
-
