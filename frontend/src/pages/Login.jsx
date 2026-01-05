@@ -124,7 +124,7 @@ const Login = () => {
                 </span> */}
 
                 <span
-                  className="link2"
+                 // className="link2"
 
                   className="link2 hover:text-orange-500 text-[#0a84ff] cursor-pointer"
 
