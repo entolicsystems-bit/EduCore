@@ -7,17 +7,16 @@ datasource db {
 }
 
 model Lead {
-  id           String         @id @default(uuid())
-  name         String
-  phone        String         @unique
-  email        String?        @unique
-  source       String
-  status       String         @default("NEW")
-  owner_id     String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  activities   LeadActivity[]
-  passwordHash String?        @db.VarChar(250)
+  id         String         @id @default(uuid())
+  name       String
+  phone      String         @unique
+  email      String?        @unique
+  source     String
+  status     String         @default("NEW")
+  owner_id   String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  activities LeadActivity[]
 }
 
 model LeadActivity {
