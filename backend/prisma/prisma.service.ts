@@ -1,23 +1,17 @@
-// src/prisma/prisma.service.ts
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import * as config from 'config'; 
 
 @Injectable()
-export class PrismaService extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService extends PrismaClient {
   constructor() {
     super({
-      log: ['error', 'warn', 'query'], // optional: add 'info' if needed
-      // DO NOT use accelerateUrl; Prisma picks up DATABASE_URL from .env
+      datasources: {
+        db: {
+          url: config.get<string>("DATABASE_URL"), 
+        },
+      },
+      log: ['error', 'warn','query'],
     });
-  }
-
-  async onModuleInit() {
-    await this.$connect();
-  }
-
-  async onModuleDestroy() {
-    await this.$disconnect();
   }
 }
