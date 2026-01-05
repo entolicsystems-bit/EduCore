@@ -54,17 +54,17 @@ const Leads = () => {
   }, [statusFilter, sourceFilter,ownerFilter, search]);
 
   /* FILTER */
-  const filteredLeads = leads.filter((lead) => {
-    const statusMatch =
-      statusFilter === "ALL" || lead.status === statusFilter;
+  // const filteredLeads = leads.filter((lead) => {
+  //   const statusMatch =
+  //     statusFilter === "ALL" || lead.status === statusFilter;
 
-    const sourceMatch =
-      sourceFilter === "ALL" || lead.source === sourceFilter;
+  //   const sourceMatch =
+  //     sourceFilter === "ALL" || lead.source === sourceFilter;
 
-    const ownerMatch =
-      ownerFilter === "ALL" || lead.owner === ownerFilter;
+  //   const ownerMatch =
+  //     ownerFilter === "ALL" || lead.owner === ownerFilter;
 
-  }, [statusFilter, sourceFilter, ownerFilter, search]);
+  // }, [statusFilter, sourceFilter, ownerFilter, search]);
 
   /* FILTER */
   const filteredLeads = leads.filter((lead) => {
@@ -127,12 +127,10 @@ const Leads = () => {
               Import CSV
             </button>
             <button
-
               className="btn-primary"
               className=" bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
               onClick={() => navigate("/leads/create")}
-            >
-              Create Lead
+              > Create Lead
             </button>
           </div>
         </div>
