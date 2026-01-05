@@ -27,9 +27,6 @@ const Leads = () => {
       setLeads(storedLeads);
 
       const uniqueOwners = [
-        ...new Set(
-          storedLeads.map((lead) => lead.owner).filter(Boolean)
-        ),
         ...new Set(storedLeads.map((lead) => lead.owner).filter(Boolean)),
       ];
       setOwners(uniqueOwners);
@@ -40,39 +37,21 @@ const Leads = () => {
     return () => window.removeEventListener("focus", loadLeads);
   }, []);
 
-  // delete lead
-  // const handleDelete = (id) => {
-  //   if (!window.confirm("Are you sure you want to delete?")) return;
-
-  //   setLeads((prev) => prev.filter((u) => u.id !== id));
-  //   setOpenMenuId(null);
-  // };
-
   /* RESET PAGE ON FILTER CHANGE */
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, sourceFilter,ownerFilter, search]);
-
-  /* FILTER */
-  // const filteredLeads = leads.filter((lead) => {
-  //   const statusMatch =
-  //     statusFilter === "ALL" || lead.status === statusFilter;
-
-  //   const sourceMatch =
-  //     sourceFilter === "ALL" || lead.source === sourceFilter;
-
-  //   const ownerMatch =
-  //     ownerFilter === "ALL" || lead.owner === ownerFilter;
-
-  // }, [statusFilter, sourceFilter, ownerFilter, search]);
+  }, [statusFilter, sourceFilter, ownerFilter, search]);
 
   /* FILTER */
   const filteredLeads = leads.filter((lead) => {
-    const statusMatch = statusFilter === "ALL" || lead.status === statusFilter;
+    const statusMatch =
+      statusFilter === "ALL" || lead.status === statusFilter;
 
-    const sourceMatch = sourceFilter === "ALL" || lead.source === sourceFilter;
+    const sourceMatch =
+      sourceFilter === "ALL" || lead.source === sourceFilter;
 
-    const ownerMatch = ownerFilter === "ALL" || lead.owner === ownerFilter;
+    const ownerMatch =
+      ownerFilter === "ALL" || lead.owner === ownerFilter;
 
     const searchText = search.toLowerCase();
     const searchMatch =
@@ -109,16 +88,11 @@ const Leads = () => {
   return (
     <DashboardLayout>
       <div className="leads-page">
-     {/* HEADER */}
-        <div className="leads-header">
-          <h2>Leads</h2>
-          <div className="header-actions">
-            <button
-              className="btn-outline"
 
         {/* HEADER */}
         <div className="leads-header">
           <h2 className="font-bold">Leads</h2>
+
           <div className="header-actions">
             <button
               className="border-2 border-[#0d99ff] text-[#0d99ff] px-6 py-2 rounded-md cursor-pointer"
@@ -126,11 +100,12 @@ const Leads = () => {
             >
               Import CSV
             </button>
+
             <button
-              className="btn-primary"
-              className=" bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
+              className="bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
               onClick={() => navigate("/leads/create")}
-              > Create Lead
+            >
+              Create Lead
             </button>
           </div>
         </div>
@@ -151,22 +126,19 @@ const Leads = () => {
             <option value="Social Media">Social Media</option>
             <option value="Email Campaign">Email Campaign</option>
           </select>
-          <select 
-             value={ownerFilter}
-             onChange={(e) => setSourceFilter(e.target.value)}>
+
           <select
             value={ownerFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
+            onChange={(e) => setOwnersFilter(e.target.value)}
           >
             <option value="ALL">All Owner</option>
-            {owner.map((owner, index) => (
-              <option key={index} value={owner}>
-                {owner}
+            {owner.map((o, index) => (
+              <option key={index} value={o}>
+                {o}
               </option>
             ))}
           </select>
 
-          {/* RIGHT ALIGNED SEARCH */}
           <input
             className="search-input"
             placeholder="Search leads..."
@@ -188,6 +160,7 @@ const Leads = () => {
                 <th></th>
               </tr>
             </thead>
+
             <tbody>
               {currentLeads.map((lead) => (
                 <tr
@@ -201,8 +174,10 @@ const Leads = () => {
                       <span>{lead.email}</span>
                     </div>
                   </td>
+
                   <td>{lead.phone}</td>
                   <td>{lead.source}</td>
+
                   <td>
                     <div className="owner-cell">
                       <div className="owner-badge">
@@ -211,28 +186,21 @@ const Leads = () => {
                       {lead.owner}
                     </div>
                   </td>
+
                   <td>
                     <span className={`status ${lead.status.toLowerCase()}`}>
                       {lead.status}
                     </span>
                   </td>
-                  {/* <td>
-                    <button
-                      className="cursor-pointer hover:bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center z-10"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate("/register");
-                      }}
-                    >
-                      <i className="ri-more-2-fill"></i>
-                    </button>
-                  </td> */}
+
                   <td className="relative">
                     <button
                       className="cursor-pointer hover:bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center z-10"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setOpenMenuId(openMenuId === lead.id ? null : lead.id);
+                        setOpenMenuId(
+                          openMenuId === lead.id ? null : lead.id
+                        );
                       }}
                     >
                       <i className="ri-more-2-fill"></i>
@@ -245,17 +213,12 @@ const Leads = () => {
                       >
                         <button
                           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                          onClick={() => navigate(`/users/edit/${lead.id}`)}
+                          onClick={() =>
+                            navigate(`/users/edit/${lead.id}`)
+                          }
                         >
                           ✏️ Edit
                         </button>
-
-                        {/* <button
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(lead.id)}
-                        >
-                          🗑 Delete
-                        </button> */}
                       </div>
                     )}
                   </td>
@@ -264,7 +227,7 @@ const Leads = () => {
 
               {currentLeads.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="no-data">
+                  <td colSpan="6" className="no-data">
                     No leads found
                   </td>
                 </tr>
@@ -274,39 +237,6 @@ const Leads = () => {
         </div>
 
         {/* PAGINATION */}
-        
-          <div className="pagination">
-            <span>
-              Showing {showingFrom} to {showingTo} of {totalItems} results
-            </span>
-
-            <div className="pages">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
-              >
-                ‹
-              </button>
-
-              {getVisiblePages().map((page) => (
-                <button
-                  key={page}
-                  className={currentPage === page ? "active" : ""}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(currentPage + 1)}
-              >
-                ›
-              </button>
-            </div>
-          </div>
-
         <div className="pagination">
           <span>
             Showing {showingFrom} to {showingTo} of {totalItems} results
@@ -338,6 +268,7 @@ const Leads = () => {
             </button>
           </div>
         </div>
+
       </div>
     </DashboardLayout>
   );
