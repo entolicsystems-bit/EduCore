@@ -1,18 +1,13 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Backend deployment started"
+echo "Starting backend AfterDeploy script..."
 
-cd /home/ec2-user/EduCore/backend
+cd /home/ec2-user/backend || exit 1
 
-echo "📦 Installing dependencies"
-npm install --omit=dev
+npm install --production
+npm run build
 
-echo "🧬 Generating Prisma client"
-npx prisma generate
+pm2 restart all || pm2 start dist/main.js --name backend
 
-echo "♻️ Restarting backend service"
-pm2 restart backend || pm2 start dist/main.js --name backend
-
-echo "✅ Backend deployment completed"
-exit 0
+echo "Backend deployment completed successfully"
