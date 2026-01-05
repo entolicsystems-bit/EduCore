@@ -1,53 +1,62 @@
 import 'package:equatable/equatable.dart';
 
-class AuthState extends Equatable {
-  final bool isStudent;
+class LoginState extends Equatable {
   final String email;
   final String password;
   final bool isPasswordVisible;
   final bool isLoading;
   final bool isSuccess;
   final String? errorMessage;
+  final bool isAuthenticated;
+  final String? accessToken;
+  final String? refreshToken;
 
-  const AuthState({
-    this.isStudent = true,
+  const LoginState({
     this.email = '',
     this.password = '',
     this.isPasswordVisible = false,
     this.isLoading = false,
     this.isSuccess = false,
     this.errorMessage,
+    this.isAuthenticated = false,
+    this.accessToken,
+    this.refreshToken,
   });
 
-  AuthState copyWith({
-    bool? isStudent,
+  LoginState copyWith({
     String? email,
     String? password,
     bool? isPasswordVisible,
     bool? isLoading,
-    bool? isSuccess, // ✅ ADD THIS
+    bool? isSuccess,
     String? errorMessage,
+    bool? isAuthenticated,
+    String? accessToken,
+    String? refreshToken,
   }) {
-    return AuthState(
-      isStudent: isStudent ?? this.isStudent,
+    return LoginState(
       email: email ?? this.email,
       password: password ?? this.password,
-      isPasswordVisible:
-      isPasswordVisible ?? this.isPasswordVisible,
+      isPasswordVisible: isPasswordVisible ?? this.isPasswordVisible,
       isLoading: isLoading ?? this.isLoading,
       isSuccess: isSuccess ?? this.isSuccess,
       errorMessage: errorMessage,
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
+      accessToken: accessToken ?? this.accessToken,
+      refreshToken: refreshToken ?? this.refreshToken,
     );
   }
 
   @override
   List<Object?> get props => [
-    isStudent,
     email,
     password,
     isPasswordVisible,
     isLoading,
-    isSuccess, // ✅ ADD THIS
+    isSuccess,
     errorMessage,
+    isAuthenticated,
+    accessToken,
+    refreshToken,
   ];
 }
