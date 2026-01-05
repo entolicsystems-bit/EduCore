@@ -13,11 +13,7 @@ import LeadDetails from "./pages/LeadDetails";
 import ImportLeads from "./pages/ImportLeads";
 import UsersRoles from "./pages/UsersRoles";
 
-<<<<<<< HEAD
-import ProtectedRoute from "../routes/ProtectedRoute";
-=======
 // import ProtectedRoute from "../routes/ProtectedRoute";
->>>>>>> 4abeb698185233caddf91cfc03b4dfbe11b97a16
 
 function App() {
   return (
