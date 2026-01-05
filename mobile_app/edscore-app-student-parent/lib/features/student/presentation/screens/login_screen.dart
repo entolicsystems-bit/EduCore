@@ -397,7 +397,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 14.h),
+                  SizedBox(height: 18.h),
 
                   // Footer
                   Column(

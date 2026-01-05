@@ -8,7 +8,8 @@ class ResetPasswordSuccess extends ResetPasswordState {}
 
 class ResetPasswordFailure extends ResetPasswordState {
   final String error;
-  ResetPasswordFailure(this.error);
+
+  ResetPasswordFailure({required this.error});
 }
 
 class ResetPasswordValidating extends ResetPasswordState {
