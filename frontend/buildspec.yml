@@ -5,15 +5,23 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
+      - echo "Installing latest npm..."
       - npm install -g npm@9
       - cd frontend
       - npm ci
-
+  pre_build:
+    commands:
+      - echo "Pre-build phase complete"
   build:
     commands:
+      - echo "Building frontend..."
       - npm run build
+  post_build:
+    commands:
+      - echo "Build complete"
 
 artifacts:
-  base-directory: frontend/build
+  # Vite outputs to 'dist' by default
+  base-directory: frontend/dist
   files:
     - '**/*'
