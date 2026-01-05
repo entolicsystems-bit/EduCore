@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import "./ImportLeads.css";
-import uploadImage from "./uploadFile.png";
 
 const ImportLeads = () => {
   const navigate = useNavigate();
@@ -80,7 +79,8 @@ const ImportLeads = () => {
               className="cursor-pointer flex flex-col items-center py-6 hover:border-2 hover:bg-[#eff6ff] hover:border-[#3b82f6] rounded-lg"
               onClick={() => document.getElementById("csvInput").click()}
             >
-              <img src={uploadImage} alt="Upload" className="w-28 h-28" />
+              {/* Use public folder path */}
+              <img src="/uploadFile.png" alt="Upload" className="w-28 h-28" />
 
               <h3 className="pt-5 text-gray-400 text-lg">
                 Drag & drop CSV file here
