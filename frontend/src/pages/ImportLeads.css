@@ -3,35 +3,21 @@
   width: 100%;
   height: 100%;
   padding: 2rem;
-  background-color: #f3f4f6; /* Light gray background */
-  border: none; 
-  box-sizing: border-box;
-}
-
-.import-header {
-/* .import-page {
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
   background-color: #f3f4f6;
   border: none;
   box-sizing: border-box;
-} */
+}
 
-/* .import-header {
+/* --- HEADER --- */
+.import-header {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
-  color: #B5B5B5;
+  color: #b5b5b5;
 }
 
-
 .back-btn {
-  color: #b5b5b5;
-} */
-
-/* .back-btn {
   background: none;
   border: none;
   font-size: 1.25rem;
@@ -43,71 +29,40 @@
 .import-header h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: #B5B5B5;
+  color: #b5b5b5;
 }
 
-/* --- MAIN CARD (The white box) --- */
+/* --- MAIN CARD --- */
 .import-card {
-  background: white;
-  max-width: 700px; 
-} */
-
-/* .import-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #b5b5b5;
-} */
-
-/* --- MAIN CARD (The white box) --- */
-/* .import-card {
   background: white;
   max-width: 700px;
   width: 100%;
-  height: 350px;
   margin: 0 auto;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   overflow: hidden;
-  border: none; 
+  border: none;
 }
 
 /* --- UPLOAD BOX --- */
 .upload-box {
-  border: none;
-} */
-
-/* --- UPLOAD BOX --- */
-/* .upload-box {
   padding: 3rem;
   text-align: center;
-  border: 2px;
   border-radius: 8px;
   margin: 1rem;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .upload-box:hover {
-  border-color: #3b82f6;
   background-color: #eff6ff;
 }
 
-
-
 .browse-link {
-} */
-
-/* .upload-box:hover {
-  border-color: #3b82f6;
-  background-color: #eff6ff;
-} */
-
-/* .browse-link {
   color: #3b82f6;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
-
 }
 
 .upload-hint {
@@ -116,21 +71,12 @@
   margin-top: 0.5rem;
 }
 
-} */
-
-/* .upload-hint {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-top: 0.5rem;
-} */
-
-/* --- IMPORT SUMMARY DIV (The separate box you requested) --- */
+/* --- IMPORT SUMMARY --- */
 .import-summary-container {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 110px;
   box-sizing: border-box;
 }
 
@@ -146,7 +92,6 @@
 .summary-list {
   display: flex;
   flex-direction: column;
-  gap: 0; 
 }
 
 .summary-row {
@@ -166,7 +111,6 @@
 .summary-row .label {
   font-weight: 500;
   font-size: 16px;
-
 }
 
 .summary-row .value {
@@ -174,52 +118,36 @@
   font-size: 17px;
 }
 
-/* Specific Colors */
 .value.success {
-  color: #10b981; /* Green */
+  color: #10b981;
 }
 
 .value.failed {
-  color: #ef4444; /* Red */
+  color: #ef4444;
 }
 
-/* --- BUTTONS AREA --- */
+/* --- ACTION BUTTONS --- */
 .summary-actions {
-
-/* .summary-actions {
   margin-top: 2rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
-
 }
 
 .btn-download {
-} */
-
-/* .btn-download {
   padding: 0.5rem 1rem;
-  background: white;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  background: #e5e7eb;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.875rem;
-
+  color: #374151;
 }
 
 .btn-download:hover {
-  background-color: #f9fafb;
+  background-color: #d1d5db;
 }
-
-} */
-
-/* .btn-download:hover {
-  background-color: #f9fafb;
-} */
-
 
 .btn-done {
   padding: 0.5rem 1.5rem;
@@ -234,8 +162,4 @@
 
 .btn-done:hover {
   background: #1d4ed8;
-
 }
-
-}
-
