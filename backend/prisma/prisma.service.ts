@@ -12,19 +12,17 @@ export class PrismaService
     super({
       datasources: {
         db: {
-          url: config.get<string>('DATABASE_URL'), // dynamically set database URL
+          url: config.get<string>('DATABASE_URL'), 
         },
       },
-      log: ['error', 'warn', 'query'], // optional: include 'query' for debugging
+      log: ['error', 'warn'], 
     });
   }
 
-  // Connect when the module initializes
   async onModuleInit() {
     await this.$connect();
   }
 
-  // Disconnect gracefully when the module is destroyed
   async onModuleDestroy() {
     await this.$disconnect();
   }
