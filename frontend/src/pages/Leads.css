@@ -24,7 +24,6 @@
 
 .btn-outline {
   height: 40px;
-  padding: 0 22px;
   padding: 10px 22px;
   border-radius: 8px;
   border: 1px solid #0d99ff;
@@ -33,16 +32,15 @@
   font-size: 13px;
 }
 
-
 .btn-primary {
+  height: 40px;
   padding: 0 22px;
- margin-bottom: 10px;
- height: 40px;
-  
+  margin-bottom: 10px;
+}
+
 .btn-create-lead {
   margin-top: 0 !important;
   padding: 10px 20px !important;
-
 }
 
 /* FILTERS */
@@ -85,8 +83,6 @@ table {
 thead {
   background: #f9fafb;
 }
-
-th, td {
 
 th,
 td {
@@ -153,20 +149,9 @@ th {
   justify-content: space-between;
   align-items: center;
   position: relative;
-  /* justify-content: space-between;
-  align-items: center; */
   margin-top: 14px;
   font-size: 13px;
 }
-
-
-.pages {
-  display: flex;
-  gap: 6px;
-
-/* .pagination span {
-  width: 15%;
-} */
 
 .pages {
   position: absolute;
@@ -174,20 +159,14 @@ th {
   display: flex;
   gap: 6px;
   transform: translate(-50%, 0);
-
 }
 
 .pages button {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-
-  border: 1px solid #E5E7EB;
-  background: #E5E7EB;
-
   border: 1px solid #e5e7eb;
   background: #e5e7eb;
-
   cursor: pointer;
 }
 
