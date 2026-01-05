@@ -14,7 +14,7 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
+   justify-content: center; 
   background: #eef4ff;
   padding: 0px 0px 18px 20px;
 }
@@ -91,6 +91,7 @@
   font-size: 22px;
   font-weight: 700;
 } */
+
 
 /* INPUTS */
 .form input {

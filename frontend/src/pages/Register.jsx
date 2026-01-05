@@ -12,6 +12,7 @@ const Register = () => {
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // user types input,re-check the form
   useEffect(() => {
@@ -85,6 +86,11 @@ const Register = () => {
     navigate("/");
   };
 
+  // show Password toggle
+  const toggleShowPassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   return (
     <div className="page">
       <div className="outer-card">
@@ -119,16 +125,21 @@ const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+              <div className="border-2 relative border-gray-300 px-3 py-3 rounded-2xl">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="outline-none w-full"
+                  placeholder="Enter Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <i
+                  className="ri-eye-line absolute right-2.5 top-2.5 text-lg text-blue-500 cursor-pointer"
+                  onClick={toggleShowPassword}
+                ></i>
+              </div>
 
-              <input
-                type="password"
-                className="border-2 border-gray-300 px-3 py-3 rounded-2xl"
-                placeholder="Enter Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              {error && <p className="error-message">{error}</p>}
+              {error && <p className="error-message text-[#EF4444]">{error}</p>}
 
               {/* Disable button until valid */}
               <button

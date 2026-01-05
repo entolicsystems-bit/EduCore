@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const navigate = useNavigate();
 
   // close dropdown on outside click
   useEffect(() => {
@@ -21,7 +24,7 @@ const Navbar = () => {
 
       <div className="flex gap-6 items-center">
         {/* Notification */}
-        <div className="relative w-8 h-8 flex justify-center items-center rounded-full bg-[#82c0eb] cursor-pointer">
+        <div className="relative w-8 h-8 flex justify-center items-center rounded-full bg-[#b8dbf6] cursor-pointer">
           <span className="absolute top-0 right-0 bg-[#1d6bff] rounded-full h-2.5 w-2.5"></span>
           <i className="ri-notification-4-line text-2xl"></i>
         </div>
@@ -50,16 +53,25 @@ const Navbar = () => {
               </div>
 
               <ul className="py-2">
-                <li className="mx-2 px-3 py-2 text-sm hover:text-white rounded-md hover:bg-blue-500 cursor-pointer">
+                <li
+                  className="mx-2 px-3 py-2 text-sm hover:text-white rounded-md hover:bg-blue-500 cursor-pointer"
+                  onClick={() => navigate("/profile")}
+                >
                   Profile
                 </li>
-                <li className="mx-2 px-3 py-2 text-sm hover:text-white rounded-md hover:bg-blue-500 cursor-pointer">
+                <li
+                  className="mx-2 px-3 py-2 text-sm hover:text-white rounded-md hover:bg-blue-500 cursor-pointer"
+                  onClick={() => navigate("/settings")}
+                >
                   Settings
                 </li>
 
                 <div className="my-2 border-t border-gray-200"></div>
 
-                <li className="mx-2 px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 cursor-pointer">
+                <li
+                  className="mx-2 px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 cursor-pointer"
+                  onClick={() => navigate("/")}
+                >
                   Log out
                 </li>
               </ul>

@@ -13,7 +13,7 @@ import LeadDetails from "./pages/LeadDetails";
 import ImportLeads from "./pages/ImportLeads";
 import UsersRoles from "./pages/UsersRoles";
 
-import ProtectedRoute from "../routes/ProtectedRoute";
+// import ProtectedRoute from "../routes/ProtectedRoute";
 
 function App() {
   return (
@@ -30,45 +30,45 @@ function App() {
         <Route
           path="/leads"
           element={
-            <ProtectedRoute>
-              <Leads />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <Leads />
+            // </ProtectedRoute>
           }
         />
 
         <Route
           path="/leads/create"
           element={
-            <ProtectedRoute>
-              <CreateLead />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <CreateLead />
+            // </ProtectedRoute>
           }
         />
 
         <Route
           path="/leads/:id"
           element={
-            <ProtectedRoute>
-              <LeadDetails />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <LeadDetails />
+            // </ProtectedRoute>
           }
         />
 
         <Route
           path="/leads/import"
           element={
-            <ProtectedRoute>
-              <ImportLeads />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <ImportLeads />
+            // </ProtectedRoute>
           }
         />
 
         <Route
           path="/users-roles"
           element={
-            <ProtectedRoute>
-              <UsersRoles />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <UsersRoles />
+            // </ProtectedRoute>
           }
         />
       </Routes>
