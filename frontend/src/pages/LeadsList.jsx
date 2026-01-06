@@ -52,6 +52,12 @@ const Leads = () => {
 
     const ownerMatch =
       ownerFilter === "ALL" || lead.owner === ownerFilter;
+    
+    const statusMatch = statusFilter === "ALL" || lead.status === statusFilter;
+
+    const sourceMatch = sourceFilter === "ALL" || lead.source === sourceFilter;
+
+    const ownerMatch = ownerFilter === "ALL" || lead.owner === ownerFilter;
 
     const searchText = search.toLowerCase();
     const searchMatch =
@@ -103,6 +109,8 @@ const Leads = () => {
 
             <button
               className="bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
+
+              className=" bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
               onClick={() => navigate("/leads/create")}
             >
               Create Lead
@@ -237,6 +245,7 @@ const Leads = () => {
         </div>
 
         {/* PAGINATION */}
+
         <div className="pagination">
           <span>
             Showing {showingFrom} to {showingTo} of {totalItems} results
@@ -268,7 +277,6 @@ const Leads = () => {
             </button>
           </div>
         </div>
-
       </div>
     </DashboardLayout>
   );

@@ -1,4 +1,5 @@
 /* ===== RESET ===== */
+
 * {
   margin: 0;
   padding: 0;
@@ -46,7 +47,6 @@ body {
     255,
     0.08
   ); /* Moved background here to ensure full coverage */
-
 }
 
 /* ===== CSS VARIABLES ===== */
@@ -82,7 +82,6 @@ button {
   align-items: center;
   justify-content: center;
   flex: 1;
-
 }
 
 .auth-outer {

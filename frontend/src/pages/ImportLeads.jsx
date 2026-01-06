@@ -53,8 +53,9 @@ const ImportLeads = () => {
 
   return (
     <DashboardLayout>
-      <div className="import-page bg-[#f3f4f6] min-h-screen">
 
+      <div className="import-page bg-[#f3f4f6] min-h-screen">
+      <div className="flex flex-col items-center w-full h-full bg-[#f3f4f6]">
         {/* HEADER */}
         <div className="w-full px-6 py-3">
           <button className="back-btn" onClick={() => navigate(-1)}>
@@ -67,6 +68,11 @@ const ImportLeads = () => {
 
           {/* UPLOAD CARD (ALWAYS VISIBLE) */}
           <div className="bg-white w-[90%] max-w-3xl rounded-2xl shadow-md p-8 text-center">
+        {/* CARD */}
+        <div className="flex flex-col gap-4 w-full px-4 sm:px-0 items-center">
+          {/* UPLOAD STATE (ALWAYS VISIBLE) */}
+          <div className="text-center flex flex-col gap-6 bg-white w-[90%] rounded-2xl shadow-md p-8">
+
             <input
               type="file"
               id="csvInput"
@@ -142,3 +148,5 @@ const ImportLeads = () => {
 };
 
 export default ImportLeads;
+export default ImportLeads;
+

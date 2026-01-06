@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -52,6 +53,7 @@ const DashboardLayout = ({ children }) => {
         <main className="content">{children}</main>
       </div>
     </div>
+    </>
   );
 };
 

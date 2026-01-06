@@ -15,7 +15,6 @@
   flex-direction: column;
   border-right: 1px solid #eef2f7;
 }
-
 .logo {
   width: 160px;
   height: 80px;
@@ -35,7 +34,7 @@
 .sidebar-nav a {
   display: block;
   width: 100%;
-  
+
 .sidebar-nav {
   display: flex;
   flex-direction: column; /* 👈 INLINE COLUMN */
@@ -78,7 +77,6 @@
   font-size: 14px;
 } */
 
-
 /* CONTENT */
 .content {
   flex: 1;
@@ -89,6 +87,7 @@
 
 /* 🔥 FORCE SIDEBAR COLUMN FIX */
 .sidebar .sidebar-nav {
+
   display: flex !important;
   flex-direction: column !important;
   padding-left: 45px;
@@ -106,8 +105,10 @@
   margin: 0 !important;
   text-align: left !important;
 
+
 }
 
+} */
 
 } */
 

@@ -43,6 +43,8 @@ model User {
 
   refreshTokens RefreshToken[]
   roles         UserRole[]
+  createdAt     DateTime       @default(now())
+
 }
 
 model RefreshToken {
@@ -53,9 +55,8 @@ model RefreshToken {
   createdAt DateTime @default(now())
   jti       String   @unique
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
+ user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ @@index([userId])
 }
 
 model AuditLog {

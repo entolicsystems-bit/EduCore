@@ -149,9 +149,16 @@ th {
   justify-content: space-between;
   align-items: center;
   position: relative;
+  position: relative;
+  /* justify-content: space-between;
+  align-items: center; */
   margin-top: 14px;
   font-size: 13px;
 }
+
+/* .pagination span {
+  width: 15%;
+} */
 
 .pages {
   position: absolute;
