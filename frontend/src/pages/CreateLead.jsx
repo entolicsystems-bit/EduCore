@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
+import { createLead } from "../services/leadService";
 import "./CreateLead.css";
 
 const CreateLead = () => {
@@ -15,6 +16,7 @@ const CreateLead = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   // HANDLE CHANGE (phone digits only)
   const handleChange = (e) => {
@@ -59,20 +61,43 @@ const CreateLead = () => {
   };
 
   // SAVE
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) return;
 
-    const existingLeads = JSON.parse(localStorage.getItem("leads")) || [];
+    try{
+      setLoading(true);
 
-    const newLead = {
-      id: Date.now().toString(),
-      ...form,
-      status: "NEW",
-    };
+      await createLead({
+        name: form.name,
+        phone: form.phone,
+        email: form.owner,
+        source: form.source,
+      });
+ 
+      navigate("/leads");
+    }catch (error){
+      console.error("Create lead failed", error);
 
-    localStorage.setItem("leads", JSON.stringify([...existingLeads, newLead]));
+      if (error.response?.data?.mesaage){
+        alert(error.response.data.mesaage);
+      } else{
+        alert("something went wrong, Please try agin.");
+      }
+    } finally{
+      setLoading(false);
+    }
 
-    navigate("/leads");
+    // const existingLeads = JSON.parse(localStorage.getItem("leads")) || [];
+
+    // const newLead = {
+    //   id: Date.now().toString(),
+    //   ...form,
+    //   status: "NEW",
+    // };
+
+    // localStorage.setItem("leads", JSON.stringify([...existingLeads, newLead]));
+
+    // navigate("/leads");
   };
 
   return (
@@ -137,6 +162,7 @@ const CreateLead = () => {
             <button
               className="btn-cancel cursor-pointer"
               onClick={() => navigate("/leads")}
+              disabled = {loading}
             >
               Cancel
             </button>
