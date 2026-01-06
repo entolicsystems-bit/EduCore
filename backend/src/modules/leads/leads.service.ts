@@ -54,7 +54,6 @@ export class LeadsService {
         ...dto,
         owner_id: null, //new lead has no owner id
         status: "NEW",
-        
       });
 
       await Promise.all([
