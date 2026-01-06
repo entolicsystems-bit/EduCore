@@ -56,18 +56,25 @@ export class LeadsController {
     return this.service.updateLead(id, body, req.user);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN", "COUNSELLOR")
-  @Delete(":id")
-  deleteLead(@Param("id") id: string, @Req() req) {
-    return this.service.deleteLead(id, req.user);
-  }
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles("ADMIN", "COUNSELLOR")
+  // @Delete(":id")
+  // deleteLead(@Param("id") id: string, @Req() req) {
+  //   return this.service.deleteLead(id, req.user);
+  // }
 
   //counsellor and admin creates lead
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR")
-  @Post("counsellor")
+  @Post("add")
   createByCounsellor(@Body() dto: CreateLeadDto, @Req() req) {
     return this.service.createCounsellorLead(dto, req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR")
+  @Delete("delete/:id")
+  sdelete(@Param("id") id: string, @Req() req) {
+    return this.service.softDeleteUser(id,req.user);
   }
 }

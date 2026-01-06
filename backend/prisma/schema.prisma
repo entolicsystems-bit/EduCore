@@ -4,13 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // Prisma 7 does not support `url` in schema. 
-  // Connection string should be defined in prisma.config.ts or environment variable.
+  url = env("DATABASE_URL")
 }
-
-//////////////////////////
-// Leads and Activities //
-//////////////////////////
 
 model Lead {
   id         String         @id @default(uuid())
@@ -23,6 +18,7 @@ model Lead {
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
   activities LeadActivity[]
+  deleted_at DateTime?
 }
 
 model LeadActivity {
@@ -36,20 +32,16 @@ model LeadActivity {
   @@index([lead_id])
 }
 
-/////////////////////
-// Users & Auth    //
-/////////////////////
-
 model User {
-  id            String        @id @default(uuid()) @db.VarChar(250)
-  name          String?       @db.VarChar(250)
-  email         String        @unique @db.VarChar(250)
-  role          String?       @db.VarChar(250)
-  passwordHash  String?       @db.VarChar(250)
-  phone         String?       @db.VarChar(250)
-  refreshTokens RefreshToken[]  // Changed from single RefreshToken to array for 1:N relation
-  roles         UserRole[]      // No change, kept 1:N relation with UserRole
-  createdAt DateTime @default(now())
+  id            String         @id @default(uuid()) @db.VarChar(250)
+  name          String?        @db.VarChar(250)
+  email         String         @unique @db.VarChar(250)
+  role          String?        @db.VarChar(250)
+  passwordHash  String?        @db.VarChar(250)
+  phone         String?        @db.VarChar(250)
+  refreshTokens RefreshToken[]
+  roles         UserRole[]
+  createdAt     DateTime       @default(now())
 }
 
 model RefreshToken {
@@ -61,13 +53,8 @@ model RefreshToken {
   jti       String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])   // Added index for better query performance
-  
+  @@index([userId])
 }
-
-/////////////////////
-// Audit Logging   //
-/////////////////////
 
 model AuditLog {
   id        Int      @id @default(autoincrement())
@@ -79,25 +66,20 @@ model AuditLog {
   createdAt DateTime @default(now())
 }
 
-/////////////////////
-// Roles & Permissions //
-/////////////////////
-
 model Role {
   id          Int              @id @default(autoincrement())
   name        String           @unique
   createdAt   DateTime         @default(now())
-  users       UserRole[]
   permissions RolePermission[]
+  users       UserRole[]
 }
 
 model UserRole {
   id     Int    @id @default(autoincrement())
   userId String
   roleId Int
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, roleId])
   @@index([userId])
@@ -105,11 +87,10 @@ model UserRole {
 }
 
 model Permission {
-  id        Int      @id @default(autoincrement())
-  module    String
-  action    String
-  createdAt DateTime @default(now())
-
+  id              Int              @id @default(autoincrement())
+  module          String
+  action          String
+  createdAt       DateTime         @default(now())
   rolePermissions RolePermission[]
 
   @@unique([module, action])
@@ -119,9 +100,8 @@ model RolePermission {
   id           Int        @id @default(autoincrement())
   roleId       Int
   permissionId Int
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, permissionId])
   @@index([roleId])

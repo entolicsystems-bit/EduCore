@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:sizer/sizer.dart';
 import '../../bloc/auth/reset_password/reset_bloc.dart';
 import '../../bloc/auth/reset_password/reset_event.dart';
 import '../../bloc/auth/reset_password/reset_state.dart';
-
-
+import '../../../../core/theme/app_colours.dart';
 
 class ResetPasswordScreen extends StatelessWidget {
   final String email;
@@ -37,6 +36,31 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
 
+  // Cache computed values
+  late final BoxDecoration cardDecoration;
+  late final BorderRadius inputBorderRadius;
+  late final BorderRadius buttonBorderRadius;
+  late final double screenHeight;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    screenHeight = MediaQuery.of(context).size.height;
+    inputBorderRadius = BorderRadius.circular(1.5.h);
+    buttonBorderRadius = BorderRadius.circular(1.5.h);
+    cardDecoration = BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(2.5.h),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x14000000),
+          blurRadius: 16,
+          offset: Offset(0, 8),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _newPasswordController.dispose();
@@ -44,27 +68,37 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
     super.dispose();
   }
 
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(fontSize: 14.sp),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          top: 5.h,
+          left: 4.w,
+          right: 4.w,
+          bottom: screenHeight - 15.h,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FD),
+      backgroundColor: AppColors.background,
       body: BlocConsumer<ResetPasswordBloc, ResetPasswordState>(
         listener: (context, state) {
           if (state is ResetPasswordSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Password reset successful!'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            _showSnackBar('Password reset successful!', AppColors.success);
             Navigator.of(context).popUntil((route) => route.isFirst);
           } else if (state is ResetPasswordFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.error),
-                backgroundColor: Colors.red,
-              ),
-            );
+            _showSnackBar(state.error, AppColors.error);
           }
         },
         builder: (context, state) {
@@ -78,118 +112,86 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
 
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 5.w),
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 380),
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
+                constraints: BoxConstraints(maxWidth: 90.w),
+                padding: EdgeInsets.all(3.h),
+                decoration: cardDecoration,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
+                    // Header with back button
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Reset Password',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: AppColors.textPrimary,
+                            size: 24.sp,
                           ),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
+                        SizedBox(width: 2.w),
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: 1.h),
 
-                    TextField(
+                    // Title
+                    Padding(
+                      padding: EdgeInsets.only(left: 1.w),
+                      child: Text(
+                        'Reset Password',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 3.h),
+
+                    // New Password Field
+                    _PasswordField(
                       controller: _newPasswordController,
+                      hintText: 'Enter New Password',
+                      errorText: newPasswordError,
                       obscureText: _obscureNewPassword,
-                      decoration: InputDecoration(
-                        hintText: 'Enter new password',
-                        errorText: newPasswordError,
-                        filled: true,
-                        fillColor: const Color(0xFFF2F4F8),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureNewPassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureNewPassword = !_obscureNewPassword;
-                            });
-                          },
-                        ),
-                      ),
+                      borderRadius: inputBorderRadius,
+                      onVisibilityToggle: () {
+                        setState(() {
+                          _obscureNewPassword = !_obscureNewPassword;
+                        });
+                      },
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: 2.h),
 
-                    TextField(
+                    // Confirm Password Field
+                    _PasswordField(
                       controller: _confirmPasswordController,
+                      hintText: 'Confirm Password',
+                      errorText: confirmPasswordError,
                       obscureText: _obscureConfirmPassword,
-                      decoration: InputDecoration(
-                        hintText: 'Confirm password',
-                        errorText: confirmPasswordError,
-                        filled: true,
-                        fillColor: const Color(0xFFF2F4F8),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureConfirmPassword =
-                              !_obscureConfirmPassword;
-                            });
-                          },
-                        ),
-                      ),
+                      borderRadius: inputBorderRadius,
+                      onVisibilityToggle: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: 3.h),
 
-
+                    // Reset Button
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
+                      height: 6.h,
                       child: ElevatedButton(
                         onPressed: state is ResetPasswordLoading
                             ? null
@@ -197,32 +199,31 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                           context.read<ResetPasswordBloc>().add(
                             ResetPasswordSubmitted(
                               email: widget.email,
-                              newPassword:
-                              _newPasswordController.text,
-                              confirmPassword:
-                              _confirmPasswordController.text,
+                              newPassword: _newPasswordController.text,
+                              confirmPassword: _confirmPasswordController.text,
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2196F3),
+                          backgroundColor: AppColors.primary,
+                          disabledBackgroundColor: AppColors.disabled,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: buttonBorderRadius,
                           ),
                         ),
                         child: state is ResetPasswordLoading
-                            ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
+                            ? SizedBox(
+                          height: 2.5.h,
+                          width: 2.5.h,
+                          child: const CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.white,
                           ),
                         )
-                            : const Text(
-                          'Reset Password',
+                            : Text(
+                          'Reset',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -230,20 +231,27 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: 2.h),
 
-
+                    // Back to Login Button
                     Center(
                       child: TextButton(
                         onPressed: () {
-                          Navigator.of(context)
-                              .popUntil((route) => route.isFirst);
+                          Navigator.of(context).popUntil((route) => route.isFirst);
                         },
-                        child: const Text(
-                          'Go back to Log in',
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 2.w,
+                            vertical: 1.h,
+                          ),
+                        ),
+                        child: Text(
+                          'Go Back to Log in',
                           style: TextStyle(
-                            color: Color(0xFF2196F3),
-                            fontSize: 14,
+                            color: AppColors.primary,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -254,6 +262,96 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// Extracted Password Field Widget
+class _PasswordField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final String? errorText;
+  final bool obscureText;
+  final BorderRadius borderRadius;
+  final VoidCallback onVisibilityToggle;
+
+  const _PasswordField({
+    required this.controller,
+    required this.hintText,
+    this.errorText,
+    required this.obscureText,
+    required this.borderRadius,
+    required this.onVisibilityToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      style: TextStyle(
+        fontSize: 16.sp,
+        color: AppColors.textPrimary,
+      ),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(
+          color: AppColors.textHint,
+          fontSize: 15.sp,
+        ),
+        errorText: errorText,
+        filled: true,
+        fillColor: AppColors.surface,
+        border: OutlineInputBorder(
+          borderRadius: borderRadius,
+          borderSide: const BorderSide(
+            color: AppColors.border,
+            width: 1,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: borderRadius,
+          borderSide: const BorderSide(
+            color: AppColors.border,
+            width: 1,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: borderRadius,
+          borderSide: const BorderSide(
+            color: AppColors.primary,
+            width: 1.5,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: borderRadius,
+          borderSide: const BorderSide(
+            color: AppColors.error,
+            width: 1,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: borderRadius,
+          borderSide: const BorderSide(
+            color: AppColors.error,
+            width: 1.5,
+          ),
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 4.w,
+          vertical: 2.h,
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscureText
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: AppColors.primary,
+            size: 22.sp,
+          ),
+          onPressed: onVisibilityToggle,
+        ),
       ),
     );
   }

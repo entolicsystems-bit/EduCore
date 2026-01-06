@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:student/features/student/presentation/screens/resend_password.dart';
-
+import 'package:sizer/sizer.dart';
 import '../../bloc/auth/otp_screen/otp_bloc.dart';
 import '../../bloc/auth/otp_screen/otp_event.dart';
 import '../../bloc/auth/otp_screen/otp_state.dart';
-
-
+import '../../../../core/theme/app_colours.dart';
+import 'resend_password.dart';
 
 class OtpScreen extends StatelessWidget {
   final String email;
@@ -42,20 +41,50 @@ class _OtpViewState extends State<OtpView> {
   int _secondsRemaining = 30;
   bool _isExpired = false;
 
+  // Cache computed values
+  late final BoxDecoration cardDecoration;
+  late final BorderRadius otpFieldBorderRadius;
+  late final BorderRadius buttonBorderRadius;
+
   @override
   void initState() {
     super.initState();
     _startTimer();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    otpFieldBorderRadius = BorderRadius.circular(1.5.h);
+    buttonBorderRadius = BorderRadius.circular(1.5.h);
+    cardDecoration = BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(2.5.h),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x14000000),
+          blurRadius: 16,
+          offset: Offset(0, 8),
+        ),
+      ],
+    );
+  }
+
   void _startTimer() {
     _timer?.cancel();
-    setState(() {
-      _secondsRemaining = 30;
-      _isExpired = false;
-    });
+    if (mounted) {
+      setState(() {
+        _secondsRemaining = 30;
+        _isExpired = false;
+      });
+    }
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
       if (_secondsRemaining > 0) {
         setState(() {
           _secondsRemaining--;
@@ -87,33 +116,60 @@ class _OtpViewState extends State<OtpView> {
     super.dispose();
   }
 
+  void _clearOtp() {
+    for (final c in _controllers) {
+      c.clear();
+    }
+    if (_focusNodes.isNotEmpty && _focusNodes.first.canRequestFocus) {
+      _focusNodes.first.requestFocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FD),
+      backgroundColor: AppColors.background,
       body: BlocConsumer<OtpBloc, OtpState>(
         listener: (context, state) {
           if (state is OtpVerified) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    ResetPasswordScreen
-                      (email: '',),
+                builder: (_) => ResetPasswordScreen(email: widget.email),
               ),
             );
           } else if (state is OtpFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.error),
-                backgroundColor: Colors.red,
+                content: Text(
+                  state.error,
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+                margin: EdgeInsets.only(
+                  top: 5.h,
+                  left: 4.w,
+                  right: 4.w,
+                  bottom: MediaQuery.of(context).size.height - 15.h,
+                ),
               ),
             );
           } else if (state is OtpResent) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('OTP resent successfully'),
-                backgroundColor: Colors.green,
+              SnackBar(
+                content: Text(
+                  'OTP resent successfully',
+                  style: TextStyle(fontSize: 15.sp),
+                ),
+                backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
+                margin: EdgeInsets.only(
+                  top: 5.h,
+                  left: 4.w,
+                  right: 4.w,
+                  bottom: MediaQuery.of(context).size.height - 15.h,
+                ),
               ),
             );
             _clearOtp();
@@ -123,103 +179,82 @@ class _OtpViewState extends State<OtpView> {
         builder: (context, state) {
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 5.w),
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 360),
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
+                constraints: BoxConstraints(maxWidth: 90.w),
+                padding: EdgeInsets.all(3.h),
+                decoration: cardDecoration,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () => Navigator.pop(context),
+                    // Header with back button
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: AppColors.textPrimary,
+                          size: 24.sp,
                         ),
-                         SizedBox(width: 10),
-                     Padding(
-                       padding:EdgeInsets.only(top: 40,right: 20),
-                       child: Text(
-                            'Enter Otp',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                     ),
-                      ],
+                        onPressed: () => Navigator.pop(context),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
                     ),
 
-                     SizedBox(height: 24),
+                    SizedBox(height: 2.h),
 
+                    // Title
+                    Text(
+                      'Enter Otp',
+                      style: TextStyle(
+                        fontSize: 21.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+
+                    SizedBox(height: 4.h),
+
+                    // OTP Input Fields
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: List.generate(4, (index) {
-                        return SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: TextField(
-                            controller: _controllers[index],
-                            focusNode: _focusNodes[index],
-                            enabled: !_isExpired,
-                            maxLength: 1,
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              filled: true,
-                              fillColor: _isExpired
-                                  ? Colors.grey
-                                  : const Color(0xFFF2F4F8),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            onChanged: (value) {
-                              if (value.isNotEmpty && index < 3) {
-                                _focusNodes[index + 1].requestFocus();
-                              } else if (value.isEmpty && index > 0) {
-                                _focusNodes[index - 1].requestFocus();
-                              }
-                            },
-                          ),
+                        return _OtpInputField(
+                          controller: _controllers[index],
+                          focusNode: _focusNodes[index],
+                          isExpired: _isExpired,
+                          borderRadius: otpFieldBorderRadius,
+                          onChanged: (value) {
+                            if (value.isNotEmpty && index < 3) {
+                              _focusNodes[index + 1].requestFocus();
+                            } else if (value.isEmpty && index > 0) {
+                              _focusNodes[index - 1].requestFocus();
+                            }
+                          },
                         );
                       }),
                     ),
 
-                    const SizedBox(height: 12),
+                    SizedBox(height: 1.5.h),
 
+                    // Expiry Message
                     if (_isExpired)
-                      const Text(
+                      Text(
                         'OTP expired. Please resend.',
                         style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 13,
+                          color: AppColors.error,
+                          fontSize: 13.sp,
                         ),
                       ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: 3.h),
 
+                    // Verify Button
                     SizedBox(
                       width: double.infinity,
-                      height: 46,
+                      height: 6.h,
                       child: ElevatedButton(
                         onPressed: (!_isOtpComplete || _isExpired || state is OtpLoading)
                             ? null
@@ -232,24 +267,25 @@ class _OtpViewState extends State<OtpView> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2196F3),
+                          backgroundColor: AppColors.primary,
+                          disabledBackgroundColor: AppColors.disabled,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: buttonBorderRadius,
                           ),
                         ),
                         child: state is OtpLoading
-                            ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
+                            ? SizedBox(
+                          height: 2.5.h,
+                          width: 2.5.h,
+                          child: const CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.white,
                           ),
                         )
-                            : const Text(
+                            : Text(
                           'Verify',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 17.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -257,9 +293,9 @@ class _OtpViewState extends State<OtpView> {
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: 2.h),
 
-
+                    // Resend OTP Button
                     TextButton(
                       onPressed: _isExpired
                           ? () {
@@ -270,19 +306,20 @@ class _OtpViewState extends State<OtpView> {
                           : null,
                       child: RichText(
                         text: TextSpan(
-                          text: _isExpired
-                              ? 'Resend OTP'
-                              : 'Resend OTP in ',
-                          style: const TextStyle(color: Colors.grey),
-                          children: _isExpired
-                              ? []
-                              : [
+                          text: 'Resend OTP in : ',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 15.sp,
+                          ),
+                          children: [
                             TextSpan(
-                              text:
-                              '00:${_secondsRemaining.toString().padLeft(2, '0')}',
-                              style: const TextStyle(
-                                color: Color(0xFF2196F3),
+                              text: _isExpired
+                                  ? 'Tap to resend'
+                                  : '00:${_secondsRemaining.toString().padLeft(2, '0')}',
+                              style: TextStyle(
+                                color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
+                                fontSize: 15.sp,
                               ),
                             ),
                           ],
@@ -298,12 +335,70 @@ class _OtpViewState extends State<OtpView> {
       ),
     );
   }
+}
 
+// Extracted OTP Input Field Widget
+class _OtpInputField extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool isExpired;
+  final BorderRadius borderRadius;
+  final ValueChanged<String> onChanged;
 
-  void _clearOtp() {
-    for (final c in _controllers) {
-      c.clear();
-    }
-    _focusNodes.first.requestFocus();
+  const _OtpInputField({
+    required this.controller,
+    required this.focusNode,
+    required this.isExpired,
+    required this.borderRadius,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 15.w,
+      height: 7.h,
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        enabled: !isExpired,
+        maxLength: 1,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 20.sp,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+        ),
+        decoration: InputDecoration(
+          counterText: '',
+          filled: true,
+          fillColor: isExpired ? AppColors.disabled : AppColors.surface,
+          border: OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: const BorderSide(
+              color: AppColors.border,
+              width: 1,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: const BorderSide(
+              color: AppColors.border,
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: const BorderSide(
+              color: AppColors.primary,
+              width: 2,
+            ),
+          ),
+          contentPadding: EdgeInsets.zero,
+        ),
+        onChanged: onChanged,
+      ),
+    );
   }
 }

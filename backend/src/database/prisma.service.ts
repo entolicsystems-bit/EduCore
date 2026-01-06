@@ -1,6 +1,6 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class PrismaService
@@ -9,7 +9,11 @@ export class PrismaService
 {
   constructor(private readonly config: ConfigService) {
     super({
-      accelerateUrl: config.get<string>('DATABASE_URL'),
+      datasources: {
+        db: {
+          url: config.get<string>("DATABASE_URL"),
+        },
+      },
     });
   }
 

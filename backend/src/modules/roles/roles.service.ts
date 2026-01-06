@@ -25,51 +25,59 @@ export class RolesService {
     });
   }
 
-  async registerStaff(dto: RegisterDto) {
-    const email = dto.email;
-    const name = dto.name;
-    const phone = dto.phone;
-    const password = dto.password;
-    const roleName = dto.role.toUpperCase();
+  async registerStaff(dto: RegisterDto, adminId: string) {
+    try {
+      const { email, name, phone, password } = dto;
+      const roleName = dto.role.toUpperCase();
 
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
-    if (existingUser) {
-      throw new BadRequestException("Email already exists");
+      const allowedRoles = ["COUNSELLOR", "TEACHER", "ACCOUNTANT"];
+      if (!allowedRoles.includes(roleName)) {
+        throw new BadRequestException("Invalid role");
+      }
+
+      const [emailExists, phoneExists] = await Promise.all([
+        this.prisma.user.findUnique({ where: { email } }),
+        this.prisma.user.findFirst({ where: { phone } }),
+      ]);
+
+      if (emailExists) throw new BadRequestException("Email already exists");
+      if (phoneExists) throw new BadRequestException("PhoneNo already exists");
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const user = await this.prisma.user.create({
+        data: {
+          email,
+          name,
+          phone,
+          role: roleName,
+          passwordHash: hashedPassword,
+        },
+      });
+
+      const roleMap = {
+        COUNSELLOR: 2,
+        TEACHER: 3,
+        ACCOUNTANT: 4,
+      };
+
+      await this.assignRole(user.id, roleMap[roleName]);
+
+      const { passwordHash: _, ...safeUser } = user;
+
+      await this.prisma.auditLog.create({
+        data: {
+          tableName: "User",
+          action: "AssignRole",
+          oldValue: null,
+          newValue: user,
+          userId: adminId,
+        },
+      });
+      return safeUser;
+    } catch (error) {
+      console.error("registerStaff failed:", error);
+      throw error;
     }
-
-    const existingPhone = await this.prisma.user.findFirst({
-      where: { phone },
-    });
-    if (existingPhone) {
-      throw new BadRequestException("PhoneNo already exists");
-    }
-
-    const allowedRoles = ["COUNSELLOR", "TEACHER", "ACCOUNTANT"];
-    if (!allowedRoles.includes(roleName)) {
-      throw new BadRequestException("Invalid role");
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        name,
-        phone,
-        role: roleName,
-        passwordHash: hashedPassword,
-      },
-    });
-
-    if (roleName === "COUNSELLOR") this.assignRole(user.id, 2);
-    else if (roleName === "TEACHER") this.assignRole(user.id, 3);
-    else if (roleName === "ACCOUNTANT") this.assignRole(user.id, 4);
-    else throw new BadRequestException("Invalid Role");
-
-    const { passwordHash: _, ...result } = user;
-
-    return result;
   }
 }

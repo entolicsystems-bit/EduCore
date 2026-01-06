@@ -1,32 +1,19 @@
 {
   "name": "educore",
   "version": "1.0.0",
-  "description": "EduCore is an enterprise-grade education management platform by Entolic Systems, designed to manage academic operations, automation, and institutional workflows. This repository follows a structured Git flow with strict branch governance, CI/CD integration, and production-grade release management.",
-  "main": "index.js",
+  "description": "EduCore is an enterprise-grade education management platform.",
+  "private": true,
+  "type": "commonjs",
   "engines": {
-    "node": "20.22.0",
-    "npm": "11.7.0"
+    "node": ">=20.19.0",
+    "npm": ">=9.0.0"
   },
   "scripts": {
     "build": "nest build",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test": "jest"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/entolicsystems-bit/EduCore.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/entolicsystems-bit/EduCore/issues"
-  },
-  "homepage": "https://github.com/entolicsystems-bit/EduCore#readme",
   "dependencies": {
     "@nestjs/common": "11.1.9",
     "@nestjs/config": "4.0.2",
@@ -36,7 +23,7 @@
     "@nestjs/platform-express": "11.1.9",
     "@nestjs/testing": "11.1.10",
     "@prisma/adapter-pg": "7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^5.22.0",
     "@prisma/extension-accelerate": "3.0.1",
     "bcrypt": "6.0.0",
     "class-transformer": "0.5.1",
@@ -51,17 +38,12 @@
     "winston": "3.19.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "11.0.14",
-    "@types/bcrypt": "6.0.0",
-    "@types/express": "5.0.6",
-    "@types/jest": "30.0.0",
-    "@types/multer": "2.0.0",
-    "@types/node": "25.0.3",
-    "@types/passport-jwt": "4.0.1",
-    "jest": "30.2.0",
-    "prisma": "7.2.0",
-    "ts-jest": "29.4.6",
-    "ts-node": "10.9.2",
-    "typescript": "5.9.3"
+    "@nestjs/cli": "^10.4.7",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.1.10",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.0.0",
+    "prisma": "5.22.0",
+    "typescript": "^5.4.5"
   }
 }

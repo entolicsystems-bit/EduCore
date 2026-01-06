@@ -109,7 +109,7 @@ async function seedRolesAndPermissions() {
     });
   }
 
-  console.log("Role permissions assigned");
+  console.log("✅ Role permissions assigned");
 }
 
 async function main() {

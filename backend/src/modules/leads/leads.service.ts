@@ -1,3 +1,4 @@
+import { Lead } from './../../interfaces/lead.interface';
 import {
   Injectable,
   BadRequestException,
@@ -54,6 +55,7 @@ export class LeadsService {
         ...dto,
         owner_id: null, //new lead has no owner id
         status: "NEW",
+        
       });
 
       await Promise.all([
@@ -73,7 +75,7 @@ export class LeadsService {
     } catch (error) {
       if (error.code === "P2002") {
         const field = error.meta?.target?.[0];
-        throw new BadRequestException(`${field} already exists`);
+        throw new BadRequestException("Existing email or phone number");
       }
       throw error;
     }
@@ -230,7 +232,7 @@ export class LeadsService {
     return updatedLead;
   }
 
-  async deleteLead(leadId: string, user: { id: string; role: string }) {
+  async softDeleteUser(leadId: string, user: { id: string; role: string }) {
     const lead = await this.repo.findById(leadId);
 
     if (!lead) {
@@ -249,7 +251,7 @@ export class LeadsService {
       }
     }
 
-    const deleteLead = await this.repo.deleteLead(leadId);
+   // const deleteLead = await this.repo.deleteLead(leadId);
 
     await this.prisma.auditLog.create({
       data: {
@@ -261,6 +263,12 @@ export class LeadsService {
       },
     });
 
-    return deleteLead;
+    return this.repo.sdelete(leadId);
+
+    //return deleteLead;
+    
   }
-}
+
+  }
+
+ 

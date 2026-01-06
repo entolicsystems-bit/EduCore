@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
 import { RolesService } from "./roles.service";
 import { Roles } from "../../common/decorator/roles.decorator";
 import { RolesGuard } from "../../guards/roles.guard";
@@ -16,15 +16,8 @@ export class RolesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
-  @Post("assign")
-  assignRole(@Body() dto: AssignRoleDto) {
-    return this.rolesService.assignRole(dto.userId, dto.roleId);
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN")
   @Post("create")
-  createStaff(@Body() dto: RegisterDto) {
-    return this.rolesService.registerStaff(dto);
+  createStaff(@Body() dto: RegisterDto, @Req() req) {
+    return this.rolesService.registerStaff(dto, req.user.id);
   }
 }
