@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
 }
 
 model Lead {
@@ -19,6 +18,8 @@ model Lead {
   updatedAt  DateTime       @updatedAt
   activities LeadActivity[]
   deleted_at DateTime?
+  tenantId String
+  branchId String
 }
 
 model LeadActivity {
