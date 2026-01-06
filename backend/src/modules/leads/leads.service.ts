@@ -1,3 +1,4 @@
+import { Lead } from './../../interfaces/lead.interface';
 import {
   Injectable,
   BadRequestException,
@@ -231,7 +232,7 @@ export class LeadsService {
     return updatedLead;
   }
 
-  async deleteLead(leadId: string, user: { id: string; role: string }) {
+  async softDeleteUser(leadId: string, user: { id: string; role: string }) {
     const lead = await this.repo.findById(leadId);
 
     if (!lead) {
@@ -250,7 +251,7 @@ export class LeadsService {
       }
     }
 
-    const deleteLead = await this.repo.deleteLead(leadId);
+   // const deleteLead = await this.repo.deleteLead(leadId);
 
     await this.prisma.auditLog.create({
       data: {
@@ -262,6 +263,12 @@ export class LeadsService {
       },
     });
 
-    return deleteLead;
+    return this.repo.sdelete(leadId);
+
+    //return deleteLead;
+    
   }
-}
+
+  }
+
+ 

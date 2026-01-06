@@ -1,6 +1,6 @@
-import 'package:educore/presentation/bloc/auth/reset/reset_event.dart';
-import 'package:educore/presentation/bloc/auth/reset/reset_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'reset_event.dart';
+import 'reset_state.dart';
 
 class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
   ResetPasswordBloc() : super(ResetPasswordInitial()) {
@@ -38,10 +38,16 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
 
     try {
       await Future.delayed(const Duration(seconds: 2));
-      // TODO: Replace with your API call
+      // TODO: Replace with your actual API call
+      // Example:
+      // await _authRepository.resetPassword(
+      //   email: event.email,
+      //   newPassword: event.newPassword,
+      // );
+
       emit(ResetPasswordSuccess());
     } catch (e) {
-      emit(ResetPasswordFailure(e.toString()));
+      emit(ResetPasswordFailure(error: e.toString()));
     }
   }
 }
