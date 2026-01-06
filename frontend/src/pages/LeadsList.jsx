@@ -155,12 +155,12 @@ const Leads = () => {
           <table>
             <thead>
               <tr>
-                <th>NAME</th>
-                <th>PHONE</th>
-                <th>SOURCE</th>
-                <th>OWNER</th>
-                <th>STATUS</th>
-                <th></th>
+                <th className="table-head">NAME</th>
+                <th className="table-head">PHONE</th>
+                <th className="table-head">SOURCE</th>
+                <th className="table-head">OWNER</th>
+                <th className="table-head">STATUS</th>
+                <th className="table-head">Action</th>
               </tr>
             </thead>
             <tbody>

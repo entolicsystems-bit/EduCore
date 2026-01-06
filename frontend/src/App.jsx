@@ -8,10 +8,13 @@ import Otp from "./pages/Otp";
 import ResetPassword from "./pages/ResetPassword";
 
 import Leads from "./pages/LeadsList";
+import Admissions from "./pages/Admission";
 import CreateLead from "./pages/CreateLead";
 import LeadDetails from "./pages/LeadDetails";
 import ImportLeads from "./pages/ImportLeads";
 import UsersRoles from "./pages/UsersRoles";
+import DocumentPage from "./pages/DocumentPage";
+import StudentPage from "./pages/StudentPage";
 
 // import ProtectedRoute from "../routes/ProtectedRoute";
 
@@ -32,6 +35,30 @@ function App() {
           element={
             // <ProtectedRoute>
             <Leads />
+            // </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admissions"
+          element={
+            // <ProtectedRoute>
+            <Admissions />
+            // </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/document-page"
+          element={
+            // <ProtectedRoute>
+            <DocumentPage />
+            // </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student-page"
+          element={
+            // <ProtectedRoute>
+            <StudentPage />
             // </ProtectedRoute>
           }
         />
