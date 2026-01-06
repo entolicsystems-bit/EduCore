@@ -113,9 +113,16 @@ export class LeadsRepository {
     });
   }
 
-  deleteLead(leadId: string) {
-    return this.prisma.lead.delete({
+  // deleteLead(leadId: string) {
+  //   return this.prisma.lead.delete({
+  //     where: { id: leadId },
+  //   });
+  // }
+
+  sdelete(leadId: string) {
+    return this.prisma.lead.update({
       where: { id: leadId },
+      data: { deleted_at: new Date() },
     });
   }
 }
