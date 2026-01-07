@@ -14,4 +14,3 @@ class AppColors {
   static const Color error = Color(0xFFFF3B30);
   static const Color success = Color(0xFF34C759);
 }
-//

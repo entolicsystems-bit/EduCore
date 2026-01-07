@@ -21,7 +21,7 @@ class ResetPasswordScreen extends StatelessWidget {
 
 class ResetPasswordView extends StatefulWidget {
   final String email;
-//
+
   const ResetPasswordView({super.key, required this.email});
 
   @override

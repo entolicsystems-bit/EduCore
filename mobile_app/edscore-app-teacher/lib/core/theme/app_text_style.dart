@@ -8,7 +8,7 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
     color: AppColors.textDark,
   );
-//
+
   static const TextStyle h2 = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
