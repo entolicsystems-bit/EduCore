@@ -9,3 +9,4 @@ class ForgotPasswordEmailChanged extends ForgotPasswordEvent {
   final String email;
   ForgotPasswordEmailChanged(this.email);
 }
+//forgot password event

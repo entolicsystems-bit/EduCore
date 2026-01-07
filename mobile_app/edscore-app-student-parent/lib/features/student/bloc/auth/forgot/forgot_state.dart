@@ -18,3 +18,4 @@ class ForgotPasswordValidating extends ForgotPasswordState {
   final String? emailError;
   ForgotPasswordValidating({this.emailError});
 }
+// forgot state

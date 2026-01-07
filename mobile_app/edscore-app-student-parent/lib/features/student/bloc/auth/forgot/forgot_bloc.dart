@@ -47,3 +47,4 @@ class ForgotPasswordBloc extends Bloc<ForgotPasswordEvent, ForgotPasswordState> 
     }
   }
 }
+//student forgot password bloc

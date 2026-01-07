@@ -20,3 +20,4 @@ class ResetPasswordValidating extends ResetPasswordState {
     this.confirmPasswordError,
   });
 }
+//
