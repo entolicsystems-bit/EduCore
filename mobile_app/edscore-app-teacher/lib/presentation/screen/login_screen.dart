@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:educore/l10n/app_localizations.dart';
@@ -108,6 +107,9 @@ class _LoginViewState extends State<LoginView> {
               SnackBar(
                 content: Text(t.loginSuccess),
                 backgroundColor: Colors.green,
+
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
               ),
             );
           } else if (state is LoginFailure) {
@@ -115,10 +117,14 @@ class _LoginViewState extends State<LoginView> {
               SnackBar(
                 content: Text(state.error),
                 backgroundColor: Colors.red,
+
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
               ),
             );
           }
         },
+
         builder: (context, state) {
           return Center(
             child: SingleChildScrollView(
@@ -127,6 +133,34 @@ class _LoginViewState extends State<LoginView> {
                 key: _formKey,
                 child: Column(
                   children: [
+
+                    Container(
+                      width: double.infinity,
+                      constraints: const BoxConstraints(maxWidth: 380),
+                      padding: const EdgeInsets.symmetric(vertical: 28),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color:  Colors.grey,
+                          width: 2,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'logo',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+
+
                     Container(
                       constraints: const BoxConstraints(maxWidth: 380),
                       padding: const EdgeInsets.all(24),
@@ -152,7 +186,6 @@ class _LoginViewState extends State<LoginView> {
                             ),
                           ),
                           const SizedBox(height: 24),
-
 
                           TextFormField(
                             controller: _emailController,
@@ -235,7 +268,7 @@ class _LoginViewState extends State<LoginView> {
                               )
                                   : Text(
                                 t.loginButton,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
@@ -246,7 +279,6 @@ class _LoginViewState extends State<LoginView> {
 
                           const SizedBox(height: 10),
 
-                          /// FORGOT
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
