@@ -7,7 +7,7 @@ class AuthHttpClient {
 
   Future<http.Response> get(String endpoint) async {
     final token = await SecureTokenStorage.getAccessToken();
-
+//
     final response = await http.get(
       Uri.parse(baseUrl + endpoint),
       headers: {
