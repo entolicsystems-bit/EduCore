@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
+import { getLeads, deleteLead } from "../services/leadService"
 import "./Leads.css";
 
 const ITEMS_PER_PAGE = 8;
@@ -9,30 +10,40 @@ const MAX_VISIBLE_PAGES = 7;
 const Leads = () => {
   const navigate = useNavigate();
 
+  //state
   const [leads, setLeads] = useState([]);
+  const [owners, setOwners] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sourceFilter, setSourceFilter] = useState("ALL");
-  const [ownerFilter, setOwnersFilter] = useState("ALL");
+  const [ownerFilter, setOwnerFilter] = useState("ALL");
   const [search, setSearch] = useState("");
+
   const [openMenuId, setOpenMenuId] = useState(null);
 
-  const [owner, setOwners] = useState([]);
 
-  /* LOAD LEADS */
-  useEffect(() => {
-    const loadLeads = () => {
-      const storedLeads = JSON.parse(localStorage.getItem("leads")) || [];
-      setLeads(storedLeads);
+    const loadLeads = async () => {
+      try{
+        const res = await getLeads();
+        const data = res.data.data || res.data;
 
+        setLeads(data);
+
+    //  extract uniqueOwners
       const uniqueOwners = [
-        ...new Set(storedLeads.map((lead) => lead.owner).filter(Boolean)),
+        ...new Set(data.map((lead) => lead.owner).filter(Boolean)),
       ];
       setOwners(uniqueOwners);
-    };
+        } catch (error) {
+          console.error("failed to load leads",error);
+        }
+      };
 
-    loadLeads();
+      /* LOAD LEADS FROM API */
+  useEffect(() => {
+    loadLeads() ;
+
     window.addEventListener("focus", loadLeads);
     return () => window.removeEventListener("focus", loadLeads);
   }, []);
@@ -41,6 +52,33 @@ const Leads = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter, sourceFilter, ownerFilter, search]);
+      // reset page on filter change
+
+      useEffect(() => {
+        setCurrentPage(1);
+      }, [statusFilter, sourceFilter, ownerFilter, search]);
+
+      // delete lead
+      const handleDelete = async (id) => {
+        if(!window("Are you sure you want to delete this lead?")) return;
+
+        try{
+          await deleteLead(id);
+          setOpenMenuId(null);
+          loadLeads();
+        } catch (error) {
+          alert("Failed to delete lead");
+        }
+      };
+
+
+  // delete lead
+  // const handleDelete = (id) => {
+  //   if (!window.confirm("Are you sure you want to delete?")) return;
+
+  //   setLeads((prev) => prev.filter((u) => u.id !== id));
+  //   setOpenMenuId(null);
+  // };
 
   /* FILTER */
   const filteredLeads = leads.filter((lead) => {
@@ -77,6 +115,7 @@ const Leads = () => {
     startIndex + ITEMS_PER_PAGE
   );
 
+  // when api fetch that time below code not need
   const showingFrom = totalItems === 0 ? 0 : startIndex + 1;
   const showingTo = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
 
@@ -143,6 +182,14 @@ const Leads = () => {
             {owner.map((o, index) => (
               <option key={index} value={o}>
                 {o}
+
+            onChange={(e) => setOwnerFilter(e.target.value)}
+          >
+            <option value="ALL">All Owner</option>
+            {owners.map((owner, index) => (
+              <option key={index} value={owner}>
+                {owner}
+
               </option>
             ))}
           </select>

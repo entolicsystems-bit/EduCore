@@ -14,7 +14,9 @@ export class LeadsRepository {
     const limit = Math.min(Number(filters.limit) || 20, 50);
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: any = {
+      deleted_at: null, //Only include leads that are not deleted
+    };
 
     if (filters.status) where.status = filters.status;
     if (filters.source) where.source = filters.source;
@@ -54,7 +56,10 @@ export class LeadsRepository {
 
   findById(id: string) {
     return this.prisma.lead.findUnique({
-      where: { id },
+      where: {
+        id,
+        deleted_at: null,
+      },
     });
   }
 
@@ -113,9 +118,22 @@ export class LeadsRepository {
     });
   }
 
-  deleteLead(leadId: string) {
-    return this.prisma.lead.delete({
+  // deleteLead(leadId: string) {
+  //   return this.prisma.lead.delete({
+  //     where: { id: leadId },
+  //   });
+  // }
+
+  async sdelete(leadId: string) {
+    const lead = await this.prisma.lead.update({
       where: { id: leadId },
+      data: { deleted_at: new Date() },
     });
+    return {
+      success: true,
+      message: "Lead deleted successfully",
+      leadId: leadId,
+      deleted_at: new Date(),
+    };
   }
 }

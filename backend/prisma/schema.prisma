@@ -8,16 +8,20 @@ datasource db {
 }
 
 model Lead {
-  id         String         @id @default(uuid())
-  name       String
-  phone      String         @unique
-  email      String?        @unique
-  source     String
-  status     String         @default("NEW")
-  owner_id   String?
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-  activities LeadActivity[]
+  id           String         @id @default(uuid())
+  name         String
+  phone        String         @unique
+  email        String?        @unique
+  source       String
+  status       String         @default("NEW")
+  owner_id     String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  activities   LeadActivity[]
+  deleted_at   DateTime?
+  tenantId     String         @default("defaultBranchId")
+  branchId     String         @default("defaultTenantId")
+  applications Application[] //✅ new added field
 }
 
 model LeadActivity {
@@ -113,4 +117,99 @@ model RolePermission {
   @@unique([roleId, permissionId])
   @@index([roleId])
   @@index([permissionId])
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+//// Application Model
+/// Stores admission application data linked to a Lead.
+/// Acts as the core entity for the admissions workflow.
+
+model Application {
+  /// Primary identifier for the application
+  /// Generated as UUID to ensure global uniqueness
+
+  id String @id @default(uuid())
+
+  /// Reference to the lead who initiated this application
+  /// Ensures traceability from enquiry → application
+
+  leadId String
+
+  /// Relation to Lead entity
+  /// onDelete: Restrict prevents accidental deletion of applications
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Restrict)
+
+  /// Selected academic program for which the student is applying
+  /// Stored as String in Sprint-2; converted to FK in Sprint-3
+
+  programId String
+
+  /// Dynamic form response data submitted by the applicant
+  /// Stored as JSON to support flexible, institution-specific fields
+
+  formData Json
+
+  /// Tracks the current stage of the application lifecycle
+  /// Default is DRAFT to support partial form completion
+
+  status ApplicationStatus @default(DRAFT)
+
+  /// Tenant identifier for multi-tenant isolation
+  /// Ensures data separation between institutions
+
+  tenantId String
+
+  /// Branch identifier for operational and reporting isolation
+  /// Allows filtering applications by physical branch/location
+
+  branchId String
+
+  /// Timestamp when the application is formally submitted
+  /// Used to differentiate drafts from submitted applications
+
+  submittedAt DateTime?
+
+  /// User ID of the admin/counsellor who reviewed the application
+  /// Helps in accountability and audit tracking
+
+  reviewedBy String?
+
+  /// Internal notes added during review or processing
+  /// Not visible to the applicant
+
+  notes String?
+
+  /// Soft delete timestamp
+  /// Allows logical deletion without losing historical data
+
+  deletedAt DateTime?
+
+  /// Timestamp when the application record was created
+  /// Used for auditing and chronological reporting
+
+  createdAt DateTime @default(now())
+
+  /// Timestamp automatically updated on every modification
+  /// Helps track updates and detect stale data
+
+  updatedAt DateTime @updatedAt
+
+  /// Optimizes lookup of applications by tenant and lead
+
+  /// Supports filtering applications by branch and status
+  /// Commonly used in admission dashboards
+
+  /// Enables efficient sorting and pagination by creation date
+
+  @@index([tenantId, leadId])
+  @@index([tenantId, branchId, status])
+  @@index([createdAt])
 }

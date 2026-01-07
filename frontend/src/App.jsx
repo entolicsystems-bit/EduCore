@@ -1,12 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
-
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Otp from "./pages/Otp";
 import ResetPassword from "./pages/ResetPassword";
-
 import Leads from "./pages/LeadsList";
 import CreateLead from "./pages/CreateLead";
 import LeadDetails from "./pages/LeadDetails";
