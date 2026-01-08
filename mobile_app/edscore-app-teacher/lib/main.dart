@@ -8,7 +8,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'l10n/app_localizations.dart';
 
-
 void main() {
   runApp(
     BlocProvider(
@@ -27,6 +26,7 @@ class MyApp extends StatelessWidget {
       builder: (context, state) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
+
           locale: state.locale,
           supportedLocales: const [
             Locale('en'),
@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
           localizationsDelegates:
 
           AppLocalizations.localizationsDelegates,
+
           home: LoginScreen(),
         );
       },
