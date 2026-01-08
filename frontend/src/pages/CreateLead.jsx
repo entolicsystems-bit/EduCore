@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
-import { createLead } from "../services/leadService";
+import { createLead, updateLead, getLeadById } from "../services/leadService";
 import "./CreateLead.css";
 
 const CreateLead = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  // const [currentLeads, setCurrentLeads] = useState([]);
 
   const [form, setForm] = useState({
     name: "",
@@ -17,6 +19,26 @@ const CreateLead = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function getCurrentLead() {
+      try {
+        const res = await getLeadById(id);
+        const currentLeads = res.data.lead;
+
+        setForm({
+          name: currentLeads.name,
+          phone: currentLeads.phone,
+          email: currentLeads.email,
+          source: createLead.source,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    getCurrentLead();
+  }, []);
 
   // HANDLE CHANGE (phone digits only)
   const handleChange = (e) => {
@@ -48,9 +70,9 @@ const CreateLead = () => {
       newErrors.email = "Invalid email address";
     }
 
-    if (!form.owner.trim()) {
-      newErrors.owner = "Owner is required";
-    }
+    // if (!form.owner.trim()) {
+    //   newErrors.owner = "Owner is required";
+    // }
 
     if (!form.source) {
       newErrors.source = "Source is required";
@@ -64,26 +86,27 @@ const CreateLead = () => {
   const handleSave = async () => {
     if (!validateForm()) return;
 
-    try{
+    try {
       setLoading(true);
 
       await createLead({
         name: form.name,
         phone: form.phone,
-        email: form.owner,
+        email: form.email,
         source: form.source,
       });
- 
-      navigate("/leads");
-    }catch (error){
-      console.error("Create lead failed", error);
 
-      if (error.response?.data?.mesaage){
-        alert(error.response.data.mesaage);
-      } else{
-        alert("something went wrong, Please try agin.");
+      navigate("/leads");
+    } catch (error) {
+      console.error("Create lead failed", error.message);
+
+      if (error.response?.data?.message) {
+        console.log("email ka error");
+        alert(error.response.data.message);
+      } else {
+        alert(error.message);
       }
-    } finally{
+    } finally {
       setLoading(false);
     }
 
@@ -98,6 +121,23 @@ const CreateLead = () => {
     // localStorage.setItem("leads", JSON.stringify([...existingLeads, newLead]));
 
     // navigate("/leads");
+  };
+
+  const handleUpdate = async () => {
+    if (!validateForm()) return;
+
+    try {
+      await updateLead(id, {
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        source: form.source,
+      });
+
+      navigate("/leads");
+    } catch (error) {
+      console.error("Update lead failed", error.message);
+    }
   };
 
   return (
@@ -162,14 +202,23 @@ const CreateLead = () => {
             <button
               className="btn-cancel cursor-pointer"
               onClick={() => navigate("/leads")}
-              disabled = {loading}
+              disabled={loading}
             >
               Cancel
             </button>
 
-            <button className="btn-save cursor-pointer" onClick={handleSave}>
-              Save
-            </button>
+            {id ? (
+              <button
+                className="btn-save cursor-pointer"
+                onClick={handleUpdate}
+              >
+                Update
+              </button>
+            ) : (
+              <button className="btn-save cursor-pointer" onClick={handleSave}>
+                Save
+              </button>
+            )}
           </div>
         </div>
       </div>

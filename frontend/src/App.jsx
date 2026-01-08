@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
+import "./services/api.js";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -21,7 +22,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* PUBLIC ROUTES */}
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/otp" element={<Otp />} />
@@ -63,6 +64,15 @@ function App() {
 
         <Route
           path="/leads/create"
+          element={
+            // <ProtectedRoute>
+            <CreateLead />
+            // </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users/edit/:id"
           element={
             // <ProtectedRoute>
             <CreateLead />
