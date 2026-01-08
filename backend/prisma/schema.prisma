@@ -40,7 +40,7 @@ model User {
   email         String         @unique @db.VarChar(250)
   role          String?        @db.VarChar(250)
   passwordHash  String?        @db.VarChar(250)
-  phone         String?        @db.VarChar(250)
+  phone         String?        @unique @db.VarChar(250)
   refreshTokens RefreshToken[]
   roles         UserRole[]
   createdAt     DateTime       @default(now())
@@ -204,3 +204,55 @@ model Application {
   @@index([tenantId, branchId, status])
   @@index([createdAt])
 }
+
+
+enum DocumentOwnerType {
+  APPLICATION
+  STUDENT
+  STAFF
+  OTHER
+}
+
+enum DocumentType {
+  ID_PROOF
+  ADDRESS_PROOF
+  ACADEMIC_RECORD
+  PHOTO
+  OTHER
+}
+
+model Document {
+  id             String   @id @default(uuid())
+
+  // Polymorphic ownership
+  ownerType      DocumentOwnerType
+  ownerId        Int
+
+  // File metadata
+  fileKey        String
+  fileName       String
+  fileSize       Int
+  fileType       String   // MIME type
+
+  // Document classification
+  documentType   DocumentType
+
+  // Verification
+  verified       Boolean   @default(false)
+  verifiedBy     String?
+  verifiedAt     DateTime?
+
+  // Multi-tenancy
+  tenantId       String
+  branchId       String
+
+  // Audit & retention
+  createdAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  @@index([ownerType, ownerId])
+  @@index([tenantId, verified])
+  @@index([documentType])
+}
+
+

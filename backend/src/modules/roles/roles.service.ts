@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
 } from "@nestjs/common";
 import { PrismaService } from "../../database/prisma.service";
 import { RegisterDto } from "src/dto/register.dto";
@@ -37,7 +36,7 @@ export class RolesService {
 
       const [emailExists, phoneExists] = await Promise.all([
         this.prisma.user.findUnique({ where: { email } }),
-        this.prisma.user.findFirst({ where: { phone } }),
+        this.prisma.user.findUnique({ where: { phone } }),
       ]);
 
       if (emailExists) throw new BadRequestException("Email already exists");
