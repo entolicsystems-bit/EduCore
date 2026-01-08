@@ -1,4 +1,3 @@
-import { Lead } from "./../../interfaces/lead.interface";
 import {
   Injectable,
   BadRequestException,

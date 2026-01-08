@@ -18,8 +18,8 @@ model Lead {
   updatedAt    DateTime       @updatedAt
   activities   LeadActivity[]
   deleted_at   DateTime?
-  tenantId     String         @default("defaultBranchId")
-  branchId     String         @default("defaultTenantId")
+  tenantId     String?        @db.Uuid
+  branchId     String?        @db.Uuid
   applications Application[] //✅ new added field
 }
 
@@ -36,14 +36,20 @@ model LeadActivity {
 
 model User {
   id            String         @id @default(uuid()) @db.VarChar(250)
-  name          String?        @db.VarChar(250)
+  name          String         @db.VarChar(250)
   email         String         @unique @db.VarChar(250)
   role          String?        @db.VarChar(250)
-  passwordHash  String?        @db.VarChar(250)
-  phone         String?        @db.VarChar(250)
+  passwordHash  String         @db.VarChar(250)
+  phone         String         @unique @db.VarChar(250)
   refreshTokens RefreshToken[]
   roles         UserRole[]
   createdAt     DateTime       @default(now())
+  tenantId      String?        @map("tenant_id") @db.Uuid
+  status        Boolean        @default(true)
+  updatedAt     DateTime?      @map("updated_at")
+  branchId      String?        @db.Uuid
+
+  @@map("User")
 }
 
 model RefreshToken {
@@ -54,8 +60,11 @@ model RefreshToken {
   createdAt DateTime @default(now())
   jti       String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId  String?  @map("tenant_id") @db.Uuid
 
   @@index([userId])
+  @@index([tenantId])
+  @@map("RefreshToken")
 }
 
 model AuditLog {
@@ -156,12 +165,12 @@ model Application {
   /// Tenant identifier for multi-tenant isolation
   /// Ensures data separation between institutions
 
-  tenantId String
+  tenantId String? @db.Uuid
 
   /// Branch identifier for operational and reporting isolation
   /// Allows filtering applications by physical branch/location
 
-  branchId String
+  branchId String? @db.Uuid
 
   /// Timestamp when the application is formally submitted
   /// Used to differentiate drafts from submitted applications
