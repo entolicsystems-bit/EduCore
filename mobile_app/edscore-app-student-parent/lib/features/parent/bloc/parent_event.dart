@@ -17,3 +17,4 @@ class ParentLoginSubmitted extends ParentEvent {}
 class ParentCheckAuthStatus extends ParentEvent {}
 
 class ParentLogoutRequested extends ParentEvent {}
+//this parent event
