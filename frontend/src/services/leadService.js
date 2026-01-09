@@ -19,3 +19,8 @@ export const updateLead = (id, data) => {
 export const deleteLead = (id) => {
   return API.delete(`/v1/leads/${id}`);
 };
+
+// GET LEAD BY ID
+export const getLeadById = (id) => {
+  return API.get(`/v1/leads/${id}`);
+};

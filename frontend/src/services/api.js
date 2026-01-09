@@ -53,6 +53,7 @@ API.interceptors.response.use(
       } catch (err) {
         localStorage.clear();
         window.location.href = "/login";
+        return Promise.reject(err);
       }
     }
 
