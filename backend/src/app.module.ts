@@ -1,3 +1,4 @@
+import { ApplicationModule } from './modules/application/application.module';
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { DatabaseModule } from "./database/database.module";
@@ -26,6 +27,8 @@ import { documentModule } from "./modules/import/documents/document.module";
     AuditLogModule,
     RolesModule,
     WinstonModule.forRoot(winstonOpions),
+    ApplicationModule, // 🔥 REQUIRED
+
   ],
 })
 export class AppModule implements NestModule {

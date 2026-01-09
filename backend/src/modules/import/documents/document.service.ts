@@ -21,34 +21,32 @@ export class documentService {
     },
   });
 
-  async uploadDocument(dto: documentUploadDto, user: any,branchId:number) {
+  async uploadDocument(dto: documentUploadDto, user: User) {
     const { fileName, file_type, owner_type, owner_id, document_type } = dto;
 
-    //Permission check (simplified)
-    // if (!user.tenantId || !user.branchId) {
+    //Permission check
+    if (!user.tenantId || !user.branchId) {
+      throw new ForbiddenException("Invalid tenant or branch id");
+    }
 
-    //   throw new ForbiddenException("Invalid tenant or branch id");
-    // }
-
-    //     if (this.prisma.lead !== user.branchId) {
-    //   throw new ForbiddenException("Cross-branch document upload not allowed");
-    // }
-
-    //check file type
+    //allowed file types
     const allowedTypes = [
       "application/pdf",
       "image/jpeg",
       "image/png",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
+
+    //check input file type
     if (!allowedTypes.includes(file_type)) {
       throw new BadRequestException("Unsupported file type");
     }
 
-    //create unique file key
+    //check extention and create timestamp
     const extension = fileName.split(".").pop();
     const timestamp = Date.now();
 
+    //create unique file key
     const fileKey = `${user.tenantId}/${user.branchId}/${owner_type}/${owner_id}/${document_type}/${timestamp}.${extension}`;
 
     // create presigned URL
@@ -63,6 +61,7 @@ export class documentService {
       },
     });
 
+    //upload url
     const uploadUrl = await getSignedUrl(this.s3, command, {
       expiresIn: 900, // 15 minutes
     });

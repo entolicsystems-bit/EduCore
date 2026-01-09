@@ -75,6 +75,6 @@ export class LeadsController {
   @Roles("ADMIN", "COUNSELLOR")
   @Delete("delete/:id")
   sdelete(@Param("id") id: string, @Req() req) {
-    return this.service.softDeleteUser(id,req.user);
+    return this.service.softDeleteUser(id, req.user);
   }
 }

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { updateLead, getLeadById } from "../services/leadService";
 import { useEffect, useState } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
-import { updateLead } from "../services/leadService";
 import "./LeadDetails.css";
 
 const LeadDetails = () => {
@@ -13,15 +13,27 @@ const LeadDetails = () => {
 
   // load lead
   useEffect(() => {
-    const storedLeads = JSON.parse(localStorage.getItem("leads")) || [];
-    const selectedLead = storedLeads.find(l => String(l.id) === id);
-    setLead(selectedLead);
+    const loadLead = async () => {
+      try {
+        setLoading(true);
+        const res = await getLeadById(id);
+        console.log(res.data);
+
+        setLead(res.data.lead || res.data);
+      } catch (error) {
+        console.error("Failed to load lead", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLead();
   }, [id]);
 
   // handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setLead(prev => ({ ...prev, [name]: value }));
+    setLead((prev) => ({ ...prev, [name]: value }));
   };
 
   // save updated lead
@@ -36,15 +48,12 @@ const LeadDetails = () => {
       });
 
       // update localStorage
-      const leads = JSON.parse(localStorage.getItem("leads")) || [];
-      const updatedLeads = leads.map(l =>
-        String(l.id) === id ? lead : l
-      );
-      localStorage.setItem("leads", JSON.stringify(updatedLeads));
+      // const leads = JSON.parse(localStorage.getItem("leads")) || [];
+      // const updatedLeads = leads.map((l) => (String(l.id) === id ? lead : l));
+      // localStorage.setItem("leads", JSON.stringify(updatedLeads));
 
       alert("Lead updated successfully");
       navigate(-1);
-
     } catch (err) {
       console.error(err);
       alert("Failed to update lead");
@@ -53,33 +62,39 @@ const LeadDetails = () => {
     }
   };
 
-  if (!lead) return null;
+  if (!lead)
+    return (
+      <DashboardLayout>
+        <div>Loading...</div>
+      </DashboardLayout>
+    );
 
   return (
     <DashboardLayout>
       <div className="lead-details-page">
-
         {/* BACK */}
         <div className="back-row" onClick={() => navigate(-1)}></div>
 
         {/* TOP CARD */}
         <div className="lead-info-card">
-          <div className="lead-left">
+          <div className="flex flex-col gap-2">
             <p>Lead: {lead.name}</p>
-
-            <label>Phone</label>
-            <input
-              name="phone"
-              value={lead.phone}
-              onChange={handleChange}
-            />
-
-            <label>Email</label>
-            <input
-              name="email"
-              value={lead.email}
-              onChange={handleChange}
-            />
+            <div>
+              <label>Phone: </label>
+              <input
+                name="phone"
+                value={lead.phone || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label>Email: </label>
+              <input
+                name="email"
+                value={lead.email || ""}
+                onChange={handleChange}
+              />
+            </div>
           </div>
 
           <div className="lead-right">
@@ -91,7 +106,7 @@ const LeadDetails = () => {
             <select
               className="status-select"
               name="status"
-              value={lead.status}
+              value={lead.status || ""}
               onChange={handleChange}
             >
               <option value="NEW">New</option>
@@ -124,8 +139,10 @@ const LeadDetails = () => {
                 <span className="dot z-10"></span>
                 <div>
                   Lead Created
-                  <p>Lead was created from website form</p>
-                  <p className="muted">System • Dec 10, 2025, 09:00 AM</p>
+                  <p>Lead was created from {lead.source} form</p>
+                  <p className="muted">
+                    {new Date(lead.updatedAt).toLocaleString()}
+                  </p>
                 </div>
               </div>
 
@@ -133,14 +150,14 @@ const LeadDetails = () => {
                 <span className="dot z-10"></span>
                 <div>
                   STATUS CHANGED
-                  <p className="muted">{lead.name} • Dec 10, 2025, 10:30 AM</p>
+                  <p className="muted">
+                    {lead.name} • {new Date(lead.updatedAt).toLocaleString()}
+                  </p>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
-
       </div>
     </DashboardLayout>
   );

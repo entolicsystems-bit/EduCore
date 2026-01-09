@@ -11,3 +11,4 @@ class ResetPasswordSubmitted extends ResetPasswordEvent {
     required this.email,
   });
 }
+//

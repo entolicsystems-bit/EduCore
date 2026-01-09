@@ -84,7 +84,7 @@ td {
   font-size: 13px;
 }
 
-th {
+.table-head {
   color: #6b7280;
   font-weight: 600;
   text-align: left;

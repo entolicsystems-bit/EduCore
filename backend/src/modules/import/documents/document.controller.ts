@@ -13,6 +13,6 @@ export class documentController {
   @Roles("ADMIN", "COUNSELLOR")
   @Post("upload")
   async uploadDocument(@Body() dto: documentUploadDto, @Req() req) {
-    return this.documentService.uploadDocument(dto, req.user, req.branchId);
+    return this.documentService.uploadDocument(dto, req.user);
   }
 }
