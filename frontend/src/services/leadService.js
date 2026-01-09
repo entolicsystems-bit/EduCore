@@ -12,7 +12,7 @@ export const createLead = (data) => {
 
 // UPDATE LEAD
 export const updateLead = (id, data) => {
-  return API.put(`/v1/leads/${id}`, data);
+  return API.patch(`/v1/leads/${id}`, data);
 };
 
 // DELETE LEAD
@@ -23,4 +23,9 @@ export const deleteLead = (id) => {
 // GET LEAD BY ID
 export const getLeadById = (id) => {
   return API.get(`/v1/leads/${id}`);
+};
+
+//limited leads
+export const getLimitedLead = (params = {}) => {
+  return API.get("/v1/leads?page=1&limit=8", { params });
 };

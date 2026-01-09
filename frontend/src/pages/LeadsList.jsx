@@ -65,11 +65,6 @@ const Leads = () => {
     return () => window.removeEventListener("focus", loadLeads);
   }, []);
 
-  // reset page on filter change
-
-  // useEffect(() => {
-  //   setCurrentPage(1);
-  // }, [statusFilter, sourceFilter, ownerFilter, search]);
   useEffect(() => {
     setCurrentPage(1);
     loadLeads(); // 🔥 call API again when filters change
@@ -91,22 +86,6 @@ const Leads = () => {
       alert("Failed to delete lead. Please try again.");
     }
   };
-
-  /* FILTER */
-  // const filteredLeads = leads.filter((lead) => {
-  //   const statusMatch = statusFilter === "ALL" || lead.status === statusFilter;
-
-  //   const sourceMatch = sourceFilter === "ALL" || lead.source === sourceFilter;
-
-  //   const ownerMatch = ownerFilter === "ALL" || lead.owner === ownerFilter;
-
-  //   const searchText = search.toLowerCase();
-  //   const searchMatch =
-  //     lead.name?.toLowerCase().includes(searchText) ||
-  //     lead.email?.toLowerCase().includes(searchText);
-
-  //   return statusMatch && sourceMatch && ownerMatch && searchMatch;
-  // });
 
   /* PAGINATION */
   const totalItems = leads.length;
