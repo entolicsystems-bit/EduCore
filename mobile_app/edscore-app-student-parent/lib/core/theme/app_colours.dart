@@ -11,6 +11,7 @@ class AppColors {
   static const Color background = Color(0xFFE8EAF6);
   static const Color surface = Colors.white;
   static const Color surfaceLight = Color(0xFFF2F4F8);
+  static const Color successlight=Colors.green;
 
   // Text Colors
   static const Color textPrimary = Color(0xFF212121);
@@ -210,4 +211,3 @@ class AppTheme {
     );
   }
 }
-//this is theme
