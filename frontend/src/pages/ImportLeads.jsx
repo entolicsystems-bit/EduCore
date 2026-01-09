@@ -3,13 +3,17 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import "./ImportLeads.css";
 import uploadImage from "/uploadFile.png";
+import { importLeadsCSV } from "../services/leadService";
 
 const ImportLeads = () => {
   const navigate = useNavigate();
+
   const [fileName, setFileName] = useState("");
   const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const processFile = (file) => {
+  // 🔹 validate & upload CSV
+  const processFile = async (file) => {
     if (!file) return;
 
     if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
@@ -19,32 +23,24 @@ const ImportLeads = () => {
 
     setFileName(file.name);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target.result;
-      const rows = text.split("\n").filter((row) => row.trim() !== "");
-      const dataRows = rows.slice(1);
+    try {
+      setLoading(true);
 
-      let success = 0;
-      let failed = 0;
-
-      dataRows.forEach((row) => {
-        const cols = row.split(",");
-        if (cols.length >= 2 && cols[0].trim() && cols[1].trim()) {
-          success++;
-        } else {
-          failed++;
-        }
-      });
+      const res = await importLeadsCSV(file);
 
       setSummary({
-        total: dataRows.length,
-        success,
-        failed,
+        total: res.data.total || 0,
+        success: res.data.success || 0,
+        failed: res.data.failed || 0,
       });
-    };
 
-    reader.readAsText(file);
+      alert("CSV imported successfully");
+    } catch (error) {
+      console.error("CSV Upload Error:", error);
+      alert("Failed to import CSV file");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -55,6 +51,7 @@ const ImportLeads = () => {
   return (
     <DashboardLayout>
       <div className="flex flex-col items-center w-full h-full bg-[#f3f4f6]">
+
         {/* HEADER */}
         <div className="w-full px-12 mt-2">
           <button className="back-btn" onClick={() => navigate(-1)}>
@@ -64,7 +61,8 @@ const ImportLeads = () => {
 
         {/* CARD */}
         <div className="flex flex-col gap-4 w-full px-4 sm:px-0 items-center">
-          {/* UPLOAD STATE (ALWAYS VISIBLE) */}
+
+          {/* UPLOAD CARD */}
           <div className="text-center flex flex-col gap-6 bg-white w-[90%] rounded-2xl shadow-md p-8">
             <input
               type="file"
@@ -90,10 +88,14 @@ const ImportLeads = () => {
                   Selected file: <b>{fileName}</b>
                 </p>
               )}
+
+              {loading && (
+                <p className="text-blue-500 mt-2">Uploading...</p>
+              )}
             </div>
           </div>
 
-          {/* SUMMARY STATE (CONDITIONAL, DOES NOT REMOVE UPLOAD) */}
+          {/* SUMMARY */}
           {summary && (
             <div className="flex flex-col gap-4 bg-white w-[90%] rounded-2xl shadow-md p-8">
               <h3 className="text-xl font-semibold mb-4">Import Summary</h3>
@@ -115,11 +117,7 @@ const ImportLeads = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between pt-6">
-                <button className="bg-gray-300 px-3 py-2 rounded-md text-gray-600 hover:bg-gray-400">
-                  Download error report
-                </button>
-
+              <div className="flex justify-end pt-6">
                 <button
                   className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
                   onClick={() => navigate(-1)}
@@ -129,6 +127,7 @@ const ImportLeads = () => {
               </div>
             </div>
           )}
+
         </div>
       </div>
     </DashboardLayout>

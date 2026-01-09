@@ -10,6 +10,10 @@ export const loginUser = async ({ email, password }) => {
   localStorage.setItem("accessToken", res.data.accessToken);
   localStorage.setItem("refreshToken", res.data.refreshToken);
 
+  // localStorage.setItem("user", JSON.stringify(user));
+
+
+
   return res.data;
 };
 

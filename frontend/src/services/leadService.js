@@ -20,11 +20,22 @@ export const deleteLead = (id) => {
   return API.delete(`/v1/leads/${id}`);
 };
 
+// IMPORT LEADS CSV
+export const importLeadsCSV = (file) => {
+  const formData = new FormData();
+  formData.append("file", file); // backend expects key "file"
+
+  return API.post("/v1/csv/import", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 // GET LEAD BY ID
 export const getLeadById = (id) => {
   return API.get(`/v1/leads/${id}`);
 };
-
 //limited leads
 export const getLimitedLead = (params = {}) => {
   return API.get("/v1/leads?page=1&limit=8", { params });
