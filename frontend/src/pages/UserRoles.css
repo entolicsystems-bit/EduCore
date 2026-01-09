@@ -10,11 +10,10 @@ body,
 .roles-page {
   padding: 24px;
   padding-top: 0%;
-
 }
 
 /* PAGE TITLE */
-.page-title  {
+.page-title {
   display: flex;
 }
 
@@ -34,7 +33,7 @@ body,
   border-radius: 8px;
 }
 
-.assign-roles-card{
+.assign-roles-card {
   min-height: 400px;
 }
 
@@ -50,7 +49,7 @@ body,
   border: 1px solid #e5e7eb;
   padding: 0 14px;
   font-size: 14px;
-  background-color:#EEF3FF;
+  background-color: #eef3ff;
 }
 
 .search-input:focus {
@@ -82,7 +81,7 @@ body,
 }
 
 .status.active {
-  background: #C3FFC7;
+  background: #c3ffc7;
 }
 
 /* ROLE ITEM */
@@ -119,14 +118,12 @@ body,
 
 /* BUTTON */
 .btn-primary {
-  padding: 11px 18px;
-  margin-top: 15px;
+  padding: 5px 10px;
+  /* margin-top: 15px; */
   border-radius: 10px;
   border: none;
   background: #0d99ff;
   color: #ffffff;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
 }
-
-

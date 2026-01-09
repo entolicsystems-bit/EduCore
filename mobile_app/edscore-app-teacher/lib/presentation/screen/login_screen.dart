@@ -135,7 +135,7 @@ class _LoginViewState extends State<LoginView> {
                   children: [
 
                     Container(
-                      width: double.infinity,
+                      width: 200,
                       constraints: const BoxConstraints(maxWidth: 380),
                       padding: const EdgeInsets.symmetric(vertical: 28),
                       margin: const EdgeInsets.only(bottom: 20),

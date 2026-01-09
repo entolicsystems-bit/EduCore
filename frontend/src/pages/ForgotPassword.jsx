@@ -10,26 +10,27 @@ const ForgotPassword = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    validateForm();
-  }, [email]);
+
 
   const validateForm = () => {
     if (!email.trim()) {
-      setIsValid(false);
-      return false;
+      return "Please enter your email";
     }
-
-    setIsValid(true);
-    return true;
+    return "";
   };
+
+    useEffect(() => {
+      const errorMsg = validateForm();
+      setError(errorMsg);
+      setIsValid(!errorMsg);
+  }, [email]);
+
 
   const handleSendOtp = (e) => {
     e.preventDefault();
     setSubmitted(true); // stop page reload
 
-    if (!validateForm()) {
-      setError("Please enter your email.");
+    if (!isValid) {
       return;
     }
 
