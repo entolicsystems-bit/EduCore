@@ -18,6 +18,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(LoginLoading());
 
     try {
+      // Login API request
       final response = await http.post(
         Uri.parse("http://3.7.212.22:3000/v1/auth/login"),
         headers: {
@@ -34,6 +35,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final accessToken = data['accessToken'];
         final refreshToken = data['refreshToken'];
+        final expiresIn = data['expiresIn']; // optional field from server
 
         if (accessToken == null || refreshToken == null) {
           emit(LoginFailure("Invalid response from server"));
@@ -41,9 +43,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         }
 
         try {
+          // Save tokens with optional expiry
           await SecureTokenStorage.saveTokens(
-            accessToken,
-            refreshToken,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            accessTokenExpirySeconds: expiresIn ?? 900, // default 15 min
+            refreshTokenExpirySeconds: 604800, // default 7 days
           );
 
           emit(LoginSuccess("Login successful"));
