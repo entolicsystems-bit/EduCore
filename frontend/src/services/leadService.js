@@ -32,3 +32,8 @@ export const importLeadsCSV = (file) => {
     },
   });
 };
+
+// GET LEAD BY ID
+export const getLeadById = (id) => {
+  return API.get(`/v1/leads/${id}`);
+};

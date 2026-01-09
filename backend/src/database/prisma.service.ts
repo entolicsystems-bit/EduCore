@@ -9,11 +9,7 @@ export class PrismaService
 {
   constructor(private readonly config: ConfigService) {
     super({
-      datasources: {
-        db: {
-          url: config.get<string>("DATABASE_URL"),
-        },
-      },
+      accelerateUrl: config.get<string>("DATABASE_URL"),
     });
   }
 

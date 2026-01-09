@@ -150,7 +150,7 @@ const Register = () => {
                 {loading ? "Registering..." : "Register"}
               </button>
 
-              <p className="back-link" onClick={() => navigate("/")}>
+              <p className="back-link" onClick={() => navigate("/login")}>
                 Go back to log in
               </p>
             </form>

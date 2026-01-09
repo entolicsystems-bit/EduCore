@@ -1,4 +1,3 @@
-import { Lead } from './../../interfaces/lead.interface';
 import {
   Injectable,
   BadRequestException,
@@ -55,7 +54,6 @@ export class LeadsService {
         ...dto,
         owner_id: null, //new lead has no owner id
         status: "NEW",
-        
       });
 
       await Promise.all([
@@ -251,7 +249,8 @@ export class LeadsService {
       }
     }
 
-   // const deleteLead = await this.repo.deleteLead(leadId);
+    // const deleteLead = await this.repo.deleteLead(leadId);
+    //return deleteLead;
 
     await this.prisma.auditLog.create({
       data: {
@@ -264,11 +263,5 @@ export class LeadsService {
     });
 
     return this.repo.sdelete(leadId);
-
-    //return deleteLead;
-    
   }
-
-  }
-
- 
+}

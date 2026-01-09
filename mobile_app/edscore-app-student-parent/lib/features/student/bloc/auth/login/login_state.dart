@@ -60,3 +60,5 @@ class LoginState extends Equatable {
     refreshToken,
   ];
 }
+
+//login state

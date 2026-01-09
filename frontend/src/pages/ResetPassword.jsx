@@ -50,7 +50,7 @@ const ResetPassword = () => {
     }
 
     alert("Password reset successful");
-    navigate("/");
+    navigate("/login");
   };
 
   // Toggle show/hide password
@@ -109,7 +109,7 @@ const ResetPassword = () => {
               <button className="btn" type="submit" disabled={!isValid}>
                 Reset
               </button>
-              <p className="back-login" onClick={() => navigate("/")}>
+              <p className="back-login" onClick={() => navigate("/login")}>
                 Go Back to Login
               </p>
             </form>
