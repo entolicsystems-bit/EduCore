@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
+import 'package:student/common/document_preview_widget.dart';
+import 'package:student/features/parent/bloc/birth/birth_bloc.dart';
+import 'package:student/features/parent/presentation/screens/medical_screen.dart';
 import 'core/theme/app_colours.dart';
-import 'features/student/presentation/screens/login_screen.dart';
+import 'features/parent/presentation/screens/birth_screen.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set system UI overlay style for status bar
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -21,20 +25,26 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Sizer must wrap the **entire app** at the top
     return Sizer(
       builder: (context, orientation, deviceType) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Student App',
-
-          // Apply the custom theme
-          theme: AppTheme.lightTheme,
-
-          home: const LoginScreen(),
+        // Wrap MaterialApp with BlocProviders, not the other way around
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<BirthBloc>(
+              create: (_) => BirthBloc(),
+            ),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Student App',
+            theme: AppTheme.lightTheme,
+            home: BirthScreen(),
+          ),
         );
       },
     );
