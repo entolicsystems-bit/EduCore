@@ -21,7 +21,6 @@ export class ApplicationController {
     return this.applicationService.createApplication(
       dto,
       req.user, // 👈 user context
-
       
     );
 
