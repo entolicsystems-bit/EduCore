@@ -54,8 +54,8 @@ export class LeadsService {
         ...dto,
         owner_id: null, //new lead has no owner id
         status: "NEW",
-        tenantId: process.env.DEFAULT_TENANT_ID,
-    branchId: process.env.DEFAULT_BRANCH_ID,
+        // tenantId: process.env.DEFAULT_TENANT_ID,
+        // branchId: process.env.DEFAULT_BRANCH_ID,
       });
 
       await Promise.all([
