@@ -54,8 +54,8 @@ export class LeadsService {
         ...dto,
         owner_id: null, //new lead has no owner id
         status: "NEW",
-        tenantId: process.env.DEFAULT_TENANT_ID,
-    branchId: process.env.DEFAULT_BRANCH_ID,
+        // tenantId: process.env.DEFAULT_TENANT_ID,
+        // branchId: process.env.DEFAULT_BRANCH_ID,
       });
 
       await Promise.all([
@@ -97,35 +97,34 @@ export class LeadsService {
   }
 
   async createCounsellorLead(
-  dto: CreateLeadDto,
-  user: { id: string; tenantId: string; branchId: string }
-) {
-  const lead = await this.repo.createLead({
-    ...dto,
-    owner_id: user.id,
-    status: "NEW",
-    tenantId: user.tenantId,
-    branchId: user.branchId,
-  });
+    dto: CreateLeadDto,
+    user: { id: string; tenantId: string; branchId: string }
+  ) {
+    const lead = await this.repo.createLead({
+      ...dto,
+      owner_id: user.id,
+      status: "NEW",
+      tenantId: user.tenantId,
+      branchId: user.branchId,
+    });
 
-  await this.repo.addActivity(lead.id, LeadTimelineAction.CREATE, {
-    source: "COUNSELLOR",
-    performedBy: user.id,
-  });
+    await this.repo.addActivity(lead.id, LeadTimelineAction.CREATE, {
+      source: "COUNSELLOR",
+      performedBy: user.id,
+    });
 
-  await this.prisma.auditLog.create({
-    data: {
-      tableName: "Lead",
-      action: "CREATE",
-      oldValue: null,
-      newValue: lead,
-      userId: user.id,
-    },
-  });
+    await this.prisma.auditLog.create({
+      data: {
+        tableName: "Lead",
+        action: "CREATE",
+        oldValue: null,
+        newValue: lead,
+        userId: user.id,
+      },
+    });
 
-  return lead;
-}
-
+    return lead;
+  }
 
   //  async createCounsellorLead(dto: CreateLeadDto, counsellorId: string) {
   //   const lead = await this.repo.createLead({

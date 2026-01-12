@@ -237,7 +237,7 @@ model Document {
 
   // Polymorphic ownership
   ownerType      DocumentOwnerType
-  ownerId        Int
+  ownerId        String    @db.Uuid
 
   // File metadata
   fileKey        String

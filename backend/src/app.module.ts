@@ -1,4 +1,4 @@
-import { ApplicationModule } from './modules/application/application.module';
+import { ApplicationModule } from "./modules/application/application.module";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { DatabaseModule } from "./database/database.module";
@@ -11,7 +11,10 @@ import { AuditContextMiddleware } from "./middleware/audit-context";
 import { WinstonModule } from "nest-winston";
 import { AuditLogModule } from "./modules/logs/audit-log.module";
 import { RolesModule } from "./modules/roles/roles.module";
-import { documentModule } from "./modules/import/documents/document.module";
+import { documentModule } from "./modules/import/documents/upload/document.module";
+import { verifyDocumentModule } from "./modules/import/documents/verify/document-verify.module";
+import { seconds, ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { APP_GUARD } from "@nestjs/core";
 
 @Module({
   imports: [
@@ -19,16 +22,26 @@ import { documentModule } from "./modules/import/documents/document.module";
       isGlobal: true, // 🔴 REQUIRED
       envFilePath: ".env", // root .env
     }),
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: "login", ttl: seconds(60), limit: 3 }],
+      errorMessage: "Too Many requests! Please wait a minute and try again!",
+    }),
     DatabaseModule,
     AuthModule,
     LeadsModule,
     CsvModule,
     documentModule,
+    verifyDocumentModule,
     AuditLogModule,
     RolesModule,
     WinstonModule.forRoot(winstonOpions),
     ApplicationModule, // 🔥 REQUIRED
-
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {

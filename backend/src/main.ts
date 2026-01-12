@@ -1,17 +1,16 @@
-import { NestFactory } from "@nestjs/core";
+import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { PrismaExceptionFilter } from "./exceptions/prisma-exception.filter";
 import { AllExceptionFilter } from "./exceptions/all-exception.filter";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
+import { ThrottlerGuard } from "@nestjs/throttler";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
     logger: ["error", "warn", "log"], //hidding debug logs
   });
-
-  // app.setGlobalPrefix('v1');
 
   app.useGlobalPipes(
     new ValidationPipe({

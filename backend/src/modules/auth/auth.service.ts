@@ -184,23 +184,22 @@
 //   }
 // }
 
-
 import {
   Injectable,
   UnauthorizedException,
   ForbiddenException,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/database/prisma.service';
-import { jwtConfig } from 'src/config/jwt.config';
-import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { PrismaService } from "src/database/prisma.service";
+import { jwtConfig } from "src/config/jwt.config";
+import * as bcrypt from "bcrypt";
+import { randomUUID } from "crypto";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwt: JwtService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaService
   ) {}
 
   // ================= LOGIN =================
@@ -210,12 +209,12 @@ export class AuthService {
     });
 
     if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
     if (!isValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     return this.issueTokens(user.id);
@@ -234,7 +233,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException("User not found");
     }
 
     const jti = randomUUID();
@@ -250,7 +249,7 @@ export class AuthService {
       {
         secret: jwtConfig.accessSecret,
         expiresIn: jwtConfig.accessTokenExpiresIn,
-      },
+      }
     );
 
     // ✅ REFRESH TOKEN
@@ -265,7 +264,7 @@ export class AuthService {
       {
         secret: jwtConfig.refreshSecret,
         expiresIn: jwtConfig.refreshTokenExpiresIn,
-      },
+      }
     );
 
     await this.prisma.$transaction([
@@ -297,7 +296,7 @@ export class AuthService {
         secret: jwtConfig.refreshSecret,
       });
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException("Invalid refresh token");
     }
 
     const stored = await this.prisma.refreshToken.findFirst({
@@ -305,12 +304,21 @@ export class AuthService {
     });
 
     if (!stored || stored.expiresAt < new Date()) {
-      throw new ForbiddenException('Refresh token expired');
+      throw new ForbiddenException("Refresh token expired");
     }
 
     const valid = await bcrypt.compare(oldToken, stored.tokenHash);
     if (!valid) {
-      throw new ForbiddenException('Invalid refresh token');
+      throw new ForbiddenException("Invalid refresh token");
+    }
+    if (!valid) {
+      // token was already rotated or tampered with
+      await this.prisma.refreshToken.deleteMany({
+        where: { userId: payload.sub },
+      });
+      // log alert for suspicious activity
+      console.warn(`Refresh token reuse detected for user ${payload.sub}`);
+      throw new ForbiddenException("Detected refresh token reuse!");
     }
 
     const newJti = randomUUID();
@@ -331,7 +339,7 @@ export class AuthService {
         {
           secret: jwtConfig.accessSecret,
           expiresIn: jwtConfig.accessTokenExpiresIn,
-        },
+        }
       );
 
       // ✅ NEW REFRESH TOKEN
@@ -346,7 +354,7 @@ export class AuthService {
         {
           secret: jwtConfig.refreshSecret,
           expiresIn: jwtConfig.refreshTokenExpiresIn,
-        },
+        }
       );
 
       await tx.refreshToken.create({
@@ -374,13 +382,13 @@ export class AuthService {
         secret: jwtConfig.refreshSecret,
       });
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException("Invalid refresh token");
     }
 
     await this.prisma.refreshToken.deleteMany({
       where: { userId: payload.sub },
     });
 
-    return { message: 'Logged out successfully' };
+    return { message: "Logged out successfully" };
   }
 }

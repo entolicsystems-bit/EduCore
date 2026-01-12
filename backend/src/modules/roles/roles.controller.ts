@@ -18,6 +18,6 @@ export class RolesController {
   @Roles("ADMIN")
   @Post("create")
   createStaff(@Body() dto: RegisterDto, @Req() req) {
-    return this.rolesService.registerStaff(dto, req.user.id);
+    return this.rolesService.registerStaff(dto, req.user);
   }
 }

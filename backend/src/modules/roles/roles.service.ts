@@ -1,10 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-} from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "../../database/prisma.service";
 import { RegisterDto } from "src/dto/register.dto";
 import * as bcrypt from "bcrypt";
+import { User } from "@prisma/client";
 
 @Injectable()
 export class RolesService {
@@ -24,12 +22,18 @@ export class RolesService {
     });
   }
 
-  async registerStaff(dto: RegisterDto, adminId: string) {
+  async registerStaff(dto: RegisterDto, reqUser: User) {
     try {
       const { email, name, phone, password } = dto;
       const roleName = dto.role.toUpperCase();
 
-      const allowedRoles = ["COUNSELLOR", "TEACHER", "ACCOUNTANT"];
+      const allowedRoles = [
+        "COUNSELLOR",
+        "TEACHER",
+        "ACCOUNTANT",
+        "PARENT",
+        "STUDENT",
+      ];
       if (!allowedRoles.includes(roleName)) {
         throw new BadRequestException("Invalid role");
       }
@@ -50,6 +54,8 @@ export class RolesService {
           name,
           phone,
           role: roleName,
+          tenantId: reqUser.tenantId,
+          branchId: reqUser.branchId,
           passwordHash: hashedPassword,
         },
       });
@@ -58,6 +64,8 @@ export class RolesService {
         COUNSELLOR: 2,
         TEACHER: 3,
         ACCOUNTANT: 4,
+        PARENT: 5,
+        STUDENT: 6,
       };
 
       await this.assignRole(user.id, roleMap[roleName]);
@@ -70,7 +78,7 @@ export class RolesService {
           action: "AssignRole",
           oldValue: null,
           newValue: user,
-          userId: adminId,
+          userId: reqUser.id,
         },
       });
       return safeUser;

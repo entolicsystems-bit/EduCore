@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsString } from "class-validator";
+import { IsEnum, IsInt, IsString, IsUUID } from "class-validator";
 
 export enum DocumentOwnerType {
   APPLICATION = "APPLICATION",
@@ -26,8 +26,8 @@ export class documentUploadDto {
   @IsEnum(DocumentOwnerType)
   owner_type: DocumentOwnerType;
 
-  @IsInt()
-  owner_id: number;
+  @IsUUID()
+  owner_id: string;
 
   @IsEnum(DocumentType)
   document_type: DocumentType;
