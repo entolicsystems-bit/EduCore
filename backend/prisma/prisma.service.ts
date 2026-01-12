@@ -9,20 +9,17 @@ export class PrismaService
 {
   constructor() {
     super({
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL, // Use env var directly
-        },
-      },
-      log: ['error', 'warn'],
+      log: ['error', 'warn'], // ✅ logs are fine
     });
   }
 
   async onModuleInit() {
     await this.$connect();
+    console.log('Prisma connected ✅');
   }
 
   async onModuleDestroy() {
     await this.$disconnect();
+    console.log('Prisma disconnected ❌');
   }
 }
