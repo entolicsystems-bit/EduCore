@@ -7,6 +7,7 @@ import '../../bloc/auth/login/login_state.dart';
 import '../../../../core/theme/app_colours.dart';
 import 'forgot_password_screen.dart';
 import 'student_details_screen.dart';
+import '../../../parent/presentation/pages/parent_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,14 +18,22 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isStudentSelected = true;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  // Cache computed values for better performance
   late final double screenHeight;
   late final BoxDecoration cardDecoration;
   late final BorderRadius inputBorderRadius;
   late final BorderRadius tabBorderRadiusLeft;
   late final BorderRadius tabBorderRadiusRight;
   late final BorderRadius buttonBorderRadius;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -54,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showSnackBar(String message, Color backgroundColor) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -69,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
           right: 4.w,
           bottom: screenHeight - 15.h,
         ),
-        duration: Duration(seconds: message.contains('Error') ? 3 : 2),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -81,24 +91,60 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state.isAuthenticated && state.isSuccess) {
-            _showSnackBar(
-              isStudentSelected
-                  ? 'Login successful! Welcome Student'
-                  : 'Login successful! Welcome Parent',
-              AppColors.success,
-            );
+            final expectedRole = isStudentSelected ? 'STUDENT' : 'PARENT';
+            final actualRole = state.userRole?.toUpperCase();
 
-            // Navigate to Student Details Screen
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => const StudentDetailsScreen(),
-              ),
-            );
+            if (actualRole != null && actualRole != expectedRole) {
+              final roleText = actualRole == 'STUDENT' ? 'a Student' : 'a Parent';
+              _showSnackBar(
+                'You are logged in as $roleText. Please select the correct tab and try again.',
+                AppColors.error,
+              );
+
+              Future.delayed(const Duration(seconds: 2), () {
+                if (mounted) {
+                  context.read<LoginBloc>().add(LogoutRequested());
+                }
+              });
+              return;
+            }
+
+            if (state.isStudent) {
+              _showSnackBar(
+                'Login successful! Welcome Student',
+                AppColors.success,
+              );
+
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const StudentDetailsScreen(),
+                    ),
+                  );
+                }
+              });
+            } else if (state.isParent) {
+              _showSnackBar(
+                'Login successful! Welcome Parent',
+                AppColors.success,
+              );
+
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const ParentHomeScreen(),
+                    ),
+                  );
+                }
+              });
+            }
           }
 
           if (state.errorMessage != null) {
             _showSnackBar(
-              state.errorMessage ?? 'An error occurred',
+              state.errorMessage!,
               AppColors.error,
             );
           }
@@ -112,7 +158,6 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo Container
                   Container(
                     height: 10.h,
                     width: 40.w,
@@ -138,8 +183,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
-                  // Main Card Container
                   Container(
                     width: 90.w,
                     padding: EdgeInsets.all(2.5.h),
@@ -147,7 +190,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Tab Buttons (Students / Parent)
                         Row(
                           children: [
                             Expanded(
@@ -156,9 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 isSelected: isStudentSelected,
                                 onTap: () {
                                   if (!isStudentSelected) {
-                                    setState(() {
-                                      isStudentSelected = true;
-                                    });
+                                    setState(() => isStudentSelected = true);
                                   }
                                 },
                                 borderRadius: tabBorderRadiusLeft,
@@ -170,9 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 isSelected: !isStudentSelected,
                                 onTap: () {
                                   if (isStudentSelected) {
-                                    setState(() {
-                                      isStudentSelected = false;
-                                    });
+                                    setState(() => isStudentSelected = false);
                                   }
                                 },
                                 borderRadius: tabBorderRadiusRight,
@@ -180,10 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         ),
-
                         SizedBox(height: 3.5.h),
-
-                        // Log In Title
                         Text(
                           'Log In',
                           style: TextStyle(
@@ -192,15 +227,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: AppColors.textPrimary,
                           ),
                         ),
-
                         SizedBox(height: 2.5.h),
-
-                        // Email Field
                         BlocBuilder<LoginBloc, LoginState>(
                           buildWhen: (previous, current) =>
                           previous.isLoading != current.isLoading,
                           builder: (context, state) {
                             return TextField(
+                              controller: _emailController,
                               enabled: !state.isLoading,
                               onChanged: (value) {
                                 context.read<LoginBloc>().add(EmailChanged(value));
@@ -245,16 +278,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                         ),
-
                         SizedBox(height: 2.h),
-
-                        // Password Field
                         BlocBuilder<LoginBloc, LoginState>(
                           buildWhen: (previous, current) =>
                           previous.isLoading != current.isLoading ||
                               previous.isPasswordVisible != current.isPasswordVisible,
                           builder: (context, state) {
                             return TextField(
+                              controller: _passwordController,
                               enabled: !state.isLoading,
                               obscureText: !state.isPasswordVisible,
                               onChanged: (value) {
@@ -304,19 +335,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                     size: 22.sp,
                                   ),
                                   onPressed: () {
-                                    context
-                                        .read<LoginBloc>()
-                                        .add(TogglePasswordVisibility());
+                                    context.read<LoginBloc>().add(TogglePasswordVisibility());
                                   },
                                 ),
                               ),
                             );
                           },
                         ),
-
                         SizedBox(height: 3.h),
-
-                        // Login Button
                         BlocBuilder<LoginBloc, LoginState>(
                           buildWhen: (previous, current) =>
                           previous.isLoading != current.isLoading,
@@ -359,10 +385,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                         ),
-
                         SizedBox(height: 1.h),
-
-                        // Forgot Password
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -396,10 +419,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-
                   SizedBox(height: 18.h),
-
-                  // Footer
                   Column(
                     children: [
                       Text(
@@ -417,7 +437,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: 14.sp,
                         ),
                       ),
-
                     ],
                   ),
                 ],
@@ -430,7 +449,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// Extracted Tab Button Widget for better performance
 class _TabButton extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -472,4 +490,3 @@ class _TabButton extends StatelessWidget {
     );
   }
 }
-//

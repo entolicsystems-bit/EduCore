@@ -3,33 +3,40 @@ import 'package:flutter/material.dart';
 // ==================== APP COLORS ====================
 class AppColors {
   // Primary Colors
-  static const Color primary = Color(0xFF2196F3);
+  static const Color primary = Color(0xFF0D99FF);
   static const Color primaryLight = Color(0xFF64B5F6);
   static const Color primaryDark = Color(0xFF1976D2);
 
   // Background Colors
-  static const Color background = Color(0xFFE8EAF6);
+  static const Color background = Color(0xFFEEF3FF);
   static const Color surface = Colors.white;
   static const Color surfaceLight = Color(0xFFF2F4F8);
+  static const Color cardBg = Colors.white;
+  static const Color inputBg = Color(0xFFF5F5F7);
+  static const Color darkBg = Color(0xFF1A1A1A);
 
   // Text Colors
   static const Color textPrimary = Color(0xFF212121);
   static const Color textSecondary = Color(0xFF757575);
   static const Color textHint = Color(0xFFBDBDBD);
+  static const Color textDark = Color(0xFF202020);
+  static const Color textGrey = Color(0xFF595959);
+  static const Color textLight = Color(0xFFB5B5B5);
 
   // Status Colors
-  static const Color success = Color(0xFF4CAF50);
-  static const Color error = Color(0xFFF44336);
+  static const Color success = Color(0xFF10B981);
+  static const Color error = Color(0xFFF59E0B);
   static const Color warning = Color(0xFFFF9800);
   static const Color info = Color(0xFF2196F3);
 
   // Border Colors
-  static const Color border = Color(0xFFE0E0E0);
+  static const Color border = Color(0xFFB5B5B5);
   static const Color borderFocused = Color(0xFF2196F3);
 
   // Additional Colors
   static const Color disabled = Color(0xFFBDBDBD);
   static const Color shadow = Color(0x0D000000);
+  static const Color golden = Color(0xFFFFD700);
 }
 
 // ==================== APP THEME ====================
@@ -210,4 +217,3 @@ class AppTheme {
     );
   }
 }
-//this is theme
