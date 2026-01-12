@@ -10,6 +10,7 @@ class LoginState extends Equatable {
   final bool isAuthenticated;
   final String? accessToken;
   final String? refreshToken;
+  final String? userRole; // Added: STUDENT or PARENT
 
   const LoginState({
     this.email = '',
@@ -21,7 +22,12 @@ class LoginState extends Equatable {
     this.isAuthenticated = false,
     this.accessToken,
     this.refreshToken,
+    this.userRole,
   });
+
+  // Helper getters
+  bool get isStudent => userRole?.toUpperCase() == 'STUDENT';
+  bool get isParent => userRole?.toUpperCase() == 'PARENT';
 
   LoginState copyWith({
     String? email,
@@ -33,6 +39,7 @@ class LoginState extends Equatable {
     bool? isAuthenticated,
     String? accessToken,
     String? refreshToken,
+    String? userRole,
   }) {
     return LoginState(
       email: email ?? this.email,
@@ -44,6 +51,7 @@ class LoginState extends Equatable {
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
+      userRole: userRole ?? this.userRole,
     );
   }
 
@@ -58,7 +66,6 @@ class LoginState extends Equatable {
     isAuthenticated,
     accessToken,
     refreshToken,
+    userRole,
   ];
 }
-
-//login state
