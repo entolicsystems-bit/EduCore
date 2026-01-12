@@ -1,5 +1,5 @@
-import { IsOptional, IsString, IsInt, Min, IsDateString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsInt, Min } from "class-validator";
+import { Type } from "class-transformer";
 
 export class LeadFilterDto {
   @IsOptional()
@@ -12,18 +12,12 @@ export class LeadFilterDto {
 
   @IsOptional()
   @IsString()
+  source?: string;
+
+  @IsOptional()
+  @IsString()
   search?: string;
 
-  // Date filters
-  @IsOptional()
-  @IsDateString()
-  fromDate?: string;
-
-  @IsOptional()
-  @IsDateString()
-  toDate?: string;
-
-  // Pagination
   @IsOptional()
   @Type(() => Number)
   @IsInt()
