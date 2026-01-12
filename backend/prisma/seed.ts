@@ -39,7 +39,14 @@ async function seedAdmin() {
 }
 
 async function seedRolesAndPermissions() {
-  const roles = ["ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT"];
+  const roles = [
+    "ADMIN",
+    "COUNSELLOR",
+    "TEACHER",
+    "ACCOUNTANT",
+    "PARENT",
+    "STUDENT",
+  ];
   for (const name of roles) {
     await prisma.role.upsert({
       where: { name },
@@ -58,6 +65,10 @@ async function seedRolesAndPermissions() {
     { module: "student", action: "read" },
     { module: "student", action: "update" },
     { module: "student", action: "delete" },
+    { module: "parent", action: "create" },
+    { module: "parent", action: "read" },
+    { module: "parent", action: "update" },
+    { module: "parent", action: "delete" },
   ];
 
   for (const permission of permissions) {
@@ -85,10 +96,16 @@ async function seedRolesAndPermissions() {
       "student:read",
       "student:update",
       "student:delete",
+      "parent:create",
+      "parent:read",
+      "parent:update",
+      "parent:delete",
     ],
-    COUNSELLOR: ["student:read", "student:update"],
+    COUNSELLOR: ["student:read", "student:update", "parent:read"],
     TEACHER: ["student:read", "student:update", "student:create"],
     ACCOUNTANT: ["student:read"],
+    PARENT: ["student:read", "parent:read"],
+    STUDENT: ["student:read"],
   };
 
   const rolesFromDb = await prisma.role.findMany();

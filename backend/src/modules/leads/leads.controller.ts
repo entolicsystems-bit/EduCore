@@ -71,4 +71,7 @@ export class LeadsController {
   delete(@Param("id") id: string, @Req() req) {
     return this.service.softDeleteUser(id, req.user);
   }
+
 }
+
+

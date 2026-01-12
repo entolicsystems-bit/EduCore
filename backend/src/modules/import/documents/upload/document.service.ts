@@ -167,6 +167,7 @@ export class documentService {
         document_type,
       };
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }

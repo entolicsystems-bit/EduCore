@@ -1,10 +1,8 @@
-// src/auth/strategy/jwt.strategy.ts
-
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { jwtConfig } from '../../config/jwt.config';
-import { PrismaService } from '../../database/prisma.service';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { jwtConfig } from "../../config/jwt.config";
+import { PrismaService } from "../../database/prisma.service";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,22 +14,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    // 🔐 Trust ONLY userId from token
+    // Always validate user exists in DB
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      select: {
-        id: true,
-        role: true,
-        tenantId: true,
-        branchId: true,
-      },
+      select: { id: true, role: true, tenantId: true, branchId: true },
     });
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid user');
-    }
-
-    // req.user is now DB-backed
-    return user;
+    if (!user) throw new UnauthorizedException("Invalid user");
+    return user; // req.user
   }
 }

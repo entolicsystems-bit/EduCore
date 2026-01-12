@@ -15,32 +15,28 @@ export class LeadsRepository {
     const skip = (page - 1) * limit;
 
     const where: any = {
-      deleted_at: null, //Only include leads that are not deleted
+      deleted_at: null, // only non-deleted leads
     };
 
-    if (filters.status) where.status = filters.status;
-    if (filters.source) where.source = filters.source;
-    if (filters.owner_id) where.owner_id = filters.owner_id;
-
-    if (filters.fromDate || filters.toDate) {
-      where.updatedAt = {};
-      if (filters.fromDate) where.updatedAt.gte = new Date(filters.fromDate);
-      if (filters.toDate) where.updatedAt.lte = new Date(filters.toDate);
+    if (filters.status) {
+      where.status = filters.status;
     }
 
-    if (filters.search) {
-      where.OR = [
-        { name: { contains: filters.search, mode: "insensitive" } },
-        { phone: { contains: filters.search, mode: "insensitive" } },
-        { email: { contains: filters.search, mode: "insensitive" } },
-      ];
+    if (filters.source) {
+      where.source = filters.source;
+    }
+
+    if (filters.owner_id) {
+      where.owner_id = filters.owner_id;
     }
 
     return this.prisma.lead.findMany({
       where,
       skip,
       take: limit,
-      orderBy: { updatedAt: "desc" },
+      orderBy: {
+        updatedAt: "desc",
+      },
       select: {
         id: true,
         name: true,
@@ -111,28 +107,16 @@ export class LeadsRepository {
     });
   }
 
-  updateLead(leadId: string, ownerId: string) {
-    return this.prisma.lead.update({
-      where: { id: leadId },
-      data: { owner_id: ownerId },
-    });
-  }
-
-  // deleteLead(leadId: string) {
-  //   return this.prisma.lead.delete({
-  //     where: { id: leadId },
-  //   });
-  // }
-
   async sdelete(leadId: string) {
-    const lead = await this.prisma.lead.update({
+    await this.prisma.lead.update({
       where: { id: leadId },
       data: { deleted_at: new Date() },
     });
+
     return {
       success: true,
       message: "Lead deleted successfully",
-      leadId: leadId,
+      leadId,
       deleted_at: new Date(),
     };
   }

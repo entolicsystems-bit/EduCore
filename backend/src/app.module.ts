@@ -23,8 +23,14 @@ import { APP_GUARD } from "@nestjs/core";
       envFilePath: ".env", // root .env
     }),
     ThrottlerModule.forRoot({
-      throttlers: [{ name: "login", ttl: seconds(60), limit: 3 }],
-      errorMessage: "Too Many requests! Please wait a minute and try again!",
+      throttlers: [
+        {
+          name: "default",
+          ttl: seconds(60),
+          limit: 3,
+        },
+      ],
+      errorMessage: "Too many request! Please wait a minute and try again!",
     }),
     DatabaseModule,
     AuthModule,

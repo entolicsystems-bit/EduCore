@@ -6,50 +6,57 @@ import "./Login.css";
 const Login = () => {
   const navigate = useNavigate();
 
+  // this is state use for form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // this is stae for UI states
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
-  useEffect(() => {
-    validateForm();
-  }, [email, password]);
-
+  
+// check validation
   const validateForm = () => {
     if (!email.trim() || !password.trim()) {
-      setError("Please fill in all fields.");
-      setIsValid(false);
-      return false;
+      return "Please fill in all fields.";
     }
+      return "";
+    };
 
-    // setError("");
-    setIsValid(true);
-    return true;
-  };
+
+    useEffect(() => {
+    const errorMsg = validateForm();
+    setError(errorMsg);
+    setIsValid(!errorMsg);
+  }, [email, password]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
 
-    if (!validateForm()) {
-      setError("Please fill in all fields.");
+    if (!isValid)
       return;
-    }
+    
 
     setLoading(true);
     setError("");
 
     try {
       const data = await loginUser({ email, password });
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      // localStorage.setItem("user", JSON.stringify(data.user));
 
       navigate("/leads");
     } catch (err) {
-      setError(err.message);
+      setError(
+  err?.response?.data?.message || "Login failed. Please try again."
+);
+
       
     } finally {
       setLoading(false);

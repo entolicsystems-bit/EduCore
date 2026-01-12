@@ -127,6 +127,7 @@ enum ApplicationStatus {
   UNDER_REVIEW
   APPROVED
   REJECTED
+  
 }
 
 //// Application Model
@@ -232,8 +233,44 @@ enum DocumentType {
   OTHER
 }
 
+// ADMISSION DOCUMENTS (PRD 3)
+// admission_documents
+
+// Column Type Constraints
+
+// id UUID
+
+// PK application_id UUID
+
+// FK → applications(id)
+
+// document_type VARCHAR(50) AADHAR / MARKSHEET / PHOTO
+
+// file_key TEXT NOT NULL
+
+// file_name TEXT
+
+// file_size BIGINT
+
+// status VARCHAR(20)
+// UPLOADED / VERIFIED / REJECTED
+
+// verified_by UUID
+
+// FK → users(id)
+
+// verified_at TIMESTAMP
+
+// created_at TIMESTAMP DEFAULT now()
+
+// Indexes
+// idx_docs_application_id
+// idx_docs_status
+
 model Document {
   id             String   @id @default(uuid())
+
+  application_id  String  @default(uuid())
 
   // Polymorphic ownership
   ownerType      DocumentOwnerType
