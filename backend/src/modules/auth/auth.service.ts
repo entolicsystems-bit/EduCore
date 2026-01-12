@@ -195,6 +195,7 @@ import { PrismaService } from 'src/database/prisma.service';
 import { jwtConfig } from 'src/config/jwt.config';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
+import { CryptoUtil } from 'src/common/crypto/crypto.util';
 
 @Injectable()
 export class AuthService {
@@ -204,22 +205,77 @@ export class AuthService {
   ) {}
 
   // ================= LOGIN =================
-  async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
+  // async login(email: string, password: string, phone: string) {
 
-    if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
+  //    // 🔐 NEW: Encrypt email before querying DB (DB stores encrypted email)
+  // const encryptedValue = await CryptoUtil.encrypt(email); // NEW
+  // const encryptedphone = await CryptoUtil.encrypt(phone); // NEW
+
+  //    // 🔍 Find user by encrypted email OR encrypted phone
+  // const user = await this.prisma.user.findFirst({
+  //   where: {
+  //     OR: [
+  //       { email: encryptedValue }, // 🔐 encrypted email
+  //       { phone: encryptedphone }, // 🔐 encrypted phone
+  //     ],
+  //   },
+  // });
+
+  //   if (!user || !user.passwordHash) {
+  //     throw new UnauthorizedException('Invalid credentials');
+  //   }
+
+  //   const isValid = await bcrypt.compare(password, user.passwordHash);
+  //   if (!isValid) {
+  //     throw new UnauthorizedException('Invalid credentials');
+  //   }
+
+  //   return this.issueTokens(user.id);
+  // }
+
+  async login(identifier: string, password: string) {
+  // 1️⃣ Fetch all users (because encrypted fields can't be searched directly)
+  const users = await this.prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      phone: true,
+      passwordHash: true,
+    },
+  });
+
+  // 2️⃣ Try to find matching user by decrypting
+  let matchedUser = null;
+
+  for (const user of users) {
+    const decryptedEmail = user.email
+      ? await CryptoUtil.decrypt(user.email)
+      : null; // 🔓 decrypt email
+
+    const decryptedPhone = user.phone
+      ? await CryptoUtil.decrypt(user.phone)
+      : null; // 🔓 decrypt phone
+
+    if (decryptedEmail === identifier || decryptedPhone === identifier) {
+      matchedUser = user;
+      break;
     }
-
-    const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    return this.issueTokens(user.id);
   }
+
+  if (!matchedUser) {
+    throw new UnauthorizedException("Invalid credentials");
+  }
+
+  // 3️⃣ Check password
+  const isValid = await bcrypt.compare(password, matchedUser.passwordHash);
+  if (!isValid) {
+    throw new UnauthorizedException("Invalid credentials");
+  }
+
+  // 4️⃣ Issue tokens
+  return this.issueTokens(matchedUser.id);
+}
+
 
   // ================= ISSUE TOKENS =================
   async issueTokens(userId: string) {

@@ -1,14 +1,23 @@
+
 import "dotenv/config";
+import { cryptoConfig } from './../src/config/crypto.config';
+import { CryptoUtil } from './../src/common/crypto/crypto.util';
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient({
+
   accelerateUrl: process.env.DATABASE_URL, // ✅ works for Prisma Accelerate
 });
 
 async function seedAdmin() {
+  console.log("CRYPTO_SECRET from seed:", process.env.CRYPTO_SECRET);
+
+    const encryptedEmail = await CryptoUtil.encrypt("admin@erp.com"); // 🔐
+  const encryptedPhone = await CryptoUtil.encrypt("9999999999");   // 🔐
+
   const exists = await prisma.user.findUnique({
-    where: { email: "admin@erp.com" },
+    where: { email: encryptedEmail },
   });
 
   if (exists) {
@@ -20,15 +29,15 @@ async function seedAdmin() {
 
   await prisma.user.create({
     data: {
-      email: "admin@erp.com",
-      name: "System Admin",
-      phone: "9999999999",
+      email: encryptedEmail,
+       name: await CryptoUtil.encrypt("System Admin"),// 🔐
+      phone: encryptedPhone,
       role: "ADMIN",
       passwordHash,
     },
   });
 
-  console.log("✅ Admin seeded successfully");
+  console.log("✅ Admin encrypted and seeded successfully");
 }
 
 async function seedRolesAndPermissions() {

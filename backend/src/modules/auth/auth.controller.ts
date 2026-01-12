@@ -9,8 +9,9 @@ export class AuthController {
 
   @Post('login')
   login(@Body() dto: LoginDto) {
-    return this.authService.login(dto.email, dto.password)
-  }
+ const identifier = dto.email || dto.phone;
+  return this.authService.login(identifier, dto.password); 
+ }
 
   @Post('refresh')
   refresh(@Body() dto: RefreshDto) {
