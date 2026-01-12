@@ -1,4 +1,4 @@
-// src/prisma/prisma.service.ts
+// src/database/prisma.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
@@ -9,7 +9,7 @@ export class PrismaService
 {
   constructor() {
     super({
-      log: ['error', 'warn'], // ✅ logs are fine
+      log: ['error', 'warn'], // only logs
     });
   }
 
