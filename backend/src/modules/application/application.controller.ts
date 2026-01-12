@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Param } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from '../../dto/application.dto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
@@ -25,4 +25,15 @@ export class ApplicationController {
     );
 
   }
+
+  //  @Post(':id/submit')
+  // submit(
+  //   @Param('id') applicationId: string,
+  //   @Req() req: Request,
+  // ) {
+  //   return this.applicationService.submitApplication(
+  //     applicationId,
+  //     req.user,
+  //   );
+
 }
