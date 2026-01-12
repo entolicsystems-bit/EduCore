@@ -6,6 +6,8 @@ import {
 import { PrismaService } from "../../database/prisma.service";
 import { RegisterDto } from "src/dto/register.dto";
 import * as bcrypt from "bcrypt";
+import { CryptoUtil } from "src/common/crypto/crypto.util"; // 🔐 add this
+
 
 @Injectable()
 export class RolesService {
@@ -35,10 +37,17 @@ export class RolesService {
         throw new BadRequestException("Invalid role");
       }
 
-      const [emailExists, phoneExists] = await Promise.all([
-        this.prisma.user.findUnique({ where: { email } }),
-        this.prisma.user.findFirst({ where: { phone } }),
-      ]);
+       // 🔐 Encrypt fields for DB comparison
+    const encryptedEmail = await CryptoUtil.encrypt(email);
+    const encryptedPhone = await CryptoUtil.encrypt(phone);
+
+
+       // 🔍 Check uniqueness on encrypted values
+    const [emailExists, phoneExists] = await Promise.all([
+      this.prisma.user.findUnique({ where: { email: encryptedEmail } }), // 🔐
+      this.prisma.user.findFirst({ where: { phone: encryptedPhone } }),  // 🔐
+    ]);
+
 
       if (emailExists) throw new BadRequestException("Email already exists");
       if (phoneExists) throw new BadRequestException("PhoneNo already exists");
@@ -47,9 +56,9 @@ export class RolesService {
 
       const user = await this.prisma.user.create({
         data: {
-          email,
-          name,
-          phone,
+          email:encryptedEmail, // 🔐
+          name : await CryptoUtil.encrypt(name), // 🔐
+          phone : encryptedPhone, // 🔐
           role: roleName,
           passwordHash: hashedPassword,
         },
@@ -80,4 +89,55 @@ export class RolesService {
       throw error;
     }
   }
+
+  async getAllStaff() {
+  const users = await this.prisma.user.findMany({
+    where: {
+      role: { in: ["COUNSELLOR", "TEACHER", "ACCOUNTANT", "PARENT", "STUDENT"] },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return Promise.all(
+    users.map(async (u) => ({
+      id: u.id,
+      name: await CryptoUtil.decrypt(u.name),      // 🔓
+      email: await CryptoUtil.decrypt(u.email),    // 🔓
+      phone: await CryptoUtil.decrypt(u.phone),    // 🔓
+      role: u.role,
+      status: u.status,
+      createdAt: u.createdAt,
+    }))
+  );
+}
+
+async searchStaffByName(search: string) {
+  const users = await this.prisma.user.findMany({
+    where: {
+      role: { in: ["COUNSELLOR", "TEACHER", "ACCOUNTANT", "PARENT", "STUDENT"] },
+    },
+  });
+
+  const results = [];
+
+  for (const user of users) {
+    const name = await CryptoUtil.decrypt(user.name); // 🔓
+
+    if (name.toLowerCase().includes(search.toLowerCase())) {
+      results.push({
+        id: user.id,
+        name,
+        email: await CryptoUtil.decrypt(user.email),
+        phone: await CryptoUtil.decrypt(user.phone),
+        role: user.role,
+        status: user.status,
+      });
+    }
+  }
+
+  return results;
+}
+
+  
+  
 }

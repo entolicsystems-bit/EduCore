@@ -137,13 +137,32 @@ model RolePermission {
   @@index([permissionId])
 }
 
+
 enum ApplicationStatus {
-  DRAFT
-  SUBMITTED
+  APPLIED
   UNDER_REVIEW
+  DOCUMENT_VERIFIED
   APPROVED
   REJECTED
+  ENROLLED
 }
+
+enum DocumentStatus {
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum TimelineEntityType {
+  APPLICATION
+  STUDENT
+}
+
+enum TimelineEventType {
+  STATUS_CHANGED
+  CREATED
+}
+
 
 //// Application Model
 /// Stores admission application data linked to a Lead.
@@ -178,7 +197,7 @@ model Application {
   /// Tracks the current stage of the application lifecycle
   /// Default is DRAFT to support partial form completion
 
-  status ApplicationStatus @default(DRAFT)
+  status ApplicationStatus @default(APPLIED)
 
   /// Tenant identifier for multi-tenant isolation
   /// Ensures data separation between institutions
@@ -231,3 +250,35 @@ model Application {
   @@index([tenantId, branchId, status])
   @@index([createdAt])
 }
+
+
+model ActivityTimeline {
+  id          String            @id @default(uuid())
+  entityType  TimelineEntityType
+  entityId    String            @db.Uuid
+  eventType   TimelineEventType
+  title       String?
+  description String?
+  actorId     String?           @db.Uuid
+  createdAt   DateTime          @default(now())
+
+  @@index([entityType, entityId], name: "idx_timeline_entity")
+  @@index([createdAt], name: "idx_timeline_created_at")
+}
+
+model Audit_Logs {
+  id         String   @id @default(uuid())
+  action     String   @db.VarChar(100)
+  entityType String   @db.VarChar(50)
+  entityId   String   @db.Uuid
+  actorId    String?  @db.Uuid
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+
+  @@index([entityType, entityId], name: "idx_audit_entity")
+  @@index([createdAt], name: "idx_audit_created_at")
+}
+
+
