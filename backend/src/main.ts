@@ -10,7 +10,7 @@ import { AllExceptionFilter } from "./exceptions/all-exception.filter";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 
 
-console.log('CRYPTO_SECRET:', process.env.CRYPTO_SECRET);
+// console.log('CRYPTO_SECRET:', process.env.CRYPTO_SECRET);
 
 
 async function bootstrap() {
