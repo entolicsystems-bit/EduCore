@@ -5,7 +5,8 @@ import 'package:educore/presentation/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
+import 'package:google_fonts/google_fonts.dart';
+import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
 
 void main() {
@@ -36,6 +37,11 @@ class MyApp extends StatelessWidget {
           localizationsDelegates:
 
           AppLocalizations.localizationsDelegates,
+          theme: AppTheme.lightTheme.copyWith(
+            textTheme: GoogleFonts.poppinsTextTheme(
+              AppTheme.lightTheme.textTheme,
+            ),
+          ),
 
           home: LoginScreen(),
         );

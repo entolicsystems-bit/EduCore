@@ -5,6 +5,7 @@ import '../bloc/auth/forgot_password/forgot_bloc.dart';
 import '../bloc/auth/forgot_password/forgot_event.dart';
 import '../bloc/auth/forgot_password/forgot_state.dart';
 import 'otp_screen.dart';
+import 'package:educore/core/theme/app_colors.dart'; // make sure path is correct
 
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});
@@ -37,7 +38,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FD),
+      backgroundColor: AppColors.background,
       body: BlocConsumer<ForgotPasswordBloc, ForgotPasswordState>(
         listener: (context, state) {
           if (state is ForgotPasswordSuccess) {
@@ -51,7 +52,9 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.error),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
               ),
             );
           }
@@ -70,7 +73,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                 constraints: const BoxConstraints(maxWidth: 380),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.cardBg,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -88,26 +91,22 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const SizedBox(width: 8),
-                         Row(
-                           children: [
-                             Text(
-                              'Forgot Password',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                                                     ),
-                           ],
-                         ),
+                        Text(
+                          'Forgot Password',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                        ),
                       ],
                     ),
 
                     const SizedBox(height: 20),
-
 
                     TextField(
                       controller: _emailController,
@@ -116,11 +115,48 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                         hintText: 'Enter your email',
                         errorText: emailError,
                         filled: true,
-                        fillColor: const Color(0xFFF2F4F8),
+                        fillColor: AppColors.inputBg,
+
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
+                          borderSide: const BorderSide(
+                            color: AppColors.border,
+                            width: 1,
+                          ),
                         ),
+
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: AppColors.border,
+                            width: 1,
+                          ),
+                        ),
+
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            width: 1,
+                          ),
+                        ),
+
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 1,
+                          ),
+                        ),
+
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 1,
+                          ),
+                        ),
+
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 16,
@@ -133,8 +169,8 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                       },
                     ),
 
-                    const SizedBox(height: 24),
 
+                    const SizedBox(height: 24),
 
                     SizedBox(
                       width: double.infinity,
@@ -150,7 +186,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2196F3),
+                          backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),

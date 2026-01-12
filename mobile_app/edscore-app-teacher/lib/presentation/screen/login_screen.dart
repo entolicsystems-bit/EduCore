@@ -6,6 +6,7 @@ import '../bloc/auth/login/auth_bloc.dart';
 import '../bloc/auth/login/auth_event.dart';
 import '../bloc/auth/login/auth_state.dart';
 import 'forgot_password.dart';
+import 'package:educore/core/theme/app_colors.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -99,15 +100,14 @@ class _LoginViewState extends State<LoginView> {
     final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FD),
+      backgroundColor: AppColors.background,
       body: BlocConsumer<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(t.loginSuccess),
-                backgroundColor: Colors.green,
-
+                backgroundColor: AppColors.success,
                 behavior: SnackBarBehavior.floating,
                 margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
               ),
@@ -116,15 +116,13 @@ class _LoginViewState extends State<LoginView> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.error),
-                backgroundColor: Colors.red,
-
+                backgroundColor: AppColors.error,
                 behavior: SnackBarBehavior.floating,
                 margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
               ),
             );
           }
         },
-
         builder: (context, state) {
           return Center(
             child: SingleChildScrollView(
@@ -134,16 +132,18 @@ class _LoginViewState extends State<LoginView> {
                 child: Column(
                   children: [
 
+                    /// LOGO BOX
                     Container(
-                      width: 200,
+                      height: 162,
+                      width: 267,
                       constraints: const BoxConstraints(maxWidth: 380),
                       padding: const EdgeInsets.symmetric(vertical: 28),
                       margin: const EdgeInsets.only(bottom: 20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.cardBg,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color:  Colors.grey,
+                          color: AppColors.border,
                           width: 2,
                         ),
                       ),
@@ -154,18 +154,17 @@ class _LoginViewState extends State<LoginView> {
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2,
-                            color: Colors.black,
+                            color: AppColors.textDark,
                           ),
                         ),
                       ),
                     ),
 
-
                     Container(
                       constraints: const BoxConstraints(maxWidth: 380),
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.cardBg,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
@@ -183,6 +182,7 @@ class _LoginViewState extends State<LoginView> {
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
+                              color: AppColors.textDark,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -200,13 +200,34 @@ class _LoginViewState extends State<LoginView> {
                             decoration: InputDecoration(
                               hintText: t.emailHint,
                               filled: true,
-                              fillColor: const Color(0xFFF2F4F8),
+                              fillColor: AppColors.inputBg,
+
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none,
+                                borderSide: const BorderSide(
+                                  color: AppColors.border,
+                                  width: 1,
+                                ),
+                              ),
+
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border,
+                                  width: 1,
+                                ),
+                              ),
+
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1,
+                                ),
                               ),
                             ),
                           ),
+
 
                           const SizedBox(height: 14),
 
@@ -223,16 +244,36 @@ class _LoginViewState extends State<LoginView> {
                             decoration: InputDecoration(
                               hintText: t.passwordHint,
                               filled: true,
-                              fillColor: const Color(0xFFF2F4F8),
+                              fillColor: AppColors.inputBg,
+
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none,
+                                borderSide: const BorderSide(
+                                  color: AppColors.border,
+                                  width: 1,
+                                ),
                               ),
+
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border,
+                                  width: 1,
+                                ),
+                              ),
+
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1,
+                                ),
+                              ),
+
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
+                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                  color: AppColors.textGrey,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -245,6 +286,7 @@ class _LoginViewState extends State<LoginView> {
 
                           const SizedBox(height: 16),
 
+
                           SizedBox(
                             width: double.infinity,
                             height: 48,
@@ -252,7 +294,7 @@ class _LoginViewState extends State<LoginView> {
                               onPressed:
                               state is LoginLoading ? null : _submitForm,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2196F3),
+                                backgroundColor: AppColors.primary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -268,7 +310,7 @@ class _LoginViewState extends State<LoginView> {
                               )
                                   : Text(
                                 t.loginButton,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
@@ -294,7 +336,7 @@ class _LoginViewState extends State<LoginView> {
                               child: Text(
                                 t.forgot,
                                 style: const TextStyle(
-                                  color: Color(0xFF2196F3),
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
@@ -309,7 +351,7 @@ class _LoginViewState extends State<LoginView> {
                       t.version,
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: AppColors.textGrey,
                       ),
                     ),
 
@@ -319,7 +361,7 @@ class _LoginViewState extends State<LoginView> {
                         t.help,
                         style: const TextStyle(
                           fontSize: 18,
-                          color: Color(0xFF2196F3),
+                          color: AppColors.primary,
                         ),
                       ),
                     ),

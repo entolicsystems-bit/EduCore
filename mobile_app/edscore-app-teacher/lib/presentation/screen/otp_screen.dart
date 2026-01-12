@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/theme/app_colors.dart';
 import 'reset_screen.dart';
 
 import '../bloc/auth/otp/otp_bloc.dart';
 import '../bloc/auth/otp/otp_event.dart';
 import '../bloc/auth/otp/otp_state.dart';
+
 
 class OtpScreen extends StatelessWidget {
   final String email;
@@ -33,8 +35,7 @@ class OtpView extends StatefulWidget {
 class _OtpViewState extends State<OtpView> {
   final List<TextEditingController> _controllers =
   List.generate(4, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes =
-  List.generate(4, (_) => FocusNode());
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
   Timer? _timer;
   int _secondsRemaining = 30;
@@ -67,50 +68,47 @@ class _OtpViewState extends State<OtpView> {
     });
   }
 
-  String _getOtp() =>
-      _controllers.map((controller) => controller.text).join();
+  String _getOtp() => _controllers.map((c) => c.text).join();
 
-  bool get _isOtpComplete =>
-      _controllers.every((controller) => controller.text.isNotEmpty);
+  bool get _isOtpComplete => _controllers.every((c) => c.text.isNotEmpty);
 
   @override
   void dispose() {
     _timer?.cancel();
-    for (final c in _controllers) {
-      c.dispose();
-    }
-    for (final f in _focusNodes) {
-      f.dispose();
-    }
+    for (final c in _controllers) c.dispose();
+    for (final f in _focusNodes) f.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FD),
+      backgroundColor: AppColors.background,
       body: BlocConsumer<OtpBloc, OtpState>(
         listener: (context, state) {
           if (state is OtpVerified) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    ResetPasswordScreen(email: widget.email),
+                builder: (_) => ResetPasswordScreen(email: widget.email),
               ),
             );
           } else if (state is OtpFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.error),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
               ),
             );
           } else if (state is OtpResent) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('OTP resent successfully'),
-                backgroundColor: Colors.green,
+              SnackBar(
+                content: const Text('OTP resent successfully'),
+                backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
               ),
             );
             _clearOtp();
@@ -125,7 +123,7 @@ class _OtpViewState extends State<OtpView> {
                 constraints: const BoxConstraints(maxWidth: 360),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.cardBg,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -138,20 +136,22 @@ class _OtpViewState extends State<OtpView> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const SizedBox(width: 8),
                         Padding(
                           padding: const EdgeInsets.only(top: 50),
                           child: const Text(
-                            'Enter Otp',
+                            'Enter OTP',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: AppColors.textDark,
                             ),
                           ),
                         ),
@@ -177,16 +177,45 @@ class _OtpViewState extends State<OtpView> {
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: AppColors.textDark,
                             ),
                             decoration: InputDecoration(
                               counterText: '',
                               filled: true,
                               fillColor: _isExpired
-                                  ? Colors.grey[200]
-                                  : const Color(0xFFF2F4F8),
+                                  ? AppColors.inputBg.withOpacity(0.5)
+                                  : AppColors.inputBg,
+
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
+                                borderSide: const BorderSide(
+                                  color: AppColors.border,
+                                  width: 1,
+                                ),
+                              ),
+
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border,
+                                  width: 1,
+                                ),
+                              ),
+
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1,
+                                ),
+                              ),
+
+                              disabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: AppColors.border.withOpacity(0.5),
+                                  width: 1,
+                                ),
                               ),
                             ),
                             onChanged: (value) {
@@ -203,12 +232,11 @@ class _OtpViewState extends State<OtpView> {
 
                     const SizedBox(height: 12),
 
-
                     if (_isExpired)
                       const Text(
                         'OTP expired. Please resend.',
                         style: TextStyle(
-                          color: Colors.red,
+                          color: AppColors.error,
                           fontSize: 13,
                         ),
                       ),
@@ -230,7 +258,7 @@ class _OtpViewState extends State<OtpView> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2196F3),
+                          backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -270,15 +298,15 @@ class _OtpViewState extends State<OtpView> {
                           text: _isExpired
                               ? 'Resend OTP'
                               : 'Resend OTP in ',
-                          style: const TextStyle(color: Colors.grey),
+                          style: TextStyle(color: AppColors.textGrey),
                           children: _isExpired
                               ? []
                               : [
                             TextSpan(
                               text:
                               '00:${_secondsRemaining.toString().padLeft(2, '0')}',
-                              style: const TextStyle(
-                                color: Color(0xFF2196F3),
+                              style: TextStyle(
+                                color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -297,9 +325,7 @@ class _OtpViewState extends State<OtpView> {
   }
 
   void _clearOtp() {
-    for (final c in _controllers) {
-      c.clear();
-    }
+    for (final c in _controllers) c.clear();
     _focusNodes.first.requestFocus();
   }
 }
