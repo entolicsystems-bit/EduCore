@@ -10,16 +10,15 @@ export class PrismaService
   constructor() {
     super({
       engine: {
-        type: 'client', // Prisma 7 default engine
-        adapter: 'postgresql', // required for client engine
-        // If using Prisma Cloud/Accelerate, you could use accelerateUrl instead
+        type: 'client',
+        accelerateUrl: process.env.DATABASE_URL, // Use prisma:// URL here
       },
     });
   }
 
   async onModuleInit() {
     await this.$connect();
-    console.log('✅ Prisma connected');
+    console.log('✅ Prisma connected via Accelerate');
   }
 
   async onModuleDestroy() {
