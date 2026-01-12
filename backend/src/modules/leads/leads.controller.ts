@@ -22,7 +22,7 @@ import { RolesGuard } from "src/guards/roles.guard";
 export class LeadsController {
   constructor(private readonly service: LeadsService) {}
 
-  //PUBLIC — website/manual lead
+  // PUBLIC — website lead
   @Post("create")
   create(@Body() dto: CreateLeadDto) {
     return this.service.createWebsiteLead(dto);
@@ -56,25 +56,18 @@ export class LeadsController {
     return this.service.updateLead(id, body, req.user);
   }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles("ADMIN", "COUNSELLOR")
-  // @Delete(":id")
-  // deleteLead(@Param("id") id: string, @Req() req) {
-  //   return this.service.deleteLead(id, req.user);
-  // }
-
-  //counsellor and admin creates lead
+  // ADMIN / COUNSELLOR create lead
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR")
   @Post("add")
   createByCounsellor(@Body() dto: CreateLeadDto, @Req() req) {
-    return this.service.createCounsellorLead(dto, req.user.id);
+    return this.service.createCounsellorLead(dto, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR")
   @Delete("delete/:id")
   sdelete(@Param("id") id: string, @Req() req) {
-    return this.service.softDeleteUser(id,req.user);
+    return this.service.softDeleteUser(id, req.user);
   }
 }
