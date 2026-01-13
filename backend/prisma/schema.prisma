@@ -172,7 +172,7 @@ model Application {
 
   tenantId String? @db.Uuid
   branchId String? @db.Uuid
-  applicationRef String   @unique
+  applicationRef String   @unique 
 
   submittedAt DateTime?
   reviewedBy  String?
