@@ -27,68 +27,110 @@ export class RolesService {
     });
   }
 
-  async registerStaff(dto: RegisterDto, adminId: string) {
-    try {
-      const { email, name, phone, password } = dto;
-      const roleName = dto.role.toUpperCase();
-
-      const allowedRoles = ["COUNSELLOR", "TEACHER", "ACCOUNTANT"];
-      if (!allowedRoles.includes(roleName)) {
-        throw new BadRequestException("Invalid role");
+ async registerStaff(dto: RegisterDto, adminId: string) {
+  try {
+    /**
+     * 🔐 PARAMETER ALLOWLIST
+     * -----------------------------------------------
+     * Prevents attackers from injecting extra fields
+     */
+    const allowed = ["email", "name", "phone", "password", "role"];
+    for (const key of Object.keys(dto)) {
+      if (!allowed.includes(key)) {
+        throw new BadRequestException("Invalid input");
       }
+    }
 
-       // 🔐 Encrypt fields for DB comparison
+    const { email, name, phone, password } = dto;
+    const roleName = dto.role.toUpperCase();
+
+    /**
+     * 🔐 ROLE VALIDATION
+     */
+    const allowedRoles = ["COUNSELLOR", "TEACHER", "ACCOUNTANT"];
+    if (!allowedRoles.includes(roleName)) {
+      throw new BadRequestException("Invalid role");
+    }
+
+    /**
+     * 🔐 BASIC FORMAT VALIDATION
+     */
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new BadRequestException("Invalid input");
+    }
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+      throw new BadRequestException("Invalid input");
+    }
+
+    if (!password || password.length < 8) {
+      throw new BadRequestException("Invalid input");
+    }
+
+    // 🔐 Encrypt for DB storage & comparison
     const encryptedEmail = await CryptoUtil.encrypt(email);
     const encryptedPhone = await CryptoUtil.encrypt(phone);
 
-
-       // 🔍 Check uniqueness on encrypted values
+    // 🔍 Uniqueness check on encrypted values
     const [emailExists, phoneExists] = await Promise.all([
-      this.prisma.user.findUnique({ where: { email: encryptedEmail } }), // 🔐
-      this.prisma.user.findFirst({ where: { phone: encryptedPhone } }),  // 🔐
+      this.prisma.user.findUnique({ where: { email: encryptedEmail } }),
+      this.prisma.user.findFirst({ where: { phone: encryptedPhone } }),
     ]);
 
-
-      if (emailExists) throw new BadRequestException("Email already exists");
-      if (phoneExists) throw new BadRequestException("PhoneNo already exists");
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const user = await this.prisma.user.create({
-        data: {
-          email:encryptedEmail, // 🔐
-          name : await CryptoUtil.encrypt(name), // 🔐
-          phone : encryptedPhone, // 🔐
-          role: roleName,
-          passwordHash: hashedPassword,
-        },
-      });
-
-      const roleMap = {
-        COUNSELLOR: 2,
-        TEACHER: 3,
-        ACCOUNTANT: 4,
-      };
-
-      await this.assignRole(user.id, roleMap[roleName]);
-
-      const { passwordHash: _, ...safeUser } = user;
-
-      await this.prisma.auditLog.create({
-        data: {
-          tableName: "User",
-          action: "AssignRole",
-          oldValue: null,
-          newValue: user,
-          userId: adminId,
-        },
-      });
-      return safeUser;
-    } catch (error) {
-      console.error("registerStaff failed:", error);
-      throw error;
+    /**
+     * 🔐 Prevent account enumeration
+     * Do NOT reveal which field exists
+     */
+    if (emailExists || phoneExists) {
+      throw new BadRequestException("Unable to process the request");
     }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: encryptedEmail,
+        name: await CryptoUtil.encrypt(name),
+        phone: encryptedPhone,
+        role: roleName,
+        passwordHash: hashedPassword,
+      },
+    });
+
+    const roleMap = {
+      COUNSELLOR: 2,
+      TEACHER: 3,
+      ACCOUNTANT: 4,
+    };
+
+    await this.assignRole(user.id, roleMap[roleName]);
+
+    const { passwordHash: _, ...safeUser } = user;
+
+    await this.prisma.auditLog.create({
+      data: {
+        tableName: "User",
+        action: "AssignRole",
+        oldValue: null,
+        newValue: user,
+        userId: adminId,
+      },
+    });
+
+    return safeUser;
+
+  } catch (error) {
+    /**
+     * 🔐 ERROR DISCLOSURE PROTECTION
+     * -----------------------------------------------
+     * Never expose database, Prisma, or stack traces
+     * to the client. Log internally only.
+     */
+    console.error("REGISTER STAFF ERROR:", error);
+    throw new BadRequestException("Unable to process the request");
   }
+}
+
 
   async getAllStaff() {
   const users = await this.prisma.user.findMany({

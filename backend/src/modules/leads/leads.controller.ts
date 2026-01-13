@@ -31,15 +31,15 @@ export class LeadsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
   @Get()
-  list(@Query() filters: LeadFilterDto) {
-    return this.service.getLeads(filters);
+getLeads(@Query() filters: LeadFilterDto, @Req() req) {
+  return this.service.getLeads(filters, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
-  @Get(":id")
-  detail(@Param("id") id: string) {
-    return this.service.getLead(id);
+@Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
+@Get(":id")
+detail(@Param("id") id: string, @Req() req) {
+  return this.service.getLead(id, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

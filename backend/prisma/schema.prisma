@@ -49,6 +49,10 @@ model User {
   updatedAt     DateTime?      @map("updated_at")
   branchId      String?        @db.Uuid
 
+  // 🔥 ADD ONLY THESE
+  student      Student[] // 🔥 one user → many students
+  offerLetters OfferLetter[]
+
   @@map("User")
 }
 
@@ -119,7 +123,6 @@ model RolePermission {
   @@index([permissionId])
 }
 
-
 enum ApplicationStatus {
   APPLIED
   UNDER_REVIEW
@@ -144,7 +147,6 @@ enum TimelineEventType {
   STATUS_CHANGED
   CREATED
 }
-
 
 //// Application Model
 /// Stores admission application data linked to a Lead.
@@ -221,6 +223,9 @@ model Application {
 
   updatedAt DateTime @updatedAt
 
+  student      Student[]
+  offerLetters OfferLetter[]
+
   /// Optimizes lookup of applications by tenant and lead
 
   /// Supports filtering applications by branch and status
@@ -233,16 +238,15 @@ model Application {
   @@index([createdAt])
 }
 
-
 model ActivityTimeline {
-  id          String            @id @default(uuid())
+  id          String             @id @default(uuid())
   entityType  TimelineEntityType
-  entityId    String            @db.Uuid
+  entityId    String             @db.Uuid
   eventType   TimelineEventType
   title       String?
   description String?
-  actorId     String?           @db.Uuid
-  createdAt   DateTime          @default(now())
+  actorId     String?            @db.Uuid
+  createdAt   DateTime           @default(now())
 
   @@index([entityType, entityId], name: "idx_timeline_entity")
   @@index([createdAt], name: "idx_timeline_created_at")
@@ -257,10 +261,8 @@ model Audit_Logs {
   metadata   Json?
   createdAt  DateTime @default(now())
 
-  @@map("audit_logs")
-
   @@index([entityType, entityId], name: "idx_audit_entity")
   @@index([createdAt], name: "idx_audit_created_at")
+  @@map("audit_logs")
 }
-
 
