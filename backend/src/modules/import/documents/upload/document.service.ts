@@ -4,11 +4,11 @@ import {
   Injectable,
   InternalServerErrorException,
 } from "@nestjs/common";
-import { documentUploadDto } from "src/dto/document-upload-dto";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { User } from "@prisma/client";
 import { PrismaService } from "src/database/prisma.service";
+import { User, DocumentStatus, DocumentOwnerType } from "@prisma/client";
+import { DocumentUploadDto } from "src/dto/document-upload-dto";
 
 @Injectable()
 export class documentService {
@@ -22,59 +22,33 @@ export class documentService {
     },
   });
 
-  //get owner tenantId and BranchId
-  private async getOwnerTenantAndBranch(owner_type: string, owner_id: string) {
-    switch (owner_type) {
-      case "STUDENT":
-        return this.prisma.lead.findUnique({
-          where: { id: owner_id },
-          select: { tenantId: true, branchId: true },
-        });
+  // Get owner tenant & branch
+  // private async getOwnerTenantAndBranch(ownerType: DocumentOwnerType, ownerId: string) {
+  //   switch (ownerType) {
+  //     case DocumentOwnerType.STUDENT:
+  //       return this.prisma.lead.findUnique({
+  //         where: { id: ownerId },
+  //         select: { tenantId: true, branchId: true },
+  //       });
+  //     case DocumentOwnerType.STAFF:
+  //       return this.prisma.user.findUnique({
+  //         where: { id: ownerId },
+  //         select: { tenantId: true, branchId: true },
+  //       });
+  //     default:
+  //       throw new BadRequestException("Invalid owner type");
+  //   }
+  // }
 
-      case "STAFF":
-        return this.prisma.user.findUnique({
-          where: { id: owner_id },
-          select: { tenantId: true, branchId: true },
-        });
+  async uploadDocument(dto: DocumentUploadDto, reqUser: User) {
+    const { fileName, file_type, document_type, fileSize, application_id } =
+      dto;
 
-      // case "APPLICATION":
-      //   return this.prisma.user.findUnique({
-      //     where: { id: owner_id },
-      //     select: { tenantId: true, branchId: true },
-      //   });
-
-      default:
-        throw new BadRequestException("Invalid owner type");
-    }
-  }
-
-  async uploadDocument(dto: documentUploadDto, reqUser: User) {
-    const { fileName, file_type, owner_type, owner_id, document_type } = dto;
-
-    //Permission check
     if (!reqUser.tenantId || !reqUser.branchId) {
-      throw new ForbiddenException("Invalid tenant or branch id");
+      throw new ForbiddenException("Invalid tenant or branch");
     }
 
-    //get owner TenantId and BranchId
-    const owner = await this.getOwnerTenantAndBranch(owner_type, owner_id);
-
-    //owner not found
-    if (!owner) {
-      throw new BadRequestException("Owner not found");
-    }
-
-    // Cross-tenant or cross-branch blocked
-    if (
-      owner.tenantId !== reqUser.tenantId ||
-      owner.branchId !== reqUser.branchId
-    ) {
-      throw new ForbiddenException(
-        "You cannot upload documents outside your tenant or branch"
-      );
-    }
-
-    //blocked extention
+    // Extensions
     const blockedExtensions = [
       "exe",
       "bat",
@@ -87,77 +61,80 @@ export class documentService {
       "msi",
       "com",
     ];
-
-    //allowed extention
     const allowedExtensions = ["pdf", "jpg", "jpeg", "png", "docx"];
-
     const extension = fileName.split(".").pop()?.toLowerCase();
 
     if (!extension)
       throw new BadRequestException("File must have an extension");
-
     if (blockedExtensions.includes(extension))
-      throw new BadRequestException(`Files with .${extension} are not allowed`);
-
+      throw new BadRequestException(`Files with .${extension} are blocked`);
     if (!allowedExtensions.includes(extension))
       throw new BadRequestException(
         `Files with .${extension} are not supported`
       );
 
-    //allowed file types
+    // Double extension check (e.g., file.pdf.exe)
+    const baseName = fileName.split(".").slice(0, -1).join(".");
+    if (baseName.split(".").some((ext) => blockedExtensions.includes(ext))) {
+      throw new BadRequestException("Filename contains forbidden extensions");
+    }
+
+    // MIME types
     const allowedTypes = [
       "application/pdf",
       "image/jpeg",
       "image/png",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
-
-    //check input file type
-    if (!allowedTypes.includes(file_type)) {
+    if (!allowedTypes.includes(file_type))
       throw new BadRequestException("Unsupported MIME type");
-    }
+
+    // File size
+    if (fileSize && fileSize > 10 * 1024 * 1024)
+      throw new BadRequestException("File exceeds max size of 10MB");
 
     try {
-      //check extention and create timestamp
-      const extension = fileName.split(".").pop();
       const timestamp = Date.now();
+      const fileKey = `${reqUser.tenantId}/${reqUser.branchId}/${document_type}/${timestamp}.${extension}`;
 
-      //create unique file key
-      const fileKey = `${reqUser.tenantId}/${reqUser.branchId}/${owner_type}/${owner_id}/${document_type}/${timestamp}.${extension}`;
-
-      // create presigned URL
       const command = new PutObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET!,
         Key: fileKey,
         ContentType: file_type,
         Metadata: {
-          owner_type,
-          owner_id: owner_id.toString(),
           document_type,
+          file_size: fileSize?.toString() || "0",
         },
       });
 
-      //upload url
       const uploadUrl = await getSignedUrl(this.s3, command, {
-        expiresIn: 900, // 15 minutes
+        expiresIn: 900,
       });
 
-      await this.prisma.document.create({
+      // Save document in DB
+      const document = await this.prisma.admissionDocument.create({
         data: {
-          tenantId: reqUser.tenantId,
-          branchId: reqUser.branchId,
+          applicationId: application_id, // if optional, consider nullable in schema
           documentType: document_type,
-          fileKey: fileKey,
-          fileName: fileName,
-          fileSize: 10,
+          fileKey,
+          fileName,
+          fileSize: BigInt(fileSize || 0),
           fileType: file_type,
-          ownerId: owner_id,
-          ownerType: owner_type,
-          verified: false,
+          status: DocumentStatus.UPLOADED,
         },
       });
 
-      // responce
+      // Audit log
+      await this.prisma.audit_Logs.create({
+        data: {
+          action: "UPLOAD_DOCUMENT",
+          entityType: "ADMISSION_DOCUMENT",
+          entityId: document.id,
+          actorId: reqUser.id,
+          metadata: { fileName, fileKey, documentType: document_type },
+        },
+      });
+
       return {
         upload_url: uploadUrl,
         file_key: fileKey,
@@ -167,8 +144,8 @@ export class documentService {
         document_type,
       };
     } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(error);
+      console.error(error);
+      throw new InternalServerErrorException("Failed to upload document");
     }
   }
 }

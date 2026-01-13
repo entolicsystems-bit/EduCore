@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
-import { documentUploadDto } from "src/dto/document-upload-dto";
+import { DocumentUploadDto } from "src/dto/document-upload-dto";
 import { documentService } from "./document.service";
 import { Roles } from "src/common/decorator/roles.decorator";
 import { JwtAuthGuard } from "src/guards/jwt-auth.guard";
@@ -12,7 +12,7 @@ export class documentController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR")
   @Post("upload")
-  async uploadDocument(@Body() dto: documentUploadDto, @Req() req) {
+  async uploadDocument(@Body() dto: DocumentUploadDto, @Req() req) {
     return this.documentService.uploadDocument(dto, req.user);
   }
 }

@@ -1,78 +1,138 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { PrismaService } from 'src/database/prisma.service';
-import {
-  VerificationStatus,
-  VerifyDocumentDto,
-} from 'src/dto/verify-document.dto';
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { DocumentStatus, User } from "@prisma/client";
+import { PrismaService } from "src/database/prisma.service";
+import { VerifyDocumentDto } from "src/dto/verify-document.dto";
 
 @Injectable()
 export class VerifyDocumentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  //single document verify
+  //single document verification
   async verifyOneDocument(
     documentId: string,
     dto: VerifyDocumentDto,
-    admin: User,
+    admin: User
   ) {
-    const document = await this.prisma.document.findUnique({
+    //Find document
+    const document = await this.prisma.admissionDocument.findUnique({
       where: { id: documentId },
     });
 
-    if (!document) throw new BadRequestException('Document not found');
-    if (document.verified) throw new BadRequestException('Document already verified');
+    //Given document not found
+    if (!document) {
+      throw new BadRequestException("Document not found");
+    }
 
-    const isVerified = dto.status === VerificationStatus.VERIFIED;
+    //Document already Verified or Rejected
+    if (document.status !== DocumentStatus.UPLOADED) {
+      throw new BadRequestException("Document already processed");
+    }
 
-    await this.prisma.document.update({
-      where: { id: documentId },
-      data: {
-        verified: isVerified,
-        verifiedBy: admin.id,
-        verifiedAt: new Date(),
-      },
+    //Update table
+    await this.prisma.$transaction(async (tx) => {
+      const updateDoc = await tx.admissionDocument.update({
+        where: { id: documentId },
+        data: {
+          status: dto.status, // VERIFIED or REJECTED
+          verifiedBy: admin.id,
+          verifiedAt: new Date(),
+        },
+      });
+
+      //Create audit logs
+      await tx.audit_Logs.create({
+        data: {
+          action: "VERIFY_DOCUMENT",
+          entityType: "ADMISSION_DOCUMENT",
+          entityId: documentId,
+          actorId: admin.id,
+          metadata: {
+            documentId: documentId,
+            Status: dto.status,
+            Comments: dto.comments,
+          },
+        },
+      });
+
+      // if (dto.status === DocumentStatus.VERIFIED) {
+      //   await this.handleAllDocumentVerified(updateDoc.applicationId, tx);
+      // }
     });
 
     return { success: true };
   }
 
+  //bulk verification
   async bulkVerifyDocuments(
     documentIds: string[],
     dto: VerifyDocumentDto,
-    admin: User,
+    admin: User
   ) {
+    //documents ID not given
     if (!documentIds || documentIds.length === 0) {
-      throw new BadRequestException('Document IDs are required');
+      throw new BadRequestException("Document IDs are required");
     }
 
-    const documents = await this.prisma.document.findMany({
+    const documents = await this.prisma.admissionDocument.findMany({
       where: { id: { in: documentIds } },
     });
 
+    //Given document is not present
     if (documents.length !== documentIds.length) {
-      throw new BadRequestException('One or more documents not found');
+      throw new BadRequestException("One or more documents not found");
     }
 
-    const alreadyVerified = documents.filter(d => d.verified);
-    if (alreadyVerified.length > 0) {
-      throw new BadRequestException('Some documents are already verified');
+    //Some of given documents are already Verified or Rejected
+    const alreadyProcessed = documents.some(
+      (d) => d.status !== DocumentStatus.UPLOADED
+    );
+
+    if (alreadyProcessed) {
+      throw new BadRequestException("Some documents are already processed");
     }
 
-    const isVerified = dto.status === VerificationStatus.VERIFIED;
+    //update the status and verifyUser details
+      const result = await this.prisma.admissionDocument.updateMany({
+        where: {
+          id: { in: documentIds },
+          status: DocumentStatus.UPLOADED,
+        },
+        data: {
+          status: dto.status, // VERIFIED or REJECTED
+          verifiedBy: admin.id,
+          verifiedAt: new Date(),
+        },
+      });
 
-    await this.prisma.document.updateMany({
-      where: { id: { in: documentIds } },
-      data: {
-        verified: isVerified,
-        verifiedBy: admin.id,
-        verifiedAt: new Date(),
-      },
-    });
+      //Create audit logs in bulk
+      await this.prisma.audit_Logs.createMany({
+        data: documentIds.map((documentId) => ({
+          action: "VERIFY_DOCUMENT",
+          entityType: "ADMISSION_DOCUMENT",
+          entityId: documentId,
+          actorId: admin.id,
+          metadata: {
+            documentId,
+            status: dto.status,
+            comments: dto.comments,
+            bulkOperation: true,
+          },
+        })),
+      });
 
-    return {
-      success: true,
-      verifiedCount: documentIds.length,
-    };
+      // const applicationIds = [
+      //   ...new Set(documents.map((d) => d.applicationId)),
+      // ];
+
+       // for (const appId of applicationIds) {
+       //   await this.handleAllDocumentsVerified(appId, tx);
+       // }
+
+      //Return success and count of documents
+      return {
+        success: true,
+        verifiedCount: result.count,
+      };
+   
   }
 }

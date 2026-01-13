@@ -1,4 +1,13 @@
-import { IsEnum, IsInt, IsString, IsUUID } from "class-validator";
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+} from "class-validator";
 
 export enum DocumentOwnerType {
   APPLICATION = "APPLICATION",
@@ -14,21 +23,24 @@ export enum DocumentType {
   OTHER = "OTHER",
 }
 
-export class documentUploadDto {
-  @IsString({
-    message: "File name required",
-  })
+export class DocumentUploadDto {
+  @IsString()
+  @IsNotEmpty()
   fileName: string;
 
   @IsString()
+  @IsNotEmpty()
   file_type: string; // MIME type
-
-  @IsEnum(DocumentOwnerType)
-  owner_type: DocumentOwnerType;
-
-  @IsUUID()
-  owner_id: string;
 
   @IsEnum(DocumentType)
   document_type: DocumentType;
+
+  @IsString()
+  application_id: string; // optional link to application
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(10 * 1024 * 1024) // 10 MB max
+  fileSize?: number;
 }
