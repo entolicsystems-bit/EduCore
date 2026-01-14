@@ -10,7 +10,7 @@ const MAX_VISIBLE_PAGES = 7;
 const Leads = () => {
   const navigate = useNavigate();
 
-  //state
+  //data and pagination seates
   const [leads, setLeads] = useState([]);
   const [owners, setOwners] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,8 +22,10 @@ const Leads = () => {
   const [ownerFilter, setOwnerFilter] = useState("ALL");
   const [search, setSearch] = useState("");
 
+  // for action dropdown (3-dot menu)
   const [openMenuId, setOpenMenuId] = useState(null);
 
+  // Load Leads from backend
   const loadLeads = async () => {
     try {
       const params = {
@@ -44,7 +46,7 @@ const Leads = () => {
       const allLeads = await getLeads();
       setTotalItems(allLeads.data.length);
 
-      // extract unique owners (still OK)
+      // extract unique owners for filter dropdown
       const uniqueOwners = [
         ...new Set(data.map((lead) => lead.owner).filter(Boolean)),
       ];
@@ -58,6 +60,7 @@ const Leads = () => {
   useEffect(() => {
     loadLeads();
 
+    // Refresh when browser tab regains focus
     window.addEventListener("focus", loadLeads);
     return () => window.removeEventListener("focus", loadLeads);
   }, [currentPage]);

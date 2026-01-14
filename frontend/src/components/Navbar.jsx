@@ -2,12 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  //controls profile dropdown
   const [open, setOpen] = useState(false);
+
+  // Reference for detecting outside clicks
   const dropdownRef = useRef(null);
 
   const navigate = useNavigate();
 
-  // close dropdown on outside click
+  //close dropdown when user clicks outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -19,6 +22,7 @@ const Navbar = () => {
   }, []);
 
   return (
+    //navbar container
     <div className="flex w-full justify-between items-center border-b border-gray-200 bg-white h-20 px-8">
       <h2 className="text-[#0D99FF] text-3xl font-bold font-[pridi]">
         EntoCrm
@@ -39,7 +43,7 @@ const Navbar = () => {
           <i className="ri-notification-4-line text-2xl"></i>
         </div>
 
-        {/* Profile Dropdown */}
+        {/* User Profile Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setOpen(!open)}
@@ -56,6 +60,7 @@ const Navbar = () => {
             ></i>
           </button>
 
+          {/* Dropdown menu */}
           {open && (
             <div className="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
               <div className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-300 cursor-pointer">

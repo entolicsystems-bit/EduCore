@@ -5,13 +5,17 @@ import "./ResetPassword.css";
 const ResetPassword = () => {
   const navigate = useNavigate();
 
+  // form states
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // UI states
   const [error, setError] = useState("");
   const [isValid, setValid] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [reShowPassword, setReShowPassword] = useState(false);
 
+  // Validate whenever user types
   useEffect(() => {
     if (
       newPassword.trim().length >= 6 &&
@@ -25,6 +29,7 @@ const ResetPassword = () => {
     }
   }, [newPassword, confirmPassword]);
 
+  // sumbit reset password
   const handleReset = (e) => {
     e.preventDefault();
 
@@ -43,12 +48,7 @@ const ResetPassword = () => {
       return;
     }
 
-    // ✅ Update password in localStorage
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-      user.password = newPassword;
-      localStorage.setItem("user", JSON.stringify(user));
-    }
+   
 
     alert("Password reset successful");
     navigate("/login");

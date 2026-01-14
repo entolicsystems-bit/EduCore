@@ -4,10 +4,16 @@ import "./ForgetPassword.css";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
-
+  // store email state
   const [email, setEmail] = useState("");
+
+  // Controls form validation and submission state
   const [isValid, setIsValid] = useState(false);
+
+  // Tracks if user tried to submit the form
   const [submitted, setSubmitted] = useState(false);
+
+  // Holds validation error messages
   const [error, setError] = useState("");
 
   const validateForm = () => {
@@ -27,6 +33,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setSubmitted(true); // stop page reload
 
+    // stop if form is invalid
     if (!isValid) {
       return;
     }
@@ -39,9 +46,9 @@ const ForgotPassword = () => {
     <div className="bg-[#eef4ff] w-full h-full flex justify-center items-center px-14 py-10">
       <div className="rounded-2xl h-[90vh] p-4 outer-card border-2 border-gray-300">
         <div className="grid grid-cols-2">
-          {/* LEFT */}
-          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center p-6 md:p-10">
-            <div className="w-full h-145 max-w-md md:max-w-lg lg:max-w-xl flex justify-center items-center">
+          {/* LEFT image */}
+          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center">
+            <div className="w-150 h-160 flex justify-center items-center">
               <img
                 src="/forgetpass.png"
                 alt="forgot password"
@@ -50,7 +57,7 @@ const ForgotPassword = () => {
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT image */}
           <div className="flex justify-end items-center">
             <form
               className="bg-[#ffffff] px-5 py-10 flex flex-col gap-7 border-2 border-gray-300 rounded-2xl w-90"

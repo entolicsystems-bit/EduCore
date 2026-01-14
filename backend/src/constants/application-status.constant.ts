@@ -1,17 +1,23 @@
 export enum ApplicationStatus {
-  DRAFT = 'DRAFT',
-  SUBMITTED = 'SUBMITTED',
-  UNDER_REVIEW = 'UNDER_REVIEW',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
+  APPLIED = 'APPLIED',                 // Application created & submitted
+  UNDER_REVIEW = 'UNDER_REVIEW',       // Counselor reviewing
+  DOCUMENT_VERIFIED = 'DOCUMENT_VERIFIED', // All documents approved
+  APPROVED = 'APPROVED',               // Admission approved
+  REJECTED = 'REJECTED',               // Rejected
+  ENROLLED = 'ENROLLED',               // Converted to student
 }
+
+/**
+ * Timeline events for ActivityTimeline
+ */
 export const ApplicationTimelineAction = {
-  CREATE: 'CREATE',
-  UPDATE: 'UPDATE',
-  SUBMIT: 'SUBMIT',
-  REVIEW: 'REVIEW',
+  CREATE: 'CREATE',                    // Application created
+  APPLY: 'APPLY',                      // Application submitted
+  REVIEW: 'REVIEW',                    // Counselor started review
+  DOCUMENT_VERIFIED: 'DOCUMENT_VERIFIED',
   APPROVE: 'APPROVE',
   REJECT: 'REJECT',
+  ENROLL: 'ENROLL',
 } as const;
 
 export type ApplicationTimelineAction =

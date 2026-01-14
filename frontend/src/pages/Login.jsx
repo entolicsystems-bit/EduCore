@@ -6,11 +6,11 @@ import "./Login.css";
 const Login = () => {
   const navigate = useNavigate();
 
-  // this is state use for form states
+  // holds what user types in the from
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // this is stae for UI states
+  // UI raleted states
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -41,13 +41,12 @@ const Login = () => {
     setError("");
 
     try {
-      const data = await loginUser({ email, password });
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      // localStorage.setItem("user", JSON.stringify(data.user));
-
+      await loginUser({ email, password });
+      // Tokens are already stored in authService
+      // Navigate after successful login
       navigate("/leads");
     } catch (err) {
+      // show backend error if available, else generic message
       setError(
         err?.response?.data?.message || "Login failed. Please try again."
       );
@@ -56,6 +55,7 @@ const Login = () => {
     }
   };
 
+  // show / hide password text
   const togglePassword = () => {
     setShowPass(!showPass);
   };
@@ -75,7 +75,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT - login form*/}
           <div className="flex justify-end items-center">
             <form
               className="bg-[#ffffff] px-5 py-10 mr-14 flex flex-col gap-7 border-2 border-gray-300 rounded-2xl w-90"
@@ -83,6 +83,7 @@ const Login = () => {
             >
               <h2 className="text-2xl font-bold">Log In</h2>
 
+              {/* Email or phone input */}
               <input
                 type="text"
                 className="border-2 border-gray-300 px-3 py-3 rounded-2xl"
@@ -91,6 +92,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
               />
 
+              {/* Password field with show/hide option */}
               <div className="border-2 relative border-gray-300 px-3 py-3 rounded-2xl">
                 <input
                   type={showPass ? "text" : "password"}

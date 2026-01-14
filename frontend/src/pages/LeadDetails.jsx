@@ -8,17 +8,17 @@ const LeadDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+// Lead data & UI state
   const [lead, setLead] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // load lead
+  // load lead on page open
   useEffect(() => {
     const loadLead = async () => {
       try {
         setLoading(true);
         const res = await getLeadById(id);
         console.log(res.data);
-
         setLead(res.data.lead || res.data);
       } catch (error) {
         console.error("Failed to load lead", error);
@@ -30,7 +30,7 @@ const LeadDetails = () => {
     loadLead();
   }, [id]);
 
-  // handle input change
+  // handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setLead((prev) => ({ ...prev, [name]: value }));
@@ -47,10 +47,6 @@ const LeadDetails = () => {
       //   status: lead.status,
       // });
 
-      // update localStorage
-      // const leads = JSON.parse(localStorage.getItem("leads")) || [];
-      // const updatedLeads = leads.map((l) => (String(l.id) === id ? lead : l));
-      // localStorage.setItem("leads", JSON.stringify(updatedLeads));
 
       // alert("Lead updated successfully");
       navigate(-1);
@@ -62,6 +58,7 @@ const LeadDetails = () => {
     }
   };
 
+  // Loading state
   if (!lead)
     return (
       <DashboardLayout>
@@ -72,10 +69,10 @@ const LeadDetails = () => {
   return (
     <DashboardLayout>
       <div className="lead-details-page">
-        {/* BACK */}
+        {/* Back Button*/}
         <div className="back-row" onClick={() => navigate(-1)}></div>
 
-        {/* TOP CARD */}
+        {/* Lead Info Card */}
         <div className="lead-info-card">
           <div className="flex flex-col gap-2">
             <p>Lead: {lead.name}</p>

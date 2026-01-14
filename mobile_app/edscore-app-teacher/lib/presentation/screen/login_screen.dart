@@ -94,6 +94,37 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
+  void _showSnackBar(String message, Color backgroundColor) {
+    if (!mounted) return;
+
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          top: 60,
+          left: 16,
+          right: 16,
+          bottom: screenHeight - 140,
+        ),
+        duration: const Duration(seconds: 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -103,28 +134,17 @@ class _LoginViewState extends State<LoginView> {
       body: BlocConsumer<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(t.loginSuccess),
-                backgroundColor: Colors.green,
-
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              ),
+            _showSnackBar(
+              t.loginSuccess,
+              Colors.green,
             );
           } else if (state is LoginFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.error),
-                backgroundColor: Colors.red,
-
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              ),
+            _showSnackBar(
+              state.error,
+              Colors.red,
             );
           }
         },
-
         builder: (context, state) {
           return Center(
             child: SingleChildScrollView(
@@ -133,7 +153,6 @@ class _LoginViewState extends State<LoginView> {
                 key: _formKey,
                 child: Column(
                   children: [
-
                     Container(
                       width: 200,
                       constraints: const BoxConstraints(maxWidth: 380),
@@ -143,7 +162,7 @@ class _LoginViewState extends State<LoginView> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color:  Colors.grey,
+                          color: Colors.grey,
                           width: 2,
                         ),
                       ),
@@ -159,8 +178,6 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                     ),
-
-
                     Container(
                       constraints: const BoxConstraints(maxWidth: 380),
                       padding: const EdgeInsets.all(24),
@@ -186,7 +203,6 @@ class _LoginViewState extends State<LoginView> {
                             ),
                           ),
                           const SizedBox(height: 24),
-
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
@@ -207,9 +223,7 @@ class _LoginViewState extends State<LoginView> {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 14),
-
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
@@ -242,15 +256,12 @@ class _LoginViewState extends State<LoginView> {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 16),
-
                           SizedBox(
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed:
-                              state is LoginLoading ? null : _submitForm,
+                              onPressed: state is LoginLoading ? null : _submitForm,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF2196F3),
                                 shape: RoundedRectangleBorder(
@@ -268,7 +279,7 @@ class _LoginViewState extends State<LoginView> {
                               )
                                   : Text(
                                 t.loginButton,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
@@ -276,9 +287,7 @@ class _LoginViewState extends State<LoginView> {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 10),
-
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
@@ -286,8 +295,7 @@ class _LoginViewState extends State<LoginView> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                    const ForgotPasswordScreen(),
+                                    builder: (_) => const ForgotPasswordScreen(),
                                   ),
                                 );
                               },
@@ -302,9 +310,7 @@ class _LoginViewState extends State<LoginView> {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 100),
-
                     Text(
                       t.version,
                       style: const TextStyle(
@@ -312,7 +318,6 @@ class _LoginViewState extends State<LoginView> {
                         color: Colors.grey,
                       ),
                     ),
-
                     TextButton(
                       onPressed: () {},
                       child: Text(

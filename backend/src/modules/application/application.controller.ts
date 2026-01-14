@@ -5,25 +5,23 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { Request } from 'express';
 
 @Controller('v1/applications')
-@UseGuards(JwtAuthGuard) //  ENABLED auth guard
+@UseGuards(JwtAuthGuard)
 export class ApplicationController {
-  constructor(
-    private readonly applicationService: ApplicationService,
-  ) {}
+  constructor(private readonly applicationService: ApplicationService) {}
 
-  @Post()
-  async create(
+  /**
+   * Create & Submit Application
+   * Status: APPLIED
+   * EPIC-1.2.1
+   */
+  @Post('create')
+  async createApplication(
     @Body() dto: CreateApplicationDto,
-    @Req() req: Request,
+    @Req() req
   ) {
-
-
     return this.applicationService.createApplication(
       dto,
-      req.user, // 👈 user context
-
-      
+      req.user, // contains id, tenantId, branchId
     );
-
   }
 }

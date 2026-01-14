@@ -16,11 +16,11 @@ model Lead {
   owner_id     String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  activities   LeadActivity[]
   deleted_at   DateTime?
-  tenantId     String?        @db.Uuid
   branchId     String?        @db.Uuid
-  applications Application[] //✅ new added field
+  tenantId     String?        @db.Uuid
+  applications Application[]
+  activities   LeadActivity[]
 }
 
 model LeadActivity {
@@ -35,19 +35,20 @@ model LeadActivity {
 }
 
 model User {
-  id            String         @id @default(uuid()) @db.VarChar(250)
-  name          String         @db.VarChar(250)
-  email         String         @unique @db.VarChar(250)
-  role          String?        @db.VarChar(250)
-  passwordHash  String         @db.VarChar(250)
-  phone         String         @unique @db.VarChar(250)
-  refreshTokens RefreshToken[]
-  roles         UserRole[]
-  createdAt     DateTime       @default(now())
-  tenantId      String?        @map("tenant_id") @db.Uuid
-  status        Boolean        @default(true)
-  updatedAt     DateTime?      @map("updated_at")
-  branchId      String?        @db.Uuid
+  id                         String              @id @default(uuid()) @db.VarChar(250)
+  name                       String              @db.VarChar(250)
+  email                      String              @unique @db.VarChar(250)
+  createdAt                  DateTime            @default(now())
+  passwordHash               String              @db.VarChar(250)
+  phone                      String              @unique @db.VarChar(250)
+  status                     Boolean             @default(true)
+  tenantId                   String?             @map("tenant_id") @db.Uuid
+  updatedAt                  DateTime?           @map("updated_at")
+  branchId                   String?             @db.Uuid
+  role                       String?             @db.VarChar(250)
+  refreshTokens              RefreshToken[]
+  roles                      UserRole[]
+  verifiedAdmissionDocuments AdmissionDocument[] @relation("AdmissionDocumentVerifiedBy")
 
   @@map("User")
 }
@@ -59,22 +60,12 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   jti       String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenantId  String?  @map("tenant_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([tenantId])
   @@map("RefreshToken")
-}
-
-model AuditLog {
-  id        Int      @id @default(autoincrement())
-  tableName String
-  action    String
-  oldValue  Json?
-  newValue  Json?
-  userId    String?
-  createdAt DateTime @default(now())
 }
 
 model Role {
@@ -119,97 +110,146 @@ model RolePermission {
   @@index([permissionId])
 }
 
-enum ApplicationStatus {
-  DRAFT
-  SUBMITTED
-  UNDER_REVIEW
-  APPROVED
-  REJECTED
-}
-
-//// Application Model
-/// Stores admission application data linked to a Lead.
-/// Acts as the core entity for the admissions workflow.
-
 model Application {
-  /// Primary identifier for the application
-  /// Generated as UUID to ensure global uniqueness
-
-  id String @id @default(uuid())
-
-  /// Reference to the lead who initiated this application
-  /// Ensures traceability from enquiry → application
-
-  leadId String
-
-  /// Relation to Lead entity
-  /// onDelete: Restrict prevents accidental deletion of applications
-
-  lead Lead @relation(fields: [leadId], references: [id], onDelete: Restrict)
-
-  /// Selected academic program for which the student is applying
-  /// Stored as String in Sprint-2; converted to FK in Sprint-3
-
-  programId String
-
-  /// Dynamic form response data submitted by the applicant
-  /// Stored as JSON to support flexible, institution-specific fields
-
-  formData Json
-
-  /// Tracks the current stage of the application lifecycle
-  /// Default is DRAFT to support partial form completion
-
-  status ApplicationStatus @default(DRAFT)
-
-  /// Tenant identifier for multi-tenant isolation
-  /// Ensures data separation between institutions
-
-  tenantId String? @db.Uuid
-
-  /// Branch identifier for operational and reporting isolation
-  /// Allows filtering applications by physical branch/location
-
-  branchId String? @db.Uuid
-
-  /// Timestamp when the application is formally submitted
-  /// Used to differentiate drafts from submitted applications
-
-  submittedAt DateTime?
-
-  /// User ID of the admin/counsellor who reviewed the application
-  /// Helps in accountability and audit tracking
-
-  reviewedBy String?
-
-  /// Internal notes added during review or processing
-  /// Not visible to the applicant
-
-  notes String?
-
-  /// Soft delete timestamp
-  /// Allows logical deletion without losing historical data
-
-  deletedAt DateTime?
-
-  /// Timestamp when the application record was created
-  /// Used for auditing and chronological reporting
-
-  createdAt DateTime @default(now())
-
-  /// Timestamp automatically updated on every modification
-  /// Helps track updates and detect stale data
-
-  updatedAt DateTime @updatedAt
-
-  /// Optimizes lookup of applications by tenant and lead
-
-  /// Supports filtering applications by branch and status
-  /// Commonly used in admission dashboards
-
-  /// Enables efficient sorting and pagination by creation date
+  id                 String              @id @default(uuid())
+  leadId             String
+  programId          String
+  formData           Json
+  status             ApplicationStatus   @default(APPLIED)
+  submittedAt        DateTime?
+  reviewedBy         String?
+  notes              String?
+  deletedAt          DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  tenantId           String?             @db.Uuid
+  branchId           String?             @db.Uuid
+  applicationRef     String?             @unique @db.VarChar(30)
+  lead               Lead                @relation(fields: [leadId], references: [id])
+  admissionDocuments AdmissionDocument[]
 
   @@index([tenantId, leadId])
   @@index([tenantId, branchId, status])
   @@index([createdAt])
+}
+
+model AdmissionDocument {
+  id            String         @id @default(uuid())
+  applicationId String
+  documentType  DocumentType
+  fileKey       String
+  fileName      String?
+  fileSize      BigInt
+  fileType      String
+  status        DocumentStatus @default(UPLOADED)
+  verifiedBy    String?        @db.VarChar(250)
+  verifiedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  verifiedUser  User?          @relation("AdmissionDocumentVerifiedBy", fields: [verifiedBy], references: [id])
+
+  @@index([applicationId])
+  @@index([status])
+  @@map("admission_documents")
+}
+
+model Student {
+  tenant_id      String?  @db.Uuid
+  application_id String   @unique @db.Uuid
+  user_id        String   @db.Uuid
+  profile_data   Json
+  status         String   @default("ENROLLED") @db.VarChar(20)
+  created_at     DateTime @default(now())
+  id             String   @id @default(uuid()) @db.Uuid
+
+  @@index([application_id], map: "idx_students_application_unique")
+  @@index([user_id], map: "idx_students_user_id")
+}
+
+model OfferLetter {
+  application_id String   @db.Uuid
+  file_key       String
+  generated_by   String   @db.Uuid
+  generated_at   DateTime @default(now())
+  id             String   @id @default(uuid()) @db.Uuid
+
+  @@index([application_id], map: "idx_offer_application_id")
+}
+
+model ActivityTimeline {
+  id          String             @id @default(uuid())
+  entityType  TimelineEntityType
+  entityId    String             @db.Uuid
+  eventType   TimelineEventType
+  title       String?
+  description String?
+  actorId     String?            @db.Uuid
+  createdAt   DateTime           @default(now())
+
+  @@index([createdAt], map: "idx_timeline_created_at")
+  @@index([entityType, entityId], map: "idx_timeline_entity")
+}
+
+model Audit_Logs {
+  id         String   @id @default(uuid())
+  action     String   @db.VarChar(100)
+  entityType String   @db.VarChar(50)
+  entityId   String   @db.Uuid
+  actorId    String?  @db.Uuid
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt], map: "idx_audit_created_at")
+  @@index([entityType, entityId], map: "idx_audit_entity")
+  @@map("audit_logs")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  tableName String
+  action    String
+  oldValue  Json?
+  newValue  Json?
+  userId    String?
+  createdAt DateTime @default(now())
+}
+
+enum ApplicationStatus {
+  APPLIED
+  UNDER_REVIEW
+  DOCUMENT_VERIFIED
+  APPROVED
+  REJECTED
+  ENROLLED
+}
+
+enum DocumentStatus {
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum TimelineEntityType {
+  APPLICATION
+  STUDENT
+}
+
+enum TimelineEventType {
+  STATUS_CHANGED
+  CREATED
+}
+
+enum DocumentOwnerType {
+  APPLICATION
+  STUDENT
+  STAFF
+  OTHER
+}
+
+enum DocumentType {
+  ID_PROOF
+  ADDRESS_PROOF
+  ACADEMIC_RECORD
+  PHOTO
+  OTHER
 }

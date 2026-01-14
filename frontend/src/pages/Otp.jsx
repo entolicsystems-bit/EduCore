@@ -4,14 +4,17 @@ import "./VerifyOtp.css";
 
 const Otp = () => {
   const navigate = useNavigate();
-
+ 
+  // otp digist states
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [error, setError] = useState("");
   const [timeLeft, setTimeLeft] = useState(30);
   const [canResend, setCanResend] = useState(false);
 
+  //  refs to input boxes for auto focus
   const inputRefs = useRef([]);
 
+  // countdown timer for resend otp
   useEffect(() => {
     if (timeLeft === 0) {
       setCanResend(true);
@@ -25,8 +28,9 @@ const Otp = () => {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
+  // handel typeing in otp inputs
   const handleChange = (value, index) => {
-    if (!/^\d?$/.test(value)) return;
+    if (!/^\d?$/.test(value)) return; // only allow digits
 
     const newOtp = [...otp];
     newOtp[index] = value;
@@ -39,6 +43,7 @@ const Otp = () => {
     }
   };
 
+  //  verify the otp
   const handleVerify = () => {
     const enteredOtp = otp.join("");
 
@@ -47,7 +52,7 @@ const Otp = () => {
       return;
     }
 
-    // ✅ Demo OTP check (for UI project)
+    //  Demo OTP check (for UI project)
     if (enteredOtp === "1234") {
       navigate("/reset");
     } else {
@@ -55,6 +60,7 @@ const Otp = () => {
     }
   };
 
+  // resend the otp logic
   const handleResendOtp = () => {
     setOtp(["", "", "", ""]);
     setTimeLeft(30);
@@ -63,6 +69,7 @@ const Otp = () => {
     inputRefs.current[0].focus();
   };
 
+  // Check if all otp digits are filled
   const isOtpComplete = otp.every((digit) => digit !== "");
 
   return (
