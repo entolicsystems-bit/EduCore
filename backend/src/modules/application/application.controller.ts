@@ -10,17 +10,18 @@ export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
   /**
-   * CREATE + SUBMIT Application
-   * Status = APPLIED
+   * Create & Submit Application
+   * Status: APPLIED
+   * EPIC-1.2.1
    */
-  @Post()
-  async create(
+  @Post('create')
+  async createApplication(
     @Body() dto: CreateApplicationDto,
-    @Req() req: Request,
+    @Req() req
   ) {
     return this.applicationService.createApplication(
       dto,
-      req.user, // tenantId, branchId, userId
+      req.user, // contains id, tenantId, branchId
     );
   }
 }

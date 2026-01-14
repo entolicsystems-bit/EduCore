@@ -1,3 +1,5 @@
+// src/guards/roles.guard.ts
+
 import {
   Injectable,
   CanActivate,
@@ -14,23 +16,19 @@ export class RolesGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(
       ROLES_KEY,
-      [
-        context.getHandler(),
-        context.getClass(),
-      ],
+      [context.getHandler(), context.getClass()],
     );
 
     if (!requiredRoles) return true;
 
     const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const user = request.user; // DB-backed
 
     if (!user || !requiredRoles.includes(user.role)) {
       throw new ForbiddenException(
         'You are not allowed to perform this action',
       );
     }
-    
 
     return true;
   }

@@ -1,3 +1,5 @@
+// src/modules/leads/leads.controller.ts
+
 import {
   Controller,
   Post,
@@ -15,14 +17,14 @@ import { CreateLeadDto } from "../../dto/create-lead.dto";
 import { LeadFilterDto } from "../../dto/lead-filter.dto";
 import { LeadTimelineDto } from "../../dto/lead-timeline.dto";
 import { JwtAuthGuard } from "../../guards/jwt-auth.guard";
-import { Roles } from "src/common/decorator/roles.decorator";
-import { RolesGuard } from "src/guards/roles.guard";
+import { Roles } from "../../common/decorator/roles.decorator";
+import { RolesGuard } from "../../guards/roles.guard";
 
 @Controller("v1/leads")
 export class LeadsController {
   constructor(private readonly service: LeadsService) {}
 
-  // PUBLIC — website lead
+  // PUBLIC
   @Post("create")
   create(@Body() dto: CreateLeadDto) {
     return this.service.createWebsiteLead(dto);
@@ -31,15 +33,15 @@ export class LeadsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
   @Get()
-  list(@Query() filters: LeadFilterDto) {
-    return this.service.getLeads(filters);
+getLeads(@Query() filters: LeadFilterDto, @Req() req) {
+  return this.service.getLeads(filters, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
-  @Get(":id")
-  detail(@Param("id") id: string) {
-    return this.service.getLead(id);
+@Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
+@Get(":id")
+detail(@Param("id") id: string, @Req() req) {
+  return this.service.getLead(id, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -56,7 +58,6 @@ export class LeadsController {
     return this.service.updateLead(id, body, req.user);
   }
 
-  // ADMIN / COUNSELLOR create lead
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR")
   @Post("add")
@@ -67,7 +68,10 @@ export class LeadsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR")
   @Delete("delete/:id")
-  sdelete(@Param("id") id: string, @Req() req) {
+  delete(@Param("id") id: string, @Req() req) {
     return this.service.softDeleteUser(id, req.user);
   }
+
 }
+
+

@@ -32,20 +32,34 @@ async function encryptFormPII(formData: any) {
 export class ApplicationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * CREATE + SUBMIT application (no Draft)
-   */
   async createApplication(dto: CreateApplicationDto, user: any) {
     const { leadId, programId, formData } = dto;
     const { tenantId, branchId, id: userId } = user;
 
-    // 1️⃣ Validate required fields
-    const { name, email, phone } = formData;
+    // 1️⃣ Load Lead
+    const lead = await this.prisma.lead.findFirst({
+      where: { id: leadId, tenantId, branchId, deleted_at: null },
+    });
+
+    if (!lead) {
+      throw new BadRequestException('Lead not found or access denied');
+    }
+
+    // 2️⃣ Pre-populate from lead if missing
+    const finalData = {
+      name: formData.name || lead.name,
+      email: formData.email || lead.email,
+      phone: formData.phone || lead.phone,
+      ...formData,
+    };
+
+    const { name, email, phone } = finalData;
+
     if (!name || !email || !phone) {
       throw new BadRequestException('Name, email and phone are required');
     }
 
-    // 2️⃣ Validate formats
+    // 3️⃣ Validate formats
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       throw new BadRequestException('Invalid email format');
@@ -56,16 +70,7 @@ export class ApplicationService {
       throw new BadRequestException('Invalid phone number');
     }
 
-    // 3️⃣ Validate lead ownership
-    const lead = await this.prisma.lead.findFirst({
-      where: { id: leadId, tenantId, branchId, deleted_at: null },
-    });
-
-    if (!lead) {
-      throw new BadRequestException('Lead not found or access denied');
-    }
-
-    // 4️⃣ Prevent duplicate application
+    // 4️⃣ Prevent duplicate
     const existing = await this.prisma.application.findFirst({
       where: { leadId, programId, deletedAt: null },
     });
@@ -76,15 +81,21 @@ export class ApplicationService {
       );
     }
 
-    // 5️⃣ Sanitize + encrypt
+    // 5️⃣ Sanitize + version
     const sanitized = {
-      ...sanitizeFormData(formData),
-      _meta: { version: 'v1', storedAt: new Date() },
+      ...sanitizeFormData(finalData),
+      _meta: {
+        version: 'v1',
+        storedAt: new Date(),
+      },
     };
 
     const encrypted = await encryptFormPII(sanitized);
 
-    // 6️⃣ Create application as APPLIED (already submitted)
+    // 6️⃣ Generate application reference
+    const applicationRef = `APP-${new Date().getFullYear()}-${Date.now()}`;
+
+    // 7️⃣ Create application (APPLIED = submitted)
     const application = await this.prisma.application.create({
       data: {
         leadId,
@@ -92,52 +103,58 @@ export class ApplicationService {
         formData: encrypted,
         tenantId,
         branchId,
+        applicationRef,
         status: ApplicationStatus.APPLIED,
         submittedAt: new Date(),
       },
     });
 
-    // 7️⃣ Lead timeline
+    // 8️⃣ Lead timeline → APPLICATION_STARTED
+    await this.prisma.leadActivity.create({
+      data: {
+        lead_id: leadId,
+        action: 'APPLICATION_STARTED',
+        metadata: { applicationId: application.id },
+      },
+    });
+
+    // 9️⃣ Lead timeline → APPLICATION_SUBMITTED
     await this.prisma.leadActivity.create({
       data: {
         lead_id: leadId,
         action: 'APPLICATION_SUBMITTED',
-        metadata: {
-          applicationId: application.id,
-          programId,
-        },
+        metadata: { applicationId: application.id, programId },
       },
     });
 
-    // 8️⃣ Application timeline
+    // 10️⃣ Application timeline
     await this.prisma.activityTimeline.create({
       data: {
         entityType: 'APPLICATION',
         entityId: application.id,
         eventType: 'CREATED',
         title: 'Application Submitted',
-        description: 'Lead submitted an application',
+        description: 'Application created and submitted',
         actorId: userId,
       },
     });
 
-    // 9️⃣ Audit log
+    // 11️⃣ Business Audit (Sprint-2)
     await this.prisma.audit_Logs.create({
-  data: {
-    action: 'APPLICATION_SUBMITTED',
-    entityType: 'APPLICATION',
-    entityId: application.id,
-    actorId: userId,
-    metadata: {
-      leadId,
-      programId,
-      status: application.status,
-    },
-  },
-});
+      data: {
+        action: 'APPLICATION_SUBMITTED',
+        entityType: 'APPLICATION',
+        entityId: application.id,
+        actorId: userId,
+        metadata: {
+          leadId,
+          programId,
+          applicationRef,
+        },
+      },
+    });
 
-
-    // 10️⃣ Update lead
+    // 12️⃣ Update lead status
     await this.prisma.lead.update({
       where: { id: leadId },
       data: { status: 'APPLICATION_IN_PROGRESS' },
@@ -147,6 +164,7 @@ export class ApplicationService {
       success: true,
       data: {
         applicationId: application.id,
+        applicationRef,
         status: application.status,
       },
     };

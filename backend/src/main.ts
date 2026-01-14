@@ -1,3 +1,4 @@
+
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -8,6 +9,7 @@ import { ValidationPipe } from "@nestjs/common";
 import { PrismaExceptionFilter } from "./exceptions/prisma-exception.filter";
 import { AllExceptionFilter } from "./exceptions/all-exception.filter";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
+import { ThrottlerGuard } from "@nestjs/throttler";
 
 
 // console.log('CRYPTO_SECRET:', process.env.CRYPTO_SECRET);
@@ -43,7 +45,6 @@ async function bootstrap() {
   },
   credentials: true,
 });
-
 
   app.useGlobalPipes(
     new ValidationPipe({
