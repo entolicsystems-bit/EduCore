@@ -6,9 +6,9 @@ import "./CreateLead.css";
 
 const CreateLead = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  // const [currentLeads, setCurrentLeads] = useState([]);
-
+  const { id } = useParams(); // if persent, it's edit mode
+  
+   // Form State
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -20,6 +20,7 @@ const CreateLead = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Load Lead when editing
   useEffect(() => {
     async function getCurrentLead() {
       try {
@@ -44,13 +45,14 @@ const CreateLead = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Phone should accept only dogits
     if (name === "phone" && !/^\d*$/.test(value)) return;
 
     setForm({ ...form, [name]: value });
     setErrors({ ...errors, [name]: "" });
   };
 
-  // VALIDATION
+  // Form Validation
   const validateForm = () => {
     let newErrors = {};
 
@@ -70,9 +72,6 @@ const CreateLead = () => {
       newErrors.email = "Invalid email address";
     }
 
-    // if (!form.owner.trim()) {
-    //   newErrors.owner = "Owner is required";
-    // }
 
     if (!form.source) {
       newErrors.source = "Source is required";
@@ -82,7 +81,7 @@ const CreateLead = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // SAVE
+  // Create new Lead
   const handleSave = async () => {
     if (!validateForm()) return;
 
@@ -101,7 +100,7 @@ const CreateLead = () => {
       console.error("Create lead failed", error.message);
 
       if (error.response?.data?.message) {
-        console.log("email ka error");
+        console.log("email error");
         alert(error.response.data.message);
       } else {
         alert(error.message);
@@ -109,18 +108,6 @@ const CreateLead = () => {
     } finally {
       setLoading(false);
     }
-
-    // const existingLeads = JSON.parse(localStorage.getItem("leads")) || [];
-
-    // const newLead = {
-    //   id: Date.now().toString(),
-    //   ...form,
-    //   status: "NEW",
-    // };
-
-    // localStorage.setItem("leads", JSON.stringify([...existingLeads, newLead]));
-
-    // navigate("/leads");
   };
 
   const handleUpdate = async () => {

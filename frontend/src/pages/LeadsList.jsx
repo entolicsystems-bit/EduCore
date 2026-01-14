@@ -10,18 +10,21 @@ const MAX_VISIBLE_PAGES = 7;
 const Leads = () => {
   const navigate = useNavigate();
 
-  //state
+  //data and pagination seates
   const [leads, setLeads] = useState([]);
   const [owners, setOwners] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // filter states
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [ownerFilter, setOwnerFilter] = useState("ALL");
   const [search, setSearch] = useState("");
 
+  // for action dropdown (3-dot menu)
   const [openMenuId, setOpenMenuId] = useState(null);
 
+  // Load Leads from backend
   const loadLeads = async () => {
     try {
       const params = {};
@@ -41,13 +44,13 @@ const Leads = () => {
         params.search = search.trim();
       }
 
+      
       const res = await getLeads(params);
       const data = res.data.data || res.data;
 
       setLeads(data);
-      console.log(data);
 
-      // extract unique owners (still OK)
+      // extract unique owners for filter dropdown
       const uniqueOwners = [
         ...new Set(data.map((lead) => lead.owner).filter(Boolean)),
       ];
@@ -61,15 +64,13 @@ const Leads = () => {
   useEffect(() => {
     loadLeads();
 
+// Refresh when browser tab regains focus
     window.addEventListener("focus", loadLeads);
     return () => window.removeEventListener("focus", loadLeads);
   }, []);
 
-  // reset page on filter change
+  // reload Leads when filter change
 
-  // useEffect(() => {
-  //   setCurrentPage(1);
-  // }, [statusFilter, sourceFilter, ownerFilter, search]);
   useEffect(() => {
     setCurrentPage(1);
     loadLeads(); // 🔥 call API again when filters change
@@ -80,35 +81,19 @@ const Leads = () => {
     if (!window.confirm("Are you sure you want to delete this lead?")) return;
 
     try {
-      await deleteLead(id); // 🔥 API CALL
-
+      await deleteLead(id); // 🔥 API CAL
       // Update UI after successful delete
       setLeads((prev) => prev.filter((lead) => lead.id !== id));
-
       setOpenMenuId(null);
     } catch (error) {
-      console.error("Failed to delete lead", error);
       alert("Failed to delete lead. Please try again.");
     }
   };
 
-  /* FILTER */
-  // const filteredLeads = leads.filter((lead) => {
-  //   const statusMatch = statusFilter === "ALL" || lead.status === statusFilter;
 
-  //   const sourceMatch = sourceFilter === "ALL" || lead.source === sourceFilter;
 
-  //   const ownerMatch = ownerFilter === "ALL" || lead.owner === ownerFilter;
 
-  //   const searchText = search.toLowerCase();
-  //   const searchMatch =
-  //     lead.name?.toLowerCase().includes(searchText) ||
-  //     lead.email?.toLowerCase().includes(searchText);
-
-  //   return statusMatch && sourceMatch && ownerMatch && searchMatch;
-  // });
-
-  /* PAGINATION */
+  // Pgination logic
   const totalItems = leads.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
@@ -133,6 +118,7 @@ const Leads = () => {
   return (
     <DashboardLayout>
       <div className="leads-page">
+        
         {/* HEADER */}
         <div className="leads-header">
           <h2 className="font-bold">Leads</h2>

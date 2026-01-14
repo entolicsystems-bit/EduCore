@@ -6,9 +6,12 @@ import "./Register.css";
 const Register = () => {
   const navigate = useNavigate();
 
+  // Form fileds
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
+  // UI states
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,6 +22,7 @@ const Register = () => {
     validateForm();
   }, [name, email, password]);
 
+  // Validates all fileds before allowing submit
   const validateForm = () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
       setError("Please fill in all fields.");
@@ -26,6 +30,7 @@ const Register = () => {
       return;
     }
 
+    // Email format check
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       setError("Please enter a valid email address.");
@@ -33,26 +38,30 @@ const Register = () => {
       return;
     }
 
-    if (password.trim().length < 6) {
+    // user types password rule
+    if (password.length() < 6) {
       setError("Password must be at least 6 characters long.");
       setIsValid(false);
       return;
     }
-
+//  if all validations pass
     setError("");
     setIsValid(true);
   };
-
+  
+// Submit registaration form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Prevent invalid submit
     if (!isValid) return;
 
     setLoading(true);
     setError("");
 
     try {
-      await registerUser({
+      // send data to backend
+      await registerUsers({
         name: name.trim(),
         email: email.trim(),
         password,
@@ -65,26 +74,8 @@ const Register = () => {
     } finally {
       setLoading(false);
     }
-
-    // check if user aleady exists
-    const existingUser = JSON.parse(localStorage.getItem("user"));
-
-    if (existingUser && existingUser.email === email.trim()) {
-      setError("User with this email already exists.");
-      return;
-    }
-
-    const userData = {
-      name: name.trim(),
-      email: email.trim(),
-      password,
     };
 
-    localStorage.setItem("user", JSON.stringify(userData));
-    console.log("registration successful");
-
-    navigate("/");
-  };
 
   // show Password toggle
   const toggleShowPassword = () => {
@@ -95,6 +86,7 @@ const Register = () => {
     <div className="page">
       <div className="outer-card">
         <div className="grid grid-cols-2">
+
           {/* LEFT card */}
           <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center">
             <div className="w-150 h-160 flex justify-center items-center">
@@ -114,7 +106,7 @@ const Register = () => {
                 type="text"
                 className="border-2 border-gray-300 px-3 py-3 rounded-2xl"
                 placeholder="Enter your name"
-                value={name}
+                value={names}
                 onChange={(e) => setName(e.target.value)}
               />
 
@@ -150,7 +142,7 @@ const Register = () => {
                 {loading ? "Registering..." : "Register"}
               </button>
 
-              <p className="back-link" onClick={() => navigate("/login")}>
+              <p className="back-link" onClick={() => navigate("/")}>
                 Go back to log in
               </p>
             </form>

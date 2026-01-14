@@ -8,26 +8,28 @@ import { importLeadsCSV } from "../services/leadService";
 const ImportLeads = () => {
   const navigate = useNavigate();
 
+  // UI States
   const [fileName, setFileName] = useState("");
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 validate & upload CSV
+  // validate & upload CSV
   const processFile = async (file) => {
     if (!file) return;
 
+    //Allows only CSV files
     if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
       alert("Please upload a valid CSV file.");
       return;
     }
 
     setFileName(file.name);
+    setLoading(true);
 
     try {
-      setLoading(true);
-
       const res = await importLeadsCSV(file);
 
+//  Backend sends import summary
       setSummary({
         total: res.data.total || 0,
         success: res.data.success || 0,

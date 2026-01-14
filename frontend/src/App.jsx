@@ -22,7 +22,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* PUBLIC ROUTES */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/otp" element={<Otp />} />
