@@ -6,14 +6,11 @@ export const loginUser = async ({ email, password }) => {
     email,
     password,
   });
-
+  // console.log("Admin Response", res);
   localStorage.setItem("accessToken", res.data.accessToken);
   localStorage.setItem("refreshToken", res.data.refreshToken);
 
   // localStorage.setItem("user", JSON.stringify(user));
-
-
-
   return res.data;
 };
 

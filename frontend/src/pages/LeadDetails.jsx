@@ -41,18 +41,18 @@ const LeadDetails = () => {
     try {
       setLoading(true);
 
-      await updateLead(id, {
-        phone: lead.phone,
-        email: lead.email,
-        status: lead.status,
-      });
+      // await updateLead(id, {
+      //   phone: lead.phone,
+      //   email: lead.email,
+      //   status: lead.status,
+      // });
 
       // update localStorage
       // const leads = JSON.parse(localStorage.getItem("leads")) || [];
       // const updatedLeads = leads.map((l) => (String(l.id) === id ? lead : l));
       // localStorage.setItem("leads", JSON.stringify(updatedLeads));
 
-      alert("Lead updated successfully");
+      // alert("Lead updated successfully");
       navigate(-1);
     } catch (err) {
       console.error(err);
@@ -113,14 +113,6 @@ const LeadDetails = () => {
               <option value="FOLLOW_UP">Follow Up</option>
               <option value="CONTACTED">Contacted</option>
             </select>
-
-            <button
-              className="save-btn"
-              onClick={handleSave}
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
           </div>
         </div>
 
@@ -129,12 +121,19 @@ const LeadDetails = () => {
           <div className="card notes-card">
             <h3>Notes</h3>
             <textarea placeholder="add a quick note" />
+            <button
+              className="save-btn"
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save"}
+            </button>
           </div>
 
           <div className="card timeline-card">
             <h3>Timeline</h3>
 
-            <div className="timeline">
+            <div className="timeline relative">
               <div className="timeline-item">
                 <span className="dot z-10"></span>
                 <div>
@@ -145,7 +144,8 @@ const LeadDetails = () => {
                   </p>
                 </div>
               </div>
-
+              {/* <div className=" bg-red-500"></div> */}
+              <hr className=" border h-25 border-gray-300 absolute top-7.5 right-137" />
               <div className="timeline-item">
                 <span className="dot z-10"></span>
                 <div>

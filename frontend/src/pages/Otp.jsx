@@ -66,23 +66,27 @@ const Otp = () => {
   const isOtpComplete = otp.every((digit) => digit !== "");
 
   return (
-    <div className="page">
-      <div className="outer-card">
+    <div className="bg-[#eef4ff] flex justify-center items-center px-14 py-10">
+      <div className="rounded-2xl p-4 outer-card border-2 border-gray-300">
         <div className="grid grid-cols-2">
           {/* LEFT IMAGE */}
-          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center">
-            <div className="w-150 h-160 flex justify-center items-center">
-              <img src="/otp.png" alt="OTP illustration" className="float" />
+          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center p-6 md:p-10">
+            <div className="w-full max-w-md md:max-w-lg lg:max-w-xl flex justify-center items-center">
+              <img
+                src="/otp.png"
+                alt="OTP illustration"
+                className="w-full h-auto float object-contain"
+              />
             </div>
           </div>
 
           {/* RIGHT OTP CARD */}
           <div className="flex justify-end items-center">
-            <div className="w-90 bg-white px-5 py-8 rounded-2xl border-2 border-gray-300 flex flex-col gap-5">
-              <h2 className="text-2xl font-bold">Enter OTP</h2>
+            <div className="w-90 bg-white px-5 py-10 rounded-2xl border-2 border-gray-300 flex flex-col gap-5">
+              <h2 className="text-2xl font-bold pb-5">Enter OTP</h2>
 
               {/* OTP INPUTS */}
-              <div className="otp-inputs flex gap-4 justify-center items-center">
+              <div className="otp-inputs mr-14 w-full flex gap-6 justify-center items-center">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -99,7 +103,7 @@ const Otp = () => {
 
               {/* VERIFY BUTTON */}
               <button
-                className="btn"
+                className="btn text-lg"
                 onClick={handleVerify}
                 disabled={!isOtpComplete}
               >

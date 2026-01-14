@@ -17,7 +17,8 @@
 
 .sidebar-nav {
   display: flex;
-  flex-direction: column; /* 👈 INLINE COLUMN */
+  flex-direction: column;
+  gap: 10px;
 }
 
 .sidebar-nav a {
@@ -29,11 +30,14 @@
   text-decoration: none;
   border-radius: 6px;
 }
+.sidebar-nav a:hover {
+  background-color: #eef4ff;
+}
 
 .sidebar-nav a.active {
   color: #1d6bff;
-  font-weight: 600;
-  background: #eef4ff;
+  /* font-weight: 600; */
+  /* background: #eef4ff; */
 }
 
 .sidebar-footer {

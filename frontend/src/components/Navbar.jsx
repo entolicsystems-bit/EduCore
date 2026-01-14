@@ -20,9 +20,19 @@ const Navbar = () => {
 
   return (
     <div className="flex w-full justify-between items-center border-b border-gray-200 bg-white h-20 px-8">
-      <h2 className="text-[#1d6bff] text-3xl font-bold">EntoCrm</h2>
+      <h2 className="text-[#0D99FF] text-3xl font-bold font-[pridi]">
+        EntoCrm
+      </h2>
 
-      <div className="flex gap-6 items-center">
+      <div className="flex gap-6 items-center relative">
+        {/* Search Bar */}
+        <input
+          type="text"
+          className="border w-sm border-gray-300 rounded-full px-5 py-2 outline-0 bg-[#eef4ff] placeholder:text-gray-400"
+          placeholder="Search"
+        />
+        <i className="ri-search-line text-xl text-[#1d6bff] absolute left-86"></i>
+
         {/* Notification */}
         <div className="relative w-8 h-8 flex justify-center items-center rounded-full bg-[#b8dbf6] cursor-pointer">
           <span className="absolute top-0 right-0 bg-[#1d6bff] rounded-full h-2.5 w-2.5"></span>
@@ -70,7 +80,7 @@ const Navbar = () => {
 
                 <li
                   className="mx-2 px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 cursor-pointer"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/login")}
                 >
                   Log out
                 </li>

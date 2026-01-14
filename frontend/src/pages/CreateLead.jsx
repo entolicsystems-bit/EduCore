@@ -20,25 +20,50 @@ const CreateLead = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // useEffect(() => {
+  //   async function getCurrentLead() {
+  //     try {
+  //       const res = await getLeadById(id);
+  //       const currentLeads = res.data.lead;
+  //       console.log(res);
+
+  //       setForm({
+  //         name: currentLeads.name,
+  //         phone: currentLeads.phone,
+  //         email: currentLeads.email,
+  //         source: createLead.source,
+  //       });
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+
+  //   getCurrentLead();
+  // }, []);
+
   useEffect(() => {
+    if (!id) return;
+
     async function getCurrentLead() {
       try {
         const res = await getLeadById(id);
         const currentLeads = res.data.lead;
 
         setForm({
-          name: currentLeads.name,
-          phone: currentLeads.phone,
-          email: currentLeads.email,
-          source: createLead.source,
+          name: currentLeads.name ?? "",
+          phone: currentLeads.phone ?? "",
+          email: currentLeads.email ?? "",
+          owner: currentLeads.owner ?? "",
+          source: currentLeads.source ?? "",
         });
       } catch (error) {
-        console.log(error);
+        // console.log(error);
+        alert(error.message);
       }
     }
 
     getCurrentLead();
-  }, []);
+  }, [id]);
 
   // HANDLE CHANGE (phone digits only)
   const handleChange = (e) => {
@@ -98,10 +123,9 @@ const CreateLead = () => {
 
       navigate("/leads");
     } catch (error) {
-      console.error("Create lead failed", error.message);
-
+      // console.error("Create lead failed", error.message);
+      alert("Create lead failed", error.message);
       if (error.response?.data?.message) {
-        console.log("email ka error");
         alert(error.response.data.message);
       } else {
         alert(error.message);
@@ -125,18 +149,21 @@ const CreateLead = () => {
 
   const handleUpdate = async () => {
     if (!validateForm()) return;
+    if (!id) return;
+
+    const payload = {};
+    Object.entries(form).forEach(([key, value]) => {
+      if (value?.trim()) payload[key] = value;
+    });
 
     try {
-      await updateLead(id, {
-        name: form.name,
-        phone: form.phone,
-        email: form.email,
-        source: form.source,
-      });
-
+      await updateLead(id, payload);
       navigate("/leads");
     } catch (error) {
-      console.error("Update lead failed", error.message);
+      console.error(
+        "Update lead failed:",
+        error.response?.data || error.message
+      );
     }
   };
 
@@ -187,6 +214,8 @@ const CreateLead = () => {
                 <option value="" className="text-sm">
                   Source
                 </option>
+                <option>Admin</option>
+                <option>Counselor</option>
                 <option>Website</option>
                 <option>Referral</option>
                 <option>Social Media</option>

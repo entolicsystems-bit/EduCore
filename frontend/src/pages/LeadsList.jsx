@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
-import { getLeads, deleteLead } from "../services/leadService";
+import { getLeads, getLimitedLead } from "../services/leadService";
 import "./Leads.css";
 
 const ITEMS_PER_PAGE = 8;
@@ -15,6 +15,8 @@ const Leads = () => {
   const [owners, setOwners] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [totalItems, setTotalItems] = useState(0);
+
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [ownerFilter, setOwnerFilter] = useState("ALL");
@@ -24,28 +26,23 @@ const Leads = () => {
 
   const loadLeads = async () => {
     try {
-      const params = {};
+      const params = {
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      };
 
-      if (statusFilter !== "ALL") {
-        params.status = statusFilter;
-      }
+      if (statusFilter !== "ALL") params.status = statusFilter;
+      if (sourceFilter !== "ALL") params.source = sourceFilter;
+      if (ownerFilter !== "ALL") params.owner_id = ownerFilter; // ⚠ backend expects owner_id
+      if (search.trim() !== "") params.search = search.trim();
 
-      if (sourceFilter !== "ALL") {
-        params.source = sourceFilter;
-      }
+      const res = await getLimitedLead(params);
 
-      if (ownerFilter !== "ALL") {
-        params.owner_id = ownerFilter; // ⚠ backend expects owner_id
-      }
-      if (search.trim() !== "") {
-        params.search = search.trim();
-      }
-
-      const res = await getLeads(params);
       const data = res.data.data || res.data;
-
       setLeads(data);
-      console.log(data);
+
+      const allLeads = await getLeads();
+      setTotalItems(allLeads.data.length);
 
       // extract unique owners (still OK)
       const uniqueOwners = [
@@ -53,7 +50,7 @@ const Leads = () => {
       ];
       setOwners(uniqueOwners);
     } catch (error) {
-      console.error("failed to load leads", error);
+      alert("failed to load leads", error);
     }
   };
 
@@ -63,7 +60,7 @@ const Leads = () => {
 
     window.addEventListener("focus", loadLeads);
     return () => window.removeEventListener("focus", loadLeads);
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -71,28 +68,30 @@ const Leads = () => {
   }, [statusFilter, sourceFilter, ownerFilter, search]);
 
   // delete lead
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this lead?")) return;
+  // const handleDelete = async (id) => {
+  //   if (!window.confirm("Are you sure you want to delete this lead?")) return;
 
-    try {
-      await deleteLead(id); // 🔥 API CALL
+  //   try {
+  //     await deleteLead(id); // 🔥 API CALL
 
-      // Update UI after successful delete
-      setLeads((prev) => prev.filter((lead) => lead.id !== id));
+  //     // Update UI after successful delete
+  //     setLeads((prev) => prev.filter((lead) => lead.id !== id));
 
-      setOpenMenuId(null);
-    } catch (error) {
-      console.error("Failed to delete lead", error);
-      alert("Failed to delete lead. Please try again.");
-    }
-  };
+  //     setOpenMenuId(null);
+  //   } catch (error) {
+  //     console.error("Failed to delete lead", error);
+  //     alert("Failed to delete lead. Please try again.");
+  //   }
+  // };
 
   /* PAGINATION */
-  const totalItems = leads.length;
+  // const totalItems = leads.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentLeads = leads.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  // const currentLeads = leads.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const currentLeads = leads;
 
   // when api fetch that time below code not need
   const showingFrom = totalItems === 0 ? 0 : startIndex + 1;
@@ -108,6 +107,22 @@ const Leads = () => {
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
+
+  // const showingFrom =
+  //   totalItems === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1;
+
+  // const showingTo = Math.min(currentPage * ITEMS_PER_PAGE, totalItems);
+
+  // const getVisiblePages = () => {
+  //   let start = Math.max(currentPage - 3, 1);
+  //   let end = Math.min(start + MAX_VISIBLE_PAGES - 1, totalPages);
+
+  //   if (end - start < MAX_VISIBLE_PAGES - 1) {
+  //     start = Math.max(end - MAX_VISIBLE_PAGES + 1, 1);
+  //   }
+
+  //   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  // };
 
   return (
     <DashboardLayout>
@@ -132,37 +147,49 @@ const Leads = () => {
         </div>
 
         {/* FILTERS */}
-        <div className="filters bg-white">
-          <select onChange={(e) => setStatusFilter(e.target.value)}>
+        <div className="filters bg-[#eef3ff]">
+          <select
+            className="bg-white"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="ALL">All Status</option>
             <option value="NEW">New</option>
             <option value="FOLLOW_UP">Follow Up</option>
             <option value="CONTACTED">Contacted</option>
           </select>
 
-          <select onChange={(e) => setSourceFilter(e.target.value)}>
+          <select
+            className="bg-white"
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+          >
             <option value="ALL">All Sources</option>
-            <option value="Website">Website</option>
+            <option value="Admin">Admin</option>
+            <option value="Counselor">Counselor</option>
+            <option value="CSV Import">CSV</option>
+            <option value="website">Website</option>
             <option value="Referral">Referral</option>
             <option value="Social Media">Social Media</option>
             <option value="Email Campaign">Email Campaign</option>
           </select>
 
           <select
+            className="bg-white"
             value={ownerFilter}
             onChange={(e) => setOwnerFilter(e.target.value)}
           >
-            <option value="ALL">All Owner</option>
-            {owners.map((owner, index) => (
-              <option key={index} value={owner}>
-                {owner}
+            <option value="ALL">All Owners</option>
+            {owners.map((owner) => (
+              <option key={owner.id} value={owner.id}>
+                {owner.name}
               </option>
             ))}
           </select>
 
           {/* RIGHT ALIGNED SEARCH */}
           <input
-            className="search-input"
+            className="search-input mr-[20%] bg-white"
             placeholder="Search leads..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -224,22 +251,22 @@ const Leads = () => {
 
                     {openMenuId === lead.id && (
                       <div
-                        className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                        className="absolute text-center text-white right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
-                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          className="w-full rounded-xl px-4 py-2 bg-[#0d99ff] text-sm hover:bg-[#0f93f2] cursor-pointer"
                           onClick={() => navigate(`/users/edit/${lead.id}`)}
                         >
-                          ✏️ Edit
+                          Edit
                         </button>
 
-                        <button
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        {/* <button
+                          className="w-full rounded-xl px-4 py-2 text-sm bg-[#ff7d2d] hover:bg-[#f46d1a]"
                           onClick={() => handleDelete(lead.id)}
                         >
-                          🗑 Delete
-                        </button>
+                          Delete
+                        </button> */}
                       </div>
                     )}
                   </td>
@@ -267,7 +294,7 @@ const Leads = () => {
           <div className="pages">
             <button
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
+              onClick={() => setCurrentPage((p) => p - 1)}
             >
               ‹
             </button>
@@ -284,7 +311,7 @@ const Leads = () => {
 
             <button
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={() => setCurrentPage((p) => p + 1)}
             >
               ›
             </button>

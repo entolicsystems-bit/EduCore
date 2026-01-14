@@ -92,20 +92,24 @@ const Register = () => {
   };
 
   return (
-    <div className="page">
-      <div className="outer-card">
+    <div className="bg-[#eef4ff] flex justify-center items-center px-14 py-10">
+      <div className="rounded-2xl p-4 outer-card border-2 border-gray-300">
         <div className="grid grid-cols-2">
           {/* LEFT card */}
-          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center">
-            <div className="w-150 h-160 flex justify-center items-center">
-              <img src="/Register.png" alt="register" className="float" />
+          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center p-6 md:p-10">
+            <div className="w-full max-w-md md:max-w-lg lg:max-w-xl flex justify-center items-centerr">
+              <img
+                src="/Register.png"
+                alt="register"
+                className="w-full float h-auto object-contain"
+              />
             </div>
           </div>
 
           {/* RIGHT  card*/}
           <div className="flex justify-end items-center">
             <form
-              className="bg-[#ffffff] px-5 py-5 flex flex-col gap-7 border-2 border-gray-300 rounded-2xl w-90"
+              className="bg-[#ffffff] px-5 py-10 mr-14 flex flex-col gap-7 border-2 border-gray-300 rounded-2xl w-90"
               onSubmit={handleSubmit}
             >
               <h2 className="text-2xl font-bold">Registration</h2>
