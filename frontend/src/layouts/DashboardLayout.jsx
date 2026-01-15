@@ -27,13 +27,28 @@ const DashboardLayout = ({ children }) => {
             <NavLink to="/admissions" className={({ isActive }) => (isActive ? "active" : "")}>
               Admissions
             </NavLink>
+
             <NavLink to="/students" className={({ isActive }) => (isActive ? "active" : "")}>
+
+            <NavLink
+              to="/student-page"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
               Students
             </NavLink>
             <NavLink to="/finance" className={({ isActive }) => (isActive ? "active" : "")}>
               Finance
             </NavLink>
+
             <NavLink to="/settings" className={({ isActive }) => (isActive ? "active" : "")}>
+
+            <hr className="border-gray-300 my-4" />
+
+            <NavLink
+              to="/settings"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+
               Settings
             </NavLink>
             <NavLink to="/users-roles" className={({ isActive }) => (isActive ? "active" : "")}>
@@ -42,10 +57,10 @@ const DashboardLayout = ({ children }) => {
           </nav>
 
           <div
-            className="sidebar-footer text-center cursor-pointer"
-            onClick={() => navigate("/")}
+            className="sidebar-footer text-left cursor-pointer border-t-2 border-gray-300"
+            onClick={() => navigate("/login")}
           >
-            <button className="font-bold text-gray-400">Logout</button>
+            <button className=" text-gray-500 pt-4">Logout</button>
           </div>
         </aside>
 

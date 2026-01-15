@@ -148,7 +148,7 @@ model Application {
   leadId             String
   programId          String
   formData           Json
-  status             ApplicationStatus   @default(APPLIED)
+  status             ApplicationStatus   @default(DRAFT)
   submittedAt        DateTime?
   reviewedBy         String?
   notes              String?
@@ -248,6 +248,7 @@ model AuditLog {
 }
 
 enum ApplicationStatus {
+  DRAFT
   APPLIED
   UNDER_REVIEW
   DOCUMENT_VERIFIED

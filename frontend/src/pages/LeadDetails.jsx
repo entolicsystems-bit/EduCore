@@ -8,17 +8,17 @@ const LeadDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+// Lead data & UI state
   const [lead, setLead] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // load lead
+  // load lead on page open
   useEffect(() => {
     const loadLead = async () => {
       try {
         setLoading(true);
         const res = await getLeadById(id);
         console.log(res.data);
-
         setLead(res.data.lead || res.data);
       } catch (error) {
         console.error("Failed to load lead", error);
@@ -30,7 +30,7 @@ const LeadDetails = () => {
     loadLead();
   }, [id]);
 
-  // handle input change
+  // handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setLead((prev) => ({ ...prev, [name]: value }));
@@ -41,18 +41,14 @@ const LeadDetails = () => {
     try {
       setLoading(true);
 
-      await updateLead(id, {
-        phone: lead.phone,
-        email: lead.email,
-        status: lead.status,
-      });
+      // await updateLead(id, {
+      //   phone: lead.phone,
+      //   email: lead.email,
+      //   status: lead.status,
+      // });
 
-      // update localStorage
-      // const leads = JSON.parse(localStorage.getItem("leads")) || [];
-      // const updatedLeads = leads.map((l) => (String(l.id) === id ? lead : l));
-      // localStorage.setItem("leads", JSON.stringify(updatedLeads));
 
-      alert("Lead updated successfully");
+      // alert("Lead updated successfully");
       navigate(-1);
     } catch (err) {
       console.error(err);
@@ -62,6 +58,7 @@ const LeadDetails = () => {
     }
   };
 
+  // Loading state
   if (!lead)
     return (
       <DashboardLayout>
@@ -72,10 +69,10 @@ const LeadDetails = () => {
   return (
     <DashboardLayout>
       <div className="lead-details-page">
-        {/* BACK */}
+        {/* Back Button*/}
         <div className="back-row" onClick={() => navigate(-1)}></div>
 
-        {/* TOP CARD */}
+        {/* Lead Info Card */}
         <div className="lead-info-card">
           <div className="flex flex-col gap-2">
             <p>Lead: {lead.name}</p>
@@ -113,14 +110,6 @@ const LeadDetails = () => {
               <option value="FOLLOW_UP">Follow Up</option>
               <option value="CONTACTED">Contacted</option>
             </select>
-
-            <button
-              className="save-btn"
-              onClick={handleSave}
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
           </div>
         </div>
 
@@ -129,12 +118,19 @@ const LeadDetails = () => {
           <div className="card notes-card">
             <h3>Notes</h3>
             <textarea placeholder="add a quick note" />
+            <button
+              className="save-btn"
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save"}
+            </button>
           </div>
 
           <div className="card timeline-card">
             <h3>Timeline</h3>
 
-            <div className="timeline">
+            <div className="timeline relative">
               <div className="timeline-item">
                 <span className="dot z-10"></span>
                 <div>
@@ -145,7 +141,8 @@ const LeadDetails = () => {
                   </p>
                 </div>
               </div>
-
+              {/* <div className=" bg-red-500"></div> */}
+              <hr className=" border h-25 border-gray-300 absolute top-7.5 right-137" />
               <div className="timeline-item">
                 <span className="dot z-10"></span>
                 <div>
