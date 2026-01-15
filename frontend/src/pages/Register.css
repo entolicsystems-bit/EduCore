@@ -9,24 +9,9 @@
   --accent: #1677ff;
 }
 
-/* PAGE */
-.page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-   justify-content: center; 
-  background: #eef4ff;
-  padding: 0px 0px 18px 20px;
-}
-
 /* OUTER PANEL */
 .outer-card {
-  width: 100%;
-  max-width: 1400px;
-  height: 90vh;
   background: rgba(22, 119, 255, 0.08);
-  border-radius: 22px;
-  padding: 26px;
 }
 
 /* CONTAINER */
@@ -91,7 +76,6 @@
   font-size: 22px;
   font-weight: 700;
 } */
-
 
 /* INPUTS */
 .form input {

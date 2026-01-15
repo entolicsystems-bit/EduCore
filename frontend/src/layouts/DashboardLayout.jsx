@@ -34,7 +34,7 @@ const DashboardLayout = ({ children }) => {
             </NavLink>
 
             <NavLink
-              to="/students"
+              to="/student-page"
               className={({ isActive }) => (isActive ? "active" : "")}
             >
               Students
@@ -46,6 +46,8 @@ const DashboardLayout = ({ children }) => {
             >
               Finance
             </NavLink>
+
+            <hr className="border-gray-300 my-4" />
 
             <NavLink
               to="/settings"
@@ -63,10 +65,10 @@ const DashboardLayout = ({ children }) => {
           </nav>
 
           <div
-            className="sidebar-footer text-center cursor-pointer"
-            onClick={() => navigate("/")}
+            className="sidebar-footer text-left cursor-pointer border-t-2 border-gray-300"
+            onClick={() => navigate("/login")}
           >
-            <button className="font-bold text-gray-400">Logout</button>
+            <button className=" text-gray-500 pt-4">Logout</button>
           </div>
         </aside>
 
