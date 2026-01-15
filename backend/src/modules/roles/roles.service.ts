@@ -1,8 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "../../database/prisma.service";
 import { RegisterDto } from "src/dto/register.dto";
+
+import * as bcrypt from 'bcryptjs';
+import { CryptoUtil } from "src/common/crypto/crypto.util"; // 🔐 add this
 import * as bcrypt from "bcrypt";
 import { CryptoUtil } from "src/common/crypto/crypto.util";
+
 
 @Injectable()
 export class RolesService {

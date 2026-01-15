@@ -23,12 +23,19 @@
 }
 
 .btn-outline {
+  height: 40px;
   padding: 10px 22px;
   border-radius: 8px;
   border: 1px solid #0d99ff;
   background: transparent;
   color: #0d99ff;
   font-size: 13px;
+}
+
+.btn-primary {
+  height: 40px;
+  padding: 0 22px;
+  margin-bottom: 10px;
 }
 
 .btn-create-lead {
@@ -139,6 +146,9 @@ td {
 /* PAGINATION */
 .pagination {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
   position: relative;
   /* justify-content: space-between;
   align-items: center; */

@@ -65,17 +65,70 @@ const Leads = () => {
     return () => window.removeEventListener("focus", loadLeads);
   }, [currentPage]);
 
+  /* RESET PAGE ON FILTER CHANGE */
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, sourceFilter, ownerFilter, search]);
+      // reset page on filter change
+
+      useEffect(() => {
+        setCurrentPage(1);
+      }, [statusFilter, sourceFilter, ownerFilter, search]);
+
+  // reset page on filter change
+
+
+  // useEffect(() => {
+  //   setCurrentPage(1);
+  // }, [statusFilter, sourceFilter, ownerFilter, search]);
+
   useEffect(() => {
     setCurrentPage(1);
     loadLeads(); // 🔥 call API again when filters change
   }, [statusFilter, sourceFilter, ownerFilter, search]);
 
   // delete lead
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this lead?")) return;
+
+    try {
+      await deleteLead(id); // 🔥 API CALL
+
+      // Update UI after successful delete
+      setLeads((prev) => prev.filter((lead) => lead.id !== id));
+
+      setOpenMenuId(null);
+    } catch (error) {
+      console.error("Failed to delete lead", error);
+      alert("Failed to delete lead. Please try again.");
+    }
+  };
+
+  /* FILTER */
+
+  const filteredLeads = leads.filter((lead) => {
+    const statusMatch =
+      statusFilter === "ALL" || lead.status === statusFilter;
+
+    const sourceMatch =
+      sourceFilter === "ALL" || lead.source === sourceFilter;
+
+    const ownerMatch =
+      ownerFilter === "ALL" || lead.owner === ownerFilter;
+    
+    const statusMatch = statusFilter === "ALL" || lead.status === statusFilter;
+  // const filteredLeads = leads.filter((lead) => {
+  //   const statusMatch = statusFilter === "ALL" || lead.status === statusFilter;
+
+
+  //   const sourceMatch = sourceFilter === "ALL" || lead.source === sourceFilter;
+
   // const handleDelete = async (id) => {
   //   if (!window.confirm("Are you sure you want to delete this lead?")) return;
 
   //   try {
   //     await deleteLead(id); // 🔥 API CALL
+
 
   //     // Update UI after successful delete
   //     setLeads((prev) => prev.filter((lead) => lead.id !== id));
@@ -130,9 +183,11 @@ const Leads = () => {
   return (
     <DashboardLayout>
       <div className="leads-page">
+
         {/* HEADER */}
         <div className="leads-header">
           <h2 className="font-bold">Leads</h2>
+
           <div className="header-actions">
             <button
               className="border-2 border-[#0d99ff] text-[#0d99ff] px-6 py-2 rounded-md cursor-pointer"
@@ -140,7 +195,10 @@ const Leads = () => {
             >
               Import CSV
             </button>
+
             <button
+              className="bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
+
               className=" bg-[#0d99ff] text-white px-6 py-2 rounded-md cursor-pointer"
               onClick={() => navigate("/leads/create")}
             >
@@ -180,8 +238,21 @@ const Leads = () => {
           <select
             className="bg-white"
             value={ownerFilter}
+            onChange={(e) => setOwnersFilter(e.target.value)}
+          >
+            <option value="ALL">All Owner</option>
+            {owner.map((o, index) => (
+              <option key={index} value={o}>
+                {o}
+
             onChange={(e) => setOwnerFilter(e.target.value)}
           >
+            <option value="ALL">All Owner</option>
+            {owners.map((owner, index) => (
+              <option key={index} value={owner}>
+                {owner}
+
+
             <option value="ALL">All Owners</option>
             {owners.map((owner) => (
               <option key={owner.id} value={owner.id}>
@@ -190,7 +261,6 @@ const Leads = () => {
             ))}
           </select>
 
-          {/* RIGHT ALIGNED SEARCH */}
           <input
             className="search-input mr-[20%] bg-white"
             placeholder="Search leads..."
@@ -212,6 +282,7 @@ const Leads = () => {
                 <th className="table-head">Action</th>
               </tr>
             </thead>
+
             <tbody>
               {currentLeads.map((lead) => (
                 <tr
@@ -225,8 +296,10 @@ const Leads = () => {
                       <span>{lead.email}</span>
                     </div>
                   </td>
+
                   <td>{lead.phone}</td>
                   <td>{lead.source}</td>
+
                   <td>
                     <div className="owner-cell">
                       <div className="owner-badge">
@@ -235,6 +308,7 @@ const Leads = () => {
                       {lead.owner}
                     </div>
                   </td>
+
                   <td>
                     <span className={`status ${lead.status.toLowerCase()}`}>
                       {lead.status}
@@ -246,7 +320,9 @@ const Leads = () => {
                       className="cursor-pointer hover:bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center z-10"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setOpenMenuId(openMenuId === lead.id ? null : lead.id);
+                        setOpenMenuId(
+                          openMenuId === lead.id ? null : lead.id
+                        );
                       }}
                     >
                       <i className="ri-more-2-fill"></i>
@@ -258,6 +334,12 @@ const Leads = () => {
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
+
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() =>
+                            navigate(`/users/edit/${lead.id}`)
+                          }
+
                           className="w-full rounded-xl px-4 py-2 bg-[#0d99ff] text-sm hover:bg-[#0f93f2] cursor-pointer"
                           onClick={() => navigate(`/users/edit/${lead.id}`)}
                         >
@@ -268,8 +350,14 @@ const Leads = () => {
                           className="w-full rounded-xl px-4 py-2 text-sm bg-[#ff7d2d] hover:bg-[#f46d1a]"
                           onClick={() => handleDelete(lead.id)}
                         >
+
+                          🗑 Delete
+                        </button>
+
+
                           Delete
                         </button> */}
+
                       </div>
                     )}
                   </td>
@@ -278,7 +366,7 @@ const Leads = () => {
 
               {currentLeads.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="no-data">
+                  <td colSpan="6" className="no-data">
                     No leads found
                   </td>
                 </tr>

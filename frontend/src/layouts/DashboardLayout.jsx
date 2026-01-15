@@ -1,37 +1,34 @@
+
+import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import "./DashboardLayout.css";
 
 const DashboardLayout = ({ children }) => {
   const navigate = useNavigate();
+
   return (
-    <>
-      {/* Header */}
+    <div className="dashboard-layout-wrapper">
+      {/* HEADER */}
       <Navbar />
+
       <div className="dashboard-layout">
         {/* SIDEBAR */}
         <aside className="sidebar">
+          <h2 className="logo">EntoCrm</h2>
+
           <nav className="sidebar-nav">
-            <NavLink
-              to="/dashboard"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
+            <NavLink to="/dashboard" className={({ isActive }) => (isActive ? "active" : "")}>
               Dashboard
             </NavLink>
-
-            <NavLink
-              to="/leads"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
+            <NavLink to="/leads" className={({ isActive }) => (isActive ? "active" : "")}>
               Leads
             </NavLink>
-
-            <NavLink
-              to="/admissions"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
+            <NavLink to="/admissions" className={({ isActive }) => (isActive ? "active" : "")}>
               Admissions
             </NavLink>
+
+            <NavLink to="/students" className={({ isActive }) => (isActive ? "active" : "")}>
 
             <NavLink
               to="/student-page"
@@ -39,13 +36,11 @@ const DashboardLayout = ({ children }) => {
             >
               Students
             </NavLink>
-
-            <NavLink
-              to="/finance"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
+            <NavLink to="/finance" className={({ isActive }) => (isActive ? "active" : "")}>
               Finance
             </NavLink>
+
+            <NavLink to="/settings" className={({ isActive }) => (isActive ? "active" : "")}>
 
             <hr className="border-gray-300 my-4" />
 
@@ -53,13 +48,10 @@ const DashboardLayout = ({ children }) => {
               to="/settings"
               className={({ isActive }) => (isActive ? "active" : "")}
             >
+
               Settings
             </NavLink>
-
-            <NavLink
-              to="/users-roles"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
+            <NavLink to="/users-roles" className={({ isActive }) => (isActive ? "active" : "")}>
               Users & Roles
             </NavLink>
           </nav>
@@ -75,6 +67,7 @@ const DashboardLayout = ({ children }) => {
         {/* MAIN CONTENT */}
         <main className="content">{children}</main>
       </div>
+    </div>
     </>
   );
 };

@@ -1,5 +1,13 @@
 /* ===== RESET ===== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 @import url("https://fonts.googleapis.com/css2?family=Pridi:wght@200;300;400;500;600;700&display=swap");
+
 @import "tailwindcss";
 
 *,
@@ -28,6 +36,7 @@ body {
 body {
   width: 100%;
   font-family: "Poppins", sans-serif;
+  background: rgba(10, 132, 255, 0.08); /* Moved background here to ensure full coverage */
   background: rgba(
     10,
     132,
@@ -55,6 +64,7 @@ a {
 /* ===== SAFE BUTTON BASE ===== */
 button {
   font-family: inherit;
+  border: none;
   /* border: none; */
   outline: none;
 }

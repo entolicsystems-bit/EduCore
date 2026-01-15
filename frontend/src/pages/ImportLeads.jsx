@@ -5,6 +5,7 @@ import "./ImportLeads.css";
 import uploadImage from "/uploadFile.png";
 import { importLeadsCSV } from "../services/leadService";
 
+
 const ImportLeads = () => {
   const navigate = useNavigate();
 
@@ -52,18 +53,26 @@ const ImportLeads = () => {
 
   return (
     <DashboardLayout>
+
+      <div className="import-page bg-[#f3f4f6] min-h-screen">
       <div className="flex flex-col items-center w-full h-full bg-[#f3f4f6]">
         {/* HEADER */}
-        <div className="w-full px-12 mt-2">
+        <div className="w-full px-6 py-3">
           <button className="back-btn" onClick={() => navigate(-1)}>
             <i className="ri-arrow-left-line text-2xl"></i>
           </button>
         </div>
 
+        {/* CARD CONTAINER */}
+        <div className="flex flex-col items-center gap-6">
+
+          {/* UPLOAD CARD (ALWAYS VISIBLE) */}
+          <div className="bg-white w-[90%] max-w-3xl rounded-2xl shadow-md p-8 text-center">
         {/* CARD */}
         <div className="flex flex-col gap-4 w-full px-4 sm:px-0 items-center">
           {/* UPLOAD CARD */}
           <div className="text-center flex flex-col gap-6 bg-white w-[90%] rounded-2xl shadow-md p-8">
+
             <input
               type="file"
               id="csvInput"
@@ -73,10 +82,12 @@ const ImportLeads = () => {
             />
 
             <div
-              className="cursor-pointer flex flex-col justify-center items-center py-6 hover:border-2 hover:bg-[#eff6ff] hover:border-[#3b82f6] rounded-lg"
+              className="cursor-pointer flex flex-col items-center py-6 hover:border-2 hover:bg-[#eff6ff] hover:border-[#3b82f6] rounded-lg"
               onClick={() => document.getElementById("csvInput").click()}
             >
-              <img src={uploadImage} alt="" className="w-28 h-28" />
+              {/* Use public folder path */}
+              <img src="/uploadFile.png" alt="Upload" className="w-28 h-28" />
+
               <h3 className="pt-5 text-gray-400 text-lg">
                 Drag & drop CSV file here
                 <br />
@@ -93,10 +104,14 @@ const ImportLeads = () => {
             </div>
           </div>
 
-          {/* SUMMARY */}
+
+          {/* SUMMARY CARD (CONDITIONAL) */}
+          {/* SUMMARY */} 
           {summary && (
-            <div className="flex flex-col gap-4 bg-white w-[90%] rounded-2xl shadow-md p-8">
-              <h3 className="text-xl font-semibold mb-4">Import Summary</h3>
+            <div className="bg-white w-[90%] max-w-3xl rounded-2xl shadow-md p-8">
+              <h3 className="text-xl font-semibold mb-4">
+                Import Summary
+              </h3>
 
               <div className="space-y-3">
                 <div className="flex justify-between">
@@ -132,3 +147,7 @@ const ImportLeads = () => {
 };
 
 export default ImportLeads;
+
+export default ImportLeads;
+
+

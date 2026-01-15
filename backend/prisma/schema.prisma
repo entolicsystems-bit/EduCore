@@ -29,12 +29,36 @@ model LeadActivity {
   action    String
   metadata  Json?
   createdAt DateTime @default(now())
-  lead      Lead     @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+
+  lead Lead @relation(fields: [lead_id], references: [id], onDelete: Cascade)
 
   @@index([lead_id])
 }
 
 model User {
+
+  id            String         @id @default(uuid()) @db.VarChar(250)
+  name          String         @db.VarChar(250)
+  email         String         @unique @db.VarChar(250)
+  role          String?        @db.VarChar(250)
+  passwordHash  String?        @db.VarChar(250)
+  phone         String?        @db.VarChar(250)
+  createdAt     DateTime       @default(now())
+
+  refreshTokens RefreshToken[]
+  roles         UserRole[]
+  createdAt     DateTime       @default(now())
+
+  passwordHash  String         @db.VarChar(250)
+  phone         String         @unique @db.VarChar(250)
+  refreshTokens RefreshToken[]
+  roles         UserRole[]
+  createdAt     DateTime       @default(now())
+  tenantId      String?        @map("tenant_id") @db.Uuid
+  status        Boolean        @default(true)
+  updatedAt     DateTime?      @map("updated_at")
+  branchId      String?        @db.Uuid
+
   id                         String              @id @default(uuid()) @db.VarChar(250)
   name                       String              @db.VarChar(250)
   email                      String              @unique @db.VarChar(250)
@@ -60,18 +84,24 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   jti       String   @unique
+
+ user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ @@index([userId])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenantId  String?  @map("tenant_id") @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([tenantId])
   @@map("RefreshToken")
+
 }
 
 model Role {
   id          Int              @id @default(autoincrement())
   name        String           @unique
   createdAt   DateTime         @default(now())
+
   permissions RolePermission[]
   users       UserRole[]
 }
@@ -80,8 +110,9 @@ model UserRole {
   id     Int    @id @default(autoincrement())
   userId String
   roleId Int
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@unique([userId, roleId])
   @@index([userId])
@@ -89,21 +120,23 @@ model UserRole {
 }
 
 model Permission {
-  id              Int              @id @default(autoincrement())
-  module          String
-  action          String
-  createdAt       DateTime         @default(now())
+  id        Int      @id @default(autoincrement())
+  module    String
+  action    String
+  createdAt DateTime @default(now())
+
   rolePermissions RolePermission[]
 
   @@unique([module, action])
 }
 
 model RolePermission {
-  id           Int        @id @default(autoincrement())
+  id           Int @id @default(autoincrement())
   roleId       Int
   permissionId Int
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, permissionId])
   @@index([roleId])

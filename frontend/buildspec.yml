@@ -3,19 +3,25 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 18
+      nodejs: 20
     commands:
+      - echo "Installing latest npm..."
+      - npm install -g npm@9
       - cd frontend
-      - npm install
-
+      - npm ci
+  pre_build:
+    commands:
+      - echo "Pre-build phase complete"
   build:
     commands:
+      - echo "Building frontend..."
       - npm run build
-
   post_build:
     commands:
-      - aws s3 sync dist s3://educore-frontend-bucket --delete
+      - echo "Build complete"
 
 artifacts:
+  # Vite outputs to 'dist' by default
+  base-directory: frontend/dist
   files:
     - '**/*'

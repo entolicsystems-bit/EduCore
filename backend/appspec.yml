@@ -1,13 +1,5 @@
-version: 0.0
-os: linux
-
-files:
-  - source: backend
-    destination: /home/ec2-user/EduCore/backend
-
 hooks:
-  AfterDeploy:
-    - location: backend-deploy.sh
+  AfterInstall:
+    - location: scripts/install-deps.sh
       timeout: 300
       runas: ec2-user
-
