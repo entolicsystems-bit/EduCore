@@ -7,6 +7,7 @@ import '../../bloc/auth/login/login_state.dart';
 import '../../../../core/theme/app_colours.dart';
 import 'forgot_password_screen.dart';
 import 'student_details_screen.dart';
+import '../../../parent/presentation/screens/parent_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,8 +18,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isStudentSelected = true;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  // Cached decorations and border radii
+  late final double screenHeight;
   late final BoxDecoration cardDecoration;
   late final BorderRadius inputBorderRadius;
   late final BorderRadius tabBorderRadiusLeft;
@@ -26,9 +29,16 @@ class _LoginScreenState extends State<LoginScreen> {
   late final BorderRadius buttonBorderRadius;
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
+    screenHeight = MediaQuery.of(context).size.height;
     inputBorderRadius = BorderRadius.circular(1.5.h);
     tabBorderRadiusLeft = BorderRadius.only(
       topLeft: Radius.circular(1.5.h),
@@ -39,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
       bottomRight: Radius.circular(1.5.h),
     );
     buttonBorderRadius = BorderRadius.circular(1.5.h);
-
     cardDecoration = BoxDecoration(
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(2.h),
@@ -54,8 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showSnackBar(String message, Color backgroundColor) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
+    if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -69,9 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
           top: 5.h,
           left: 4.w,
           right: 4.w,
-          bottom: screenHeight * 0.15, // responsive bottom margin
+          bottom: screenHeight - 15.h,
         ),
-        duration: Duration(seconds: message.contains('Error') ? 3 : 2),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -83,23 +91,60 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state.isAuthenticated && state.isSuccess) {
-            _showSnackBar(
-              isStudentSelected
-                  ? 'Login successful! Welcome Student'
-                  : 'Login successful! Welcome Parent',
-              AppColors.success,
-            );
+            final expectedRole = isStudentSelected ? 'STUDENT' : 'PARENT';
+            final actualRole = state.userRole?.toUpperCase();
 
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => const StudentDetailsScreen(),
-              ),
-            );
+            if (actualRole != null && actualRole != expectedRole) {
+              final roleText = actualRole == 'STUDENT' ? 'a Student' : 'a Parent';
+              _showSnackBar(
+                'You are logged in as $roleText. Please select the correct tab and try again.',
+                AppColors.error,
+              );
+
+              Future.delayed(const Duration(seconds: 2), () {
+                if (mounted) {
+                  context.read<LoginBloc>().add(LogoutRequested());
+                }
+              });
+              return;
+            }
+
+            if (state.isStudent) {
+              _showSnackBar(
+                'Login successful! Welcome Student',
+                AppColors.success,
+              );
+
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const StudentDetailsScreen(),
+                    ),
+                  );
+                }
+              });
+            } else if (state.isParent) {
+              _showSnackBar(
+                'Login successful! Welcome Parent',
+                AppColors.success,
+              );
+
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const ParentHomeScreen(),
+                    ),
+                  );
+                }
+              });
+            }
           }
 
           if (state.errorMessage != null) {
             _showSnackBar(
-              state.errorMessage ?? 'An error occurred',
+              state.errorMessage!,
               AppColors.error,
             );
           }
@@ -113,318 +158,268 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo Container
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 400), // max width for tablet/web
-                    child: Container(
-                      height: 10.h,
-                      width: double.infinity,
-                      margin: EdgeInsets.only(bottom: 3.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(2.h),
-                        border: const Border.fromBorderSide(
-                          BorderSide(
-                            color: AppColors.border,
-                            width: 1,
-                          ),
+                  Container(
+                    height: 10.h,
+                    width: 40.w,
+                    margin: EdgeInsets.only(bottom: 3.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(2.h),
+                      border: const Border.fromBorderSide(
+                        BorderSide(
+                          color: AppColors.border,
+                          width: 1,
                         ),
                       ),
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.contain,
-                          child: Text(
-                            'logo',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'logo',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-
-                  // Main Card Container
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 600), // responsive max width
-                    child: Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(2.5.h),
-                      decoration: cardDecoration,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Tab Buttons
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _TabButton(
-                                  label: 'Students',
-                                  isSelected: isStudentSelected,
-                                  onTap: () {
-                                    if (!isStudentSelected) {
-                                      setState(() {
-                                        isStudentSelected = true;
-                                      });
-                                    }
-                                  },
-                                  borderRadius: tabBorderRadiusLeft,
-                                ),
+                  Container(
+                    width: 90.w,
+                    padding: EdgeInsets.all(2.5.h),
+                    decoration: cardDecoration,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _TabButton(
+                                label: 'Students',
+                                isSelected: isStudentSelected,
+                                onTap: () {
+                                  if (!isStudentSelected) {
+                                    setState(() => isStudentSelected = true);
+                                  }
+                                },
+                                borderRadius: tabBorderRadiusLeft,
                               ),
-                              Expanded(
-                                child: _TabButton(
-                                  label: 'Parent',
-                                  isSelected: !isStudentSelected,
-                                  onTap: () {
-                                    if (isStudentSelected) {
-                                      setState(() {
-                                        isStudentSelected = false;
-                                      });
-                                    }
-                                  },
-                                  borderRadius: tabBorderRadiusRight,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(height: 3.5.h),
-
-                          Text(
-                            'Log In',
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
                             ),
+                            Expanded(
+                              child: _TabButton(
+                                label: 'Parent',
+                                isSelected: !isStudentSelected,
+                                onTap: () {
+                                  if (isStudentSelected) {
+                                    setState(() => isStudentSelected = false);
+                                  }
+                                },
+                                borderRadius: tabBorderRadiusRight,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 3.5.h),
+                        Text(
+                          'Log In',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
                           ),
-
-                          SizedBox(height: 2.5.h),
-
-                          // Email Field
-                          BlocBuilder<LoginBloc, LoginState>(
-                            buildWhen: (previous, current) =>
-                            previous.isLoading != current.isLoading,
-                            builder: (context, state) {
-                              return ConstrainedBox(
-                                constraints: BoxConstraints(maxWidth: 500),
-                                child: TextField(
-                                  enabled: !state.isLoading,
-                                  onChanged: (value) {
-                                    context
-                                        .read<LoginBloc>()
-                                        .add(EmailChanged(value));
-                                  },
-                                  keyboardType: TextInputType.emailAddress,
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter your email',
-                                    hintStyle: TextStyle(
-                                      color: AppColors.textHint,
-                                      fontSize: 15.sp,
-                                    ),
-                                    filled: true,
-                                    fillColor: AppColors.surface,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 4.w,
-                                      vertical: 2.h,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: inputBorderRadius,
-                                      borderSide: const BorderSide(
-                                        color: AppColors.border,
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: inputBorderRadius,
-                                      borderSide: const BorderSide(
-                                        color: AppColors.border,
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: inputBorderRadius,
-                                      borderSide: const BorderSide(
-                                        color: AppColors.primary,
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-
-                          SizedBox(height: 2.h),
-
-                          // Password Field
-                          BlocBuilder<LoginBloc, LoginState>(
-                            buildWhen: (previous, current) =>
-                            previous.isLoading != current.isLoading ||
-                                previous.isPasswordVisible !=
-                                    current.isPasswordVisible,
-                            builder: (context, state) {
-                              return ConstrainedBox(
-                                constraints: BoxConstraints(maxWidth: 500),
-                                child: TextField(
-                                  enabled: !state.isLoading,
-                                  obscureText: !state.isPasswordVisible,
-                                  onChanged: (value) {
-                                    context
-                                        .read<LoginBloc>()
-                                        .add(PasswordChanged(value));
-                                  },
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter Password',
-                                    hintStyle: TextStyle(
-                                      color: AppColors.textHint,
-                                      fontSize: 15.sp,
-                                    ),
-                                    filled: true,
-                                    fillColor: AppColors.surface,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 4.w,
-                                      vertical: 2.h,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: inputBorderRadius,
-                                      borderSide: const BorderSide(
-                                        color: AppColors.border,
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: inputBorderRadius,
-                                      borderSide: const BorderSide(
-                                        color: AppColors.border,
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: inputBorderRadius,
-                                      borderSide: const BorderSide(
-                                        color: AppColors.primary,
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    suffixIcon: IconButton(
-                                      icon: Icon(
-                                        state.isPasswordVisible
-                                            ? Icons.visibility_outlined
-                                            : Icons.visibility_off_outlined,
-                                        color: AppColors.primary,
-                                        size: 22.sp,
-                                      ),
-                                      onPressed: () {
-                                        context
-                                            .read<LoginBloc>()
-                                            .add(TogglePasswordVisibility());
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-
-                          SizedBox(height: 3.h),
-
-                          // Login Button
-                          BlocBuilder<LoginBloc, LoginState>(
-                            buildWhen: (previous, current) =>
-                            previous.isLoading != current.isLoading,
-                            builder: (context, state) {
-                              return SizedBox(
-                                width: double.infinity,
-                                height: 6.5.h,
-                                child: ElevatedButton(
-                                  onPressed: state.isLoading
-                                      ? null
-                                      : () {
-                                    context
-                                        .read<LoginBloc>()
-                                        .add(LoginSubmitted());
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    disabledBackgroundColor: AppColors.disabled,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: buttonBorderRadius,
-                                    ),
-                                  ),
-                                  child: state.isLoading
-                                      ? SizedBox(
-                                    height: 2.5.h,
-                                    width: 2.5.h,
-                                    child:
-                                    const CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                      : Text(
-                                    'Log In',
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-
-                          SizedBox(height: 1.h),
-
-                          // Forgot Password
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                    const ForgotPasswordScreen(),
-                                  ),
-                                );
+                        ),
+                        SizedBox(height: 2.5.h),
+                        BlocBuilder<LoginBloc, LoginState>(
+                          buildWhen: (previous, current) =>
+                          previous.isLoading != current.isLoading,
+                          builder: (context, state) {
+                            return TextField(
+                              controller: _emailController,
+                              enabled: !state.isLoading,
+                              onChanged: (value) {
+                                context.read<LoginBloc>().add(EmailChanged(value));
                               },
-                              style: TextButton.styleFrom(
-                                foregroundColor: AppColors.primary,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 2.w,
-                                  vertical: 0.5.h,
-                                ),
-                                minimumSize: Size.zero,
-                                tapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                              keyboardType: TextInputType.emailAddress,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColors.textPrimary,
                               ),
-                              child: Text(
-                                'forgot password',
-                                style: TextStyle(
-                                  color: AppColors.primary,
+                              decoration: InputDecoration(
+                                hintText: 'Enter your email',
+                                hintStyle: TextStyle(
+                                  color: AppColors.textHint,
                                   fontSize: 15.sp,
-                                  fontWeight: FontWeight.w400,
                                 ),
+                                filled: true,
+                                fillColor: AppColors.surface,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.h,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primary,
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 2.h),
+                        BlocBuilder<LoginBloc, LoginState>(
+                          buildWhen: (previous, current) =>
+                          previous.isLoading != current.isLoading ||
+                              previous.isPasswordVisible != current.isPasswordVisible,
+                          builder: (context, state) {
+                            return TextField(
+                              controller: _passwordController,
+                              enabled: !state.isLoading,
+                              obscureText: !state.isPasswordVisible,
+                              onChanged: (value) {
+                                context.read<LoginBloc>().add(PasswordChanged(value));
+                              },
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColors.textPrimary,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Enter Password',
+                                hintStyle: TextStyle(
+                                  color: AppColors.textHint,
+                                  fontSize: 15.sp,
+                                ),
+                                filled: true,
+                                fillColor: AppColors.surface,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.h,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: inputBorderRadius,
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primary,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    state.isPasswordVisible
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    color: AppColors.primary,
+                                    size: 22.sp,
+                                  ),
+                                  onPressed: () {
+                                    context.read<LoginBloc>().add(TogglePasswordVisibility());
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 3.h),
+                        BlocBuilder<LoginBloc, LoginState>(
+                          buildWhen: (previous, current) =>
+                          previous.isLoading != current.isLoading,
+                          builder: (context, state) {
+                            return SizedBox(
+                              width: double.infinity,
+                              height: 6.5.h,
+                              child: ElevatedButton(
+                                onPressed: state.isLoading
+                                    ? null
+                                    : () {
+                                  context.read<LoginBloc>().add(LoginSubmitted());
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  disabledBackgroundColor: AppColors.disabled,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: buttonBorderRadius,
+                                  ),
+                                ),
+                                child: state.isLoading
+                                    ? SizedBox(
+                                  height: 2.5.h,
+                                  width: 2.5.h,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                    : Text(
+                                  'Log In',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 1.h),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ForgotPasswordScreen(),
+                                ),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 2.w,
+                                vertical: 0.5.h,
+                              ),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              'forgot password',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-
                   SizedBox(height: 18.h),
-
-                  // Footer
                   Column(
                     children: [
                       Text(
@@ -454,7 +449,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// Extracted Tab Button Widget
 class _TabButton extends StatelessWidget {
   final String label;
   final bool isSelected;
