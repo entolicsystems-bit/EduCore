@@ -14,7 +14,7 @@ phases:
 
   post_build:
     commands:
-      - aws s3 sync dist s3://educore-frontend-bucket --delete
+      - aws s3 sync frontend/dist/* s3://educore-frontend-bucket --delete
 
 artifacts:
   files:
