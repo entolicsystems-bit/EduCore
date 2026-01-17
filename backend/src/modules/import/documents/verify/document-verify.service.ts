@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { DocumentStatus, Prisma, User } from "@prisma/client";
-import { ApplicationStatus } from "src/constants/application-status.constant";
+import { ApplicationStatus, DocumentStatus, Prisma, User } from "@prisma/client";
 import { PrismaService } from "src/database/prisma.service";
 import { VerifyDocumentDto } from "src/dto/verify-document.dto";
 import { EventEmitter2 } from "@nestjs/event-emitter";

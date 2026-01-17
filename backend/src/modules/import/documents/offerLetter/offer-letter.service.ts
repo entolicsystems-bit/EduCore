@@ -6,9 +6,9 @@ import {
 import * as path from "path";
 import * as fs from "fs";
 import { PrismaService } from "src/database/prisma.service";
-import { ApplicationStatus } from "src/constants/application-status.constant";
 import { htmlToPdf } from "src/utils/pdf.util";
 import { StorageService } from "./storage/awsStorage.service";
+import { ApplicationStatus } from "@prisma/client";
 
 @Injectable()
 export class OfferLetterService {

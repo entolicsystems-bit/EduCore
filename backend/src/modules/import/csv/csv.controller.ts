@@ -40,107 +40,58 @@ export class CsvController {
         }
         cb(null, true);
       },
-    })
+    }),
   )
+  @Post("import")
   async importCsv(@UploadedFile() file: Express.Multer.File, @Req() req) {
-    if (!file) {
-      throw new BadRequestException("CSV file is required");
-    }
+    if (!file) throw new BadRequestException("CSV file is required");
 
+    const rows: CreateStudentCsvDto[] = [];
     const errors: any[] = [];
-    let batch: CreateStudentCsvDto[] = [];
     let rowNumber = 1;
-    let importedCount = 0;
-    let skippedCount = 0;
-
-    const stream = Readable.from(file.buffer);
 
     await new Promise<void>((resolve, reject) => {
-      stream
+      Readable.from(file.buffer)
         .pipe(csvParser())
-        .on("data", async (row) => {
-          stream.pause();
+        .on("data", (row) => {
           rowNumber++;
 
-          const rowErrors: string[] = [];
+          const dto = plainToInstance(CreateStudentCsvDto, {
+            email: row.email,
+            name: row.name,
+            phone: row.phone,
+            source: "CSV Import",
+            status: "NEW",
+          });
 
-          if (rowErrors.length) {
-            errors.push({ row: rowNumber, errors: rowErrors, data: row });
-            stream.resume();
-            return;
-          }
-
-          const dto = plainToInstance(
-            CreateStudentCsvDto,
-            {
-              email: row.email,
-              name: row.name,
-              phone: row.phone,
-              source: "CSV Import",
-              status: "NEW",
-            },
-            { enableImplicitConversion: true }
-          );
-
-          const validationErrors = validateSync(dto, { whitelist: true });
-
+          const validationErrors = validateSync(dto);
           if (validationErrors.length) {
-            errors.push({
-              row: rowNumber,
-              errors: validationErrors
-                .map((e) => Object.values(e.constraints ?? {}))
-                .flat(),
-              data: row,
-            });
-            stream.resume();
+            errors.push({ row: rowNumber, errors: validationErrors });
             return;
           }
 
-          batch.push(dto);
-
-          if (batch.length === BATCH_SIZE) {
-            const result = await this.csvService.bulkCreate(batch, req.user);
-            importedCount += result.insertedCount;
-            skippedCount += result.skippedCount;
-
-            // Add skipped rows to errors
-            errors.push(
-              ...result.skippedData.map((d) => ({
-                row: rowNumber,
-                data: d,
-                errors: ["Duplicate email or phone number"],
-              }))
-            );
-
-            batch = [];
-          }
-
-          stream.resume();
+          rows.push(dto);
         })
-        .on("end", async () => {
-          if (batch.length) {
-            const result = await this.csvService.bulkCreate(batch, req.user);
-            importedCount += result.insertedCount;
-            skippedCount += result.skippedCount;
-
-            errors.push(
-              ...result.skippedData.map((d) => ({
-                row: rowNumber,
-                data: d,
-                errors: ["Duplicate email or phone number"],
-              }))
-            );
-          }
-          resolve();
-        })
+        .on("end", resolve)
         .on("error", reject);
     });
 
+    let imported = 0;
+    let skipped = 0;
+
+    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+      const batch = rows.slice(i, i + BATCH_SIZE);
+      const result = await this.csvService.bulkCreate(batch, req.user.id);
+
+      imported += result.insertedCount;
+      skipped += result.skippedCount;
+    }
+
     return {
       message: "CSV processed successfully",
-      totalRows: rowNumber - 1,
-      imported: importedCount,
-      skipped: skippedCount,
+      totalRows: rows.length,
+      imported,
+      skipped,
       failed: errors.length,
       errors,
     };

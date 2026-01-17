@@ -7,69 +7,61 @@ datasource db {
 }
 
 model Lead {
-  id         String    @id @default(uuid()) @db.Uuid
-  name       String
-  phone      String    @unique
-  email      String?   @unique
-  source     String
-  status     String    @default("NEW")
-  owner_id   String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  deleted_at DateTime?
-  tenantId   String?   @db.Uuid
-  branchId   String?   @db.Uuid
-
-  activities   LeadActivity[]
+  id           String         @id @default(uuid())
+  name         String
+  phone        String         @unique
+  email        String?        @unique
+  source       String
+  status       String         @default("NEW")
+  owner_id     String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deleted_at   DateTime?
+  branchId     String?        @db.Uuid
+  tenantId     String?        @db.Uuid
   applications Application[]
+  activities   LeadActivity[]
 }
 
 model LeadActivity {
-  id        String   @id @default(uuid()) @db.Uuid
-  lead_id   String   @db.Uuid
+  id        String   @id @default(uuid())
+  lead_id   String
   action    String
   metadata  Json?
   createdAt DateTime @default(now())
-
-  lead Lead @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  lead      Lead     @relation(fields: [lead_id], references: [id], onDelete: Cascade)
 
   @@index([lead_id])
 }
 
 model User {
-  id           String  @id @default(uuid()) @db.VarChar(250)
-  name         String  @db.VarChar(250)
-  email        String  @unique @db.VarChar(250)
-  role         String? @db.VarChar(250)
-  passwordHash String  @db.VarChar(250)
-  phone        String  @unique @db.VarChar(250)
-  status       Boolean @default(true)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @map("updated_at")
-  tenantId  String?   @map("tenant_id") @db.Uuid
-  branchId  String?   @db.Uuid
-
-  refreshTokens RefreshToken[]
-  roles         UserRole[]
-
+  id                         String              @id @default(uuid()) @db.VarChar(250)
+  name                       String              @db.VarChar(250)
+  email                      String              @unique @db.VarChar(250)
+  createdAt                  DateTime            @default(now())
+  passwordHash               String              @db.VarChar(250)
+  phone                      String              @unique @db.VarChar(250)
+  status                     Boolean             @default(true)
+  tenantId                   String?             @map("tenant_id") @db.Uuid
+  updatedAt                  DateTime?           @map("updated_at")
+  branchId                   String?             @db.Uuid
+  role                       String?             @db.VarChar(250)
+  refreshTokens              RefreshToken[]
+  roles                      UserRole[]
   verifiedAdmissionDocuments AdmissionDocument[] @relation("AdmissionDocumentVerifiedBy")
-  students                   Student[]
-  offerLetters               OfferLetter[]
 
   @@map("User")
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid())
   tokenHash String
   userId    String
   expiresAt DateTime
-  jti       String   @unique
   createdAt DateTime @default(now())
+  jti       String   @unique
   tenantId  String?  @map("tenant_id") @db.Uuid
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([tenantId])
@@ -77,10 +69,9 @@ model RefreshToken {
 }
 
 model Role {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  createdAt   DateTime         @default(now())
   permissions RolePermission[]
   users       UserRole[]
 }
@@ -89,9 +80,8 @@ model UserRole {
   id     Int    @id @default(autoincrement())
   userId String
   roleId Int
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, roleId])
   @@index([userId])
@@ -99,27 +89,129 @@ model UserRole {
 }
 
 model Permission {
-  id        Int      @id @default(autoincrement())
-  module    String
-  action    String
-  createdAt DateTime @default(now())
-
+  id              Int              @id @default(autoincrement())
+  module          String
+  action          String
+  createdAt       DateTime         @default(now())
   rolePermissions RolePermission[]
 
   @@unique([module, action])
 }
 
 model RolePermission {
-  id           Int @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   roleId       Int
   permissionId Int
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, permissionId])
   @@index([roleId])
   @@index([permissionId])
+}
+
+model Application {
+  id                 String              @id @default(uuid())
+  leadId             String
+  programId          String
+  formData           Json
+  status             ApplicationStatus   @default(DRAFT)
+  submittedAt        DateTime?
+  reviewedBy         String?
+  notes              String?
+  deletedAt          DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  tenantId           String?             @db.Uuid
+  branchId           String?             @db.Uuid
+  applicationRef     String?             @unique @db.VarChar(30)
+  lead               Lead                @relation(fields: [leadId], references: [id])
+  admissionDocuments AdmissionDocument[]
+
+  @@index([tenantId, leadId])
+  @@index([tenantId, branchId, status])
+  @@index([createdAt])
+}
+
+model AdmissionDocument {
+  id            String         @id @default(uuid())
+  applicationId String
+  documentType  DocumentType
+  fileKey       String
+  fileName      String?
+  fileSize      BigInt
+  fileType      String
+  status        DocumentStatus @default(UPLOADED)
+  verifiedBy    String?        @db.VarChar(250)
+  verifiedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  verifiedUser  User?          @relation("AdmissionDocumentVerifiedBy", fields: [verifiedBy], references: [id])
+
+  @@index([applicationId])
+  @@index([status])
+  @@map("admission_documents")
+}
+
+model Student {
+  tenant_id      String?  @db.Uuid
+  application_id String   @unique @db.Uuid
+  user_id        String   @db.Uuid
+  profile_data   Json
+  status         String   @default("ENROLLED") @db.VarChar(20)
+  created_at     DateTime @default(now())
+  id             String   @id @default(uuid()) @db.Uuid
+
+  @@index([application_id], map: "idx_students_application_unique")
+  @@index([user_id], map: "idx_students_user_id")
+}
+
+model OfferLetter {
+  application_id String   @db.Uuid
+  file_key       String
+  generated_by   String   @db.Uuid
+  generated_at   DateTime @default(now())
+  id             String   @id @default(uuid()) @db.Uuid
+
+  @@index([application_id], map: "idx_offer_application_id")
+}
+
+model ActivityTimeline {
+  id          String             @id @default(uuid())
+  entityType  TimelineEntityType
+  entityId    String             @db.Uuid
+  eventType   TimelineEventType
+  title       String?
+  description String?
+  actorId     String?            @db.Uuid
+  createdAt   DateTime           @default(now())
+
+  @@index([createdAt], map: "idx_timeline_created_at")
+  @@index([entityType, entityId], map: "idx_timeline_entity")
+}
+
+model Audit_Logs {
+  id         String   @id @default(uuid())
+  action     String   @db.VarChar(100)
+  entityType String   @db.VarChar(50)
+  entityId   String   @db.Uuid
+  actorId    String?  @db.Uuid
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt], map: "idx_audit_created_at")
+  @@index([entityType, entityId], map: "idx_audit_entity")
+  @@map("audit_logs")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  tableName String
+  action    String
+  oldValue  Json?
+  newValue  Json?
+  userId    String?
+  createdAt DateTime @default(now())
 }
 
 enum ApplicationStatus {
@@ -129,6 +221,7 @@ enum ApplicationStatus {
   APPROVED
   REJECTED
   ENROLLED
+  DRAFT
 }
 
 enum DocumentStatus {
@@ -160,190 +253,4 @@ enum DocumentType {
   ACADEMIC_RECORD
   PHOTO
   OTHER
-}
-
-enum EnrollmentStatus {
-  ENROLLED
-  ACTIVE
-  SUSPENDED
-  GRADUATED
-  DROPPED
-}
-
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
-
-model Application {
-  id        String            @id @default(uuid()) @db.Uuid
-  leadId    String            @db.Uuid
-  programId String
-  formData  Json
-  status    ApplicationStatus @default(APPLIED)
-
-  tenantId       String? @db.Uuid
-  branchId       String? @db.Uuid
-  applicationRef String  @unique
-
-  submittedAt DateTime?
-  reviewedBy  String?
-  notes       String?
-  deletedAt   DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  lead Lead @relation(fields: [leadId], references: [id], onDelete: Restrict)
-
-  admissionDocuments AdmissionDocument[]
-  students           Student[]
-  offerLetters       OfferLetter[]
-
-  @@index([tenantId, leadId])
-  @@index([tenantId, branchId, status])
-  @@index([createdAt])
-}
-
-model AdmissionDocument {
-  id String @id @default(uuid()) @db.Uuid
-
-  applicationId String      @db.Uuid
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-
-  documentType DocumentType
-
-  fileKey  String
-  fileName String?
-  fileSize BigInt
-  fileType String
-
-  status DocumentStatus @default(UPLOADED)
-
-  verifiedBy   String? @db.VarChar(250)
-  verifiedUser User?   @relation("AdmissionDocumentVerifiedBy", fields: [verifiedBy], references: [id], onDelete: SetNull)
-
-  verifiedAt DateTime?
-  createdAt  DateTime  @default(now())
-
-  @@index([applicationId])
-  @@index([status])
-  @@map("admission_documents")
-}
-
-model Student {
-  // 🔑 Core identifiers
-  id                String @id @default(uuid()) @db.Uuid
-  roll_number       String @unique
-  enrollment_number String @unique
-
-  // 🔗 Tenant / ownership
-  tenant_id String @db.Uuid
-  branch_id String @db.Uuid
-
-  // 🔗 Existing relations
-  application_id String @unique @db.Uuid
-  user_id        String @db.Uuid
-
-  // 👤 Personal fields
-  first_name    String
-  last_name     String?
-  email         String?   @unique
-  phone         String?
-  date_of_birth DateTime?
-  gender        Gender?
-
-  // 🎓 Academic fields
-  program_id               String    @db.Uuid
-  batch_id                 String?   @db.Uuid
-  enrollment_date          DateTime?
-  expected_completion_date DateTime?
-
-  // 👨‍👩‍👧 Parent / Guardian
-  parent_name       String?
-  parent_email      String?
-  parent_phone      String?
-  emergency_contact String?
-
-  // 🏠 Address
-  current_address   String?
-  permanent_address String?
-
-  // 📄 Documents
-  photo_url    String?
-  id_proof_url String?
-
-  // 📌 Status
-  status EnrollmentStatus @default(ENROLLED)
-
-  // ⏱️ Timestamps
-  enrolled_at DateTime?
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-
-  // 🗑️ Soft delete
-  deleted_at DateTime?
-
-  // 🔗 Relations
-  application Application @relation(fields: [application_id], references: [id])
-  user        User        @relation(fields: [user_id], references: [id])
-
-  // 🔍 Indexes (5.1.3)
-  @@index([tenant_id, branch_id])
-  @@index([tenant_id, branch_id, status])
-  @@index([program_id])
-  @@index([batch_id])
-  @@index([user_id])
-}
-
-model OfferLetter {
-  id             String   @id @default(uuid()) @db.Uuid
-  application_id String   @db.Uuid
-  file_key       String
-  generated_by   String
-  generated_at   DateTime @default(now())
-
-  application Application @relation(fields: [application_id], references: [id])
-  generator   User        @relation(fields: [generated_by], references: [id])
-
-  @@index([application_id])
-}
-
-model ActivityTimeline {
-  id          String             @id @default(uuid()) @db.Uuid
-  entityType  TimelineEntityType
-  entityId    String             @db.Uuid
-  eventType   TimelineEventType
-  title       String?
-  description String?
-  actorId     String?            @db.Uuid
-  createdAt   DateTime           @default(now())
-
-  @@index([entityType, entityId])
-  @@index([createdAt])
-}
-
-model Audit_Logs {
-  id         String   @id @default(uuid()) @db.Uuid
-  action     String   @db.VarChar(100)
-  entityType String   @db.VarChar(50)
-  entityId   String   @db.Uuid
-  actorId    String?  @db.Uuid
-  metadata   Json?
-  createdAt  DateTime @default(now())
-
-  @@index([entityType, entityId])
-  @@index([createdAt])
-  @@map("audit_logs")
-}
-
-model AuditLog {
-  id        Int      @id @default(autoincrement())
-  tableName String
-  action    String
-  oldValue  Json?
-  newValue  Json?
-  userId    String?
-  createdAt DateTime @default(now())
 }

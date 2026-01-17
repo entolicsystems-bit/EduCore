@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 dotenv.config();
-
+require("newrelic");
+// import newRelic from 'newrelic';
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
@@ -8,6 +9,8 @@ import { PrismaExceptionFilter } from "./exceptions/prisma-exception.filter";
 import { AllExceptionFilter } from "./exceptions/all-exception.filter";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 import { ThrottlerGuard } from "@nestjs/throttler";
+
+// console.log('CRYPTO_SECRET:', process.env.CRYPTO_SECRET);
 
 // console.log('CRYPTO_SECRET:', process.env.CRYPTO_SECRET);
 
