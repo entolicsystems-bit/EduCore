@@ -1,1 +1,0 @@
-Database Version: PostgreSQL 15.6
