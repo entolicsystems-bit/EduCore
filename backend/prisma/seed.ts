@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { cryptoConfig } from "./../src/config/crypto.config";
 import { CryptoUtil } from "./../src/common/crypto/crypto.util";
+
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
@@ -66,8 +67,6 @@ async function seedAdmin() {
 
 //   console.log("✅ System encrypted and seeded successfully");
 // }
-
-
 
 async function seedRolesAndPermissions() {
   const roles = [
@@ -144,7 +143,7 @@ async function seedRolesAndPermissions() {
 
   const roleMap = new Map(rolesFromDb.map((r) => [r.name, r.id]));
   const permissionMap = new Map(
-    permissionsFromDb.map((p) => [`${p.module}:${p.action}`, p.id])
+    permissionsFromDb.map((p) => [`${p.module}:${p.action}`, p.id]),
   );
 
   for (const [roleName, perms] of Object.entries(rolePermissions)) {

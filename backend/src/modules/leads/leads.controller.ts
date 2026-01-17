@@ -33,15 +33,15 @@ export class LeadsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
   @Get()
-getLeads(@Query() filters: LeadFilterDto, @Req() req) {
-  return this.service.getLeads(filters, req.user);
+  getLeads(@Query() filters: LeadFilterDto, @Req() req) {
+    return this.service.getLeads(filters, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
-@Get(":id")
-detail(@Param("id") id: string, @Req() req) {
-  return this.service.getLead(id, req.user);
+  @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
+  @Get(":id")
+  detail(@Param("id") id: string, @Req() req) {
+    return this.service.getLead(id, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -71,7 +71,4 @@ detail(@Param("id") id: string, @Req() req) {
   delete(@Param("id") id: string, @Req() req) {
     return this.service.softDeleteUser(id, req.user);
   }
-
 }
-
-

@@ -5,6 +5,8 @@ import {
   IsString,
   Matches,
   Length,
+  IsOptional,
+  IsUUID,
 } from "class-validator";
 
 export class CreateStudentCsvDto {

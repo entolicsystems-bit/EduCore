@@ -1,7 +1,11 @@
+import { Optional } from "@nestjs/common";
+import { Type } from "class-transformer";
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
+  IsUUID,
   Length,
   Matches,
   MinLength,
@@ -11,9 +15,12 @@ export class RegisterDto {
   @IsEmail()
   email: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @Length(2, 100, { message: "Name must be 2–100 characters" })
+  @IsString({ message: "Name must be a string" })
+  @IsNotEmpty({ message: "Name is required" })
+  @Matches(/^[A-Za-z\s]+$/, {
+    message: "Name must contain only letters and spaces",
+  })
+  @Length(2, 50, { message: "Name must be 2–50 characters long" })
   name: string;
 
   @IsString()

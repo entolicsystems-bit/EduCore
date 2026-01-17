@@ -1,0 +1,16 @@
+import { Module } from "@nestjs/common";
+import { VerifyDocumentController } from "./document-verify.controller";
+import { VerifyDocumentService } from "./document-verify.service";
+import { OfferLetterService } from "../offerLetter/offer-letter.service";
+import { ApplicationListener } from "../offerLetter/application.listener";
+import { offerLetterpreviewController } from "../offerLetter/offer-letter-preview.controller";
+import { StorageService } from "../offerLetter/storage/awsStorage.service";
+import { StorageModule } from "../offerLetter/storage/awsStorage.module";
+
+@Module({
+  imports: [StorageModule],
+  controllers: [VerifyDocumentController, offerLetterpreviewController],
+  providers: [VerifyDocumentService, OfferLetterService, ApplicationListener],
+  exports: [OfferLetterService],
+})
+export class verifyDocumentModule {}

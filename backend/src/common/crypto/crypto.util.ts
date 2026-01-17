@@ -1,4 +1,4 @@
-import { cryptoConfig } from 'src/config/crypto.config';
+import { cryptoConfig } from "src/config/crypto.config";
 import {
   createCipheriv,
   createDecipheriv,
@@ -13,12 +13,11 @@ export class CryptoUtil {
     if (!cryptoConfig.secret) {
       throw new Error("CRYPTO_SECRET is missing in environment variables");
     }
-    
 
     return (await promisify(scrypt)(
       cryptoConfig.secret,
       "crypto_salt",
-      32
+      32,
     )) as Buffer;
   }
 
@@ -56,11 +55,7 @@ export class CryptoUtil {
       const content = Buffer.from(contentHex, "hex");
       const key = await this.getKey();
 
-      const decipher = createDecipheriv(
-        cryptoConfig.algorithm,
-        key,
-        iv
-      );
+      const decipher = createDecipheriv(cryptoConfig.algorithm, key, iv);
 
       const decrypted = Buffer.concat([
         decipher.update(content),
@@ -73,8 +68,8 @@ export class CryptoUtil {
       return encryptedText;
     }
   }
-  
-// ======================================================
+
+  // ======================================================
   // 🔐 DETERMINISTIC HASH (FOR UNIQUENESS CHECK ONLY)
   // ======================================================
   /**
@@ -91,10 +86,6 @@ export class CryptoUtil {
   static hash(text: string): string {
     if (!text) return text;
 
-    return createHash("sha256")
-      .update(text.trim().toLowerCase())
-      .digest("hex");
+    return createHash("sha256").update(text.trim().toLowerCase()).digest("hex");
   }
 }
-
-

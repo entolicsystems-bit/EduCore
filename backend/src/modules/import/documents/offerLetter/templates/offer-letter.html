@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Offer Letter</title>
+
+    <style>
+      @page {
+        size: A4;
+        margin: 30mm 20mm;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 12pt;
+        color: #333;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #1a4fd8;
+        padding-bottom: 10px;
+      }
+
+      .logo img {
+        height: 60px;
+      }
+
+      .institution-details {
+        text-align: right;
+        font-size: 10pt;
+      }
+
+      h1 {
+        font-size: 16pt;
+        margin-top: 30px;
+      }
+
+      p {
+        margin: 12px 0;
+        line-height: 1.6;
+      }
+
+      footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 9pt;
+        color: #777;
+      }
+
+      .page-number::after {
+        content: counter(page);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="logo">
+        <img src="{{INSTITUTION_LOGO}}" alt="Institution Logo" />
+      </div>
+
+      <div class="institution-details">
+        <strong>{{INSTITUTION_NAME}}</strong><br />
+        {{INSTITUTION_ADDRESS}}<br />
+        {{INSTITUTION_CONTACT}}
+      </div>
+    </header>
+
+    <p>Date: {{OFFER_DATE}}</p>
+
+    <p>Dear <strong>{{STUDENT_NAME}}</strong>,</p>
+
+    <h1>Offer of Admission</h1>
+
+    <p>
+      We are pleased to offer you admission to the
+      <strong>{{PROGRAM_NAME}}</strong> program commencing on
+      <strong>{{START_DATE}}</strong>.
+    </p>
+
+    <p>
+      <strong>Program Duration:</strong> {{PROGRAM_DURATION}}<br />
+      <strong>Total Fee:</strong> {{TOTAL_FEE}}
+    </p>
+
+    <p>
+      Please confirm your acceptance on or before
+      <strong>{{ACCEPTANCE_DEADLINE}}</strong>.
+    </p>
+
+    <p>We look forward to welcoming you to {{INSTITUTION_NAME}}.</p>
+
+    <p>
+      Sincerely,<br /><br />
+      Admissions Office<br />
+      {{INSTITUTION_NAME}}
+    </p>
+
+    <footer>Page <span class="page-number"></span></footer>
+  </body>
+</html>
