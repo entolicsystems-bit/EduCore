@@ -29,7 +29,7 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-/* ================= RESPONSE INTERCEPTOR ================= */
+/*  RESPONSE INTERCEPTOR  */
 API.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -39,7 +39,8 @@ API.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("/auth/refresh")
+      !originalRequest.url.includes("/auth/refresh") &&
+      !originalRequest.url.includes("/auth/login")
     ) {
       originalRequest._retry = true;
 
@@ -52,7 +53,7 @@ API.interceptors.response.use(
         return API(originalRequest);
       } catch (err) {
         localStorage.clear();
-        window.location.href = "/login";
+        window.location.href = "/";
         return Promise.reject(err);
       }
     }

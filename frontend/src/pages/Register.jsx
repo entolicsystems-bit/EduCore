@@ -6,9 +6,12 @@ import "./Register.css";
 const Register = () => {
   const navigate = useNavigate();
 
+  // Form fileds
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // UI states
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,6 +22,7 @@ const Register = () => {
     validateForm();
   }, [name, email, password]);
 
+  // Validates all fileds before allowing submit
   const validateForm = () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
       setError("Please fill in all fields.");
@@ -26,6 +30,7 @@ const Register = () => {
       return;
     }
 
+    // Email format check
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       setError("Please enter a valid email address.");
@@ -33,26 +38,30 @@ const Register = () => {
       return;
     }
 
-    if (password.trim().length < 6) {
+    // user types password rule
+    if (password.length() < 6) {
       setError("Password must be at least 6 characters long.");
       setIsValid(false);
       return;
     }
-
+    //  if all validations pass
     setError("");
     setIsValid(true);
   };
 
+  // Submit registaration form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Prevent invalid submit
     if (!isValid) return;
 
     setLoading(true);
     setError("");
 
     try {
-      await registerUser({
+      // send data to backend
+      await registerUsers({
         name: name.trim(),
         email: email.trim(),
         password,
@@ -65,25 +74,6 @@ const Register = () => {
     } finally {
       setLoading(false);
     }
-
-    // check if user aleady exists
-    const existingUser = JSON.parse(localStorage.getItem("user"));
-
-    if (existingUser && existingUser.email === email.trim()) {
-      setError("User with this email already exists.");
-      return;
-    }
-
-    const userData = {
-      name: name.trim(),
-      email: email.trim(),
-      password,
-    };
-
-    localStorage.setItem("user", JSON.stringify(userData));
-    console.log("registration successful");
-
-    navigate("/");
   };
 
   // show Password toggle
@@ -92,20 +82,25 @@ const Register = () => {
   };
 
   return (
-    <div className="page">
-      <div className="outer-card">
+    <div className="container bg-[#eef4ff] flex justify-center items-center px-14 py-10">
+      <div className="container-box rounded-2xl p-4 outer-card border-2 border-gray-300">
         <div className="grid grid-cols-2">
           {/* LEFT card */}
-          <div className="border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center">
-            <div className="w-150 h-160 flex justify-center items-center">
-              <img src="/Register.png" alt="register" className="float" />
+          <div className="left-card border-2 border-gray-300 bg-white rounded-2xl flex justify-center items-center p-6 md:p-10">
+            <div className="w-full max-w-md md:max-w-lg lg:max-w-xl flex justify-center items-center">
+              <img
+                src="/Register.png"
+                alt="register"
+                className="w-full float h-auto object-contain"
+              />
+              {/* <h1 className="text-lg font-bold hi">EduCore</h1> */}
             </div>
           </div>
 
           {/* RIGHT  card*/}
-          <div className="flex justify-end items-center">
+          <div className="right-card flex justify-end items-center">
             <form
-              className="bg-[#ffffff] px-5 py-5 flex flex-col gap-7 border-2 border-gray-300 rounded-2xl w-90"
+              className="bg-[#ffffff] px-5 py-8 mr-14 flex flex-col gap-3 border-2 border-gray-300 rounded-2xl w-90"
               onSubmit={handleSubmit}
             >
               <h2 className="text-2xl font-bold">Registration</h2>
@@ -150,7 +145,7 @@ const Register = () => {
                 {loading ? "Registering..." : "Register"}
               </button>
 
-              <p className="back-link" onClick={() => navigate("/login")}>
+              <p className="back-link" onClick={() => navigate("/")}>
                 Go back to log in
               </p>
             </form>

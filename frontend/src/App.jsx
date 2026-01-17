@@ -14,6 +14,7 @@ import ImportLeads from "./pages/ImportLeads";
 import UsersRoles from "./pages/UsersRoles";
 import DocumentPage from "./pages/DocumentPage";
 import StudentPage from "./pages/StudentPage";
+import { AdmissionPipeline } from "./pages/AdmissionPipeline.jsx";
 
 // import ProtectedRoute from "../routes/ProtectedRoute";
 
@@ -22,11 +23,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* PUBLIC ROUTES */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/otp" element={<Otp />} />
         <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/pipeline" element={<AdmissionPipeline />} />
 
         {/* PROTECTED ROUTES */}
         <Route
