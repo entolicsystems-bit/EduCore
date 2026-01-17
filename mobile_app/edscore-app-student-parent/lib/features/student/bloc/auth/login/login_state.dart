@@ -54,6 +54,7 @@ class LoginState extends Equatable {
       userRole: userRole ?? this.userRole,
     );
   }
+  // login state
 
   @override
   List<Object?> get props => [
