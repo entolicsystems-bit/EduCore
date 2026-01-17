@@ -68,5 +68,4 @@ getTimeline(@Param('id') applicationId: string, @Req() req: any) {
   );
 }
 
-
 }

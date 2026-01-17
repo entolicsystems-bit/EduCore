@@ -1,3 +1,4 @@
+import { cryptoConfig } from 'src/config/crypto.config';
 import {
   createCipheriv,
   createDecipheriv,
@@ -6,7 +7,6 @@ import {
   createHash,
 } from "node:crypto";
 import { promisify } from "node:util";
-import { cryptoConfig } from "src/config/crypto.config";
 
 export class CryptoUtil {
   private static async getKey(): Promise<Buffer> {
