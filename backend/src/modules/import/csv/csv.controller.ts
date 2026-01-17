@@ -99,7 +99,7 @@ export class CsvController {
           batch.push(dto);
 
           if (batch.length === BATCH_SIZE) {
-            const result = await this.csvService.bulkCreate(batch, req.user.id);
+            const result = await this.csvService.bulkCreate(batch, req.user);
             importedCount += result.insertedCount;
             skippedCount += result.skippedCount;
 
@@ -119,7 +119,7 @@ export class CsvController {
         })
         .on("end", async () => {
           if (batch.length) {
-            const result = await this.csvService.bulkCreate(batch, req.user.id);
+            const result = await this.csvService.bulkCreate(batch, req.user);
             importedCount += result.insertedCount;
             skippedCount += result.skippedCount;
 

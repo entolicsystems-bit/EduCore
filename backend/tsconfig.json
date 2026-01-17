@@ -13,7 +13,7 @@
     "incremental": true,
     "skipLibCheck": true,
     "strict": false,
-    "types": ["node"]          // <-- add this line
+    "types": ["node"] // <-- add this line
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

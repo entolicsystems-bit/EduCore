@@ -6,9 +6,9 @@ import {
 import { LeadsRepository } from "./leads.repository";
 import { CreateLeadDto } from "../../dto/create-lead.dto";
 import { LeadFilterDto } from "../../dto/lead-filter.dto";
-import { parseCsv } from "../../utils/csv.util";
 import { LeadTimelineAction } from "../../constants/lead.constants";
 import { PrismaService } from "src/database/prisma.service";
+import { CryptoUtil } from "src/common/crypto/crypto.util";
 
 @Injectable()
 export class LeadsService {
@@ -20,6 +20,9 @@ export class LeadsService {
   async createLead(dto: CreateLeadDto, userId: string) {
     const lead = await this.repo.createLead({
       ...dto,
+      name: await CryptoUtil.encrypt(dto.name),
+      email: dto.email ? await CryptoUtil.encrypt(dto.email) : null,
+      phone: await CryptoUtil.encrypt(dto.phone),
       owner_id: userId,
     });
 
@@ -31,31 +34,23 @@ export class LeadsService {
       },
     ]);
 
-    return lead;
+    return {
+      ...lead,
+      name: await CryptoUtil.decrypt(lead.name),
+      email: lead.email ? await CryptoUtil.decrypt(lead.email) : null,
+      phone: await CryptoUtil.decrypt(lead.phone),
+    };
   }
 
   async createWebsiteLead(dto: CreateLeadDto) {
-    const email = dto.email;
-    const existingEmail = await this.prisma.lead.findUnique({
-      where: { email },
-    });
-    if (existingEmail) {
-      throw new BadRequestException("Email already exists");
-    }
-    const phone = dto.phone;
-    const existingPhone = await this.prisma.lead.findUnique({
-      where: { phone },
-    });
-    if (existingPhone) {
-      throw new BadRequestException("PhoneNo already exists");
-    }
     try {
       const lead = await this.repo.createLead({
         ...dto,
-        owner_id: null, //new lead has no owner id
+        name: await CryptoUtil.encrypt(dto.name),
+        email: dto.email ? await CryptoUtil.encrypt(dto.email) : null,
+        phone: await CryptoUtil.encrypt(dto.phone),
+        owner_id: null,
         status: "NEW",
-        tenantId: process.env.DEFAULT_TENANT_ID,
-    branchId: process.env.DEFAULT_BRANCH_ID,
       });
 
       await Promise.all([
@@ -71,18 +66,29 @@ export class LeadsService {
         }),
       ]);
 
-      return lead;
+      return {
+        ...lead,
+        name: await CryptoUtil.decrypt(lead.name),
+        email: lead.email ? await CryptoUtil.decrypt(lead.email) : null,
+        phone: await CryptoUtil.decrypt(lead.phone),
+      };
     } catch (error) {
-      if (error.code === "P2002") {
-        const field = error.meta?.target?.[0];
-        throw new BadRequestException("Existing email or phone number");
-      }
+      console.error("CREATE WEBSITE LEAD ERROR 👉", error); // ✅ THIS LINE
       throw error;
     }
   }
 
-  getLeads(filters: LeadFilterDto) {
-    return this.repo.findLeads(filters);
+  async getLeads(filters: LeadFilterDto) {
+    const leads = await this.repo.findLeads(filters);
+
+    return Promise.all(
+      leads.map(async (lead) => ({
+        ...lead,
+        name: await CryptoUtil.decrypt(lead.name),
+        email: lead.email ? await CryptoUtil.decrypt(lead.email) : null,
+        phone: await CryptoUtil.decrypt(lead.phone),
+      }))
+    );
   }
 
   async getLead(id: string) {
@@ -93,64 +99,54 @@ export class LeadsService {
 
     if (!lead) throw new BadRequestException("Lead not found");
 
-    return { lead, timeline };
+    return {
+      lead: {
+        ...lead,
+        name: await CryptoUtil.decrypt(lead.name),
+        email: lead.email ? await CryptoUtil.decrypt(lead.email) : null,
+        phone: await CryptoUtil.decrypt(lead.phone),
+      },
+      timeline,
+    };
   }
 
   async createCounsellorLead(
-  dto: CreateLeadDto,
-  user: { id: string; tenantId: string; branchId: string }
-) {
-  const lead = await this.repo.createLead({
-    ...dto,
-    owner_id: user.id,
-    status: "NEW",
-    tenantId: user.tenantId,
-    branchId: user.branchId,
-  });
+    dto: CreateLeadDto,
+    user: { id: string; tenantId: string; branchId: string; role: string }
+  ) {
+    const lead = await this.repo.createLead({
+      ...dto,
+      name: await CryptoUtil.encrypt(dto.name),
+      email: dto.email ? await CryptoUtil.encrypt(dto.email) : null,
+      phone: await CryptoUtil.encrypt(dto.phone),
+      owner_id: user.id,
+      status: "NEW",
+      tenantId: user.tenantId,
+      branchId: user.branchId,
+    });
 
-  await this.repo.addActivity(lead.id, LeadTimelineAction.CREATE, {
-    source: "COUNSELLOR",
-    performedBy: user.id,
-  });
+    await this.repo.addActivity(lead.id, LeadTimelineAction.CREATE, {
+      source: user.role,
+      performedBy: user.id,
+    });
 
-  await this.prisma.auditLog.create({
-    data: {
-      tableName: "Lead",
-      action: "CREATE",
-      oldValue: null,
-      newValue: lead,
-      userId: user.id,
-    },
-  });
+    await this.prisma.auditLog.create({
+      data: {
+        tableName: "Lead",
+        action: "CREATE",
+        oldValue: null,
+        newValue: lead,
+        userId: user.id,
+      },
+    });
 
-  return lead;
-}
-
-
-  //  async createCounsellorLead(dto: CreateLeadDto, counsellorId: string) {
-  //   const lead = await this.repo.createLead({
-  //     ...dto,
-  //     owner_id: counsellorId, // ✅ auto assign
-  //     status: "NEW",
-  //   });
-
-  //   await this.repo.addActivity(lead.id, LeadTimelineAction.CREATE, {
-  //     source: "COUNSELLOR",
-  //     performedBy: counsellorId,
-  //   });
-
-  //   await this.prisma.auditLog.create({
-  //     data: {
-  //       tableName: "Lead",
-  //       action: "CREATE",
-  //       oldValue: null,
-  //       newValue: lead,
-  //       userId: counsellorId,
-  //     },
-  //   });
-
-  //   return lead;
-  // }
+    return {
+      ...lead,
+      name: await CryptoUtil.decrypt(lead.name),
+      email: lead.email ? await CryptoUtil.decrypt(lead.email) : null,
+      phone: await CryptoUtil.decrypt(lead.phone),
+    };
+  }
 
   async assignCounsellor(
     leadId: string,
@@ -190,7 +186,6 @@ export class LeadsService {
   getLeadTimeline(leadId: string, query: { page?: number; limit?: number }) {
     const page = query.page ?? 1;
     const limit = Math.min(query.limit ?? 10, 50);
-
     return this.repo.getTimeline(leadId, page, limit);
   }
 
@@ -200,50 +195,29 @@ export class LeadsService {
     user: { id: string; role: string }
   ) {
     const lead = await this.repo.findById(leadId);
+    if (!lead) throw new BadRequestException("Lead not found");
 
-    if (!lead) {
-      throw new BadRequestException("Lead not found");
-    }
-
-    // 🔐 COUNSELLOR RULES
     if (user.role === "COUNSELLOR") {
-      // ❌ not assigned yet
       if (!lead.owner_id) {
         throw new ForbiddenException("Lead is not assigned to you yet");
       }
-
-      // ❌ assigned to someone else
       if (lead.owner_id !== user.id) {
         throw new ForbiddenException("You can update only your assigned leads");
       }
     }
-    const email = dto.email;
-    const existingEmail = await this.prisma.lead.findFirst({
-      where: { email },
-    });
-    if (existingEmail) {
-      throw new BadRequestException("Email already exists");
-    }
-    const phone = dto.phone;
-    const existingPhone = await this.prisma.lead.findFirst({
-      where: { phone },
-    });
-    if (existingPhone) {
-      throw new BadRequestException("PhoneNo already exists");
-    }
 
-    // 🧼 sanitize update fields (NO owner_id allowed)
     const data: any = {};
 
-    if (dto.name !== undefined) data.name = dto.name;
-    if (dto.phone !== undefined) data.phone = dto.phone;
-    if (dto.email !== undefined) data.email = dto.email;
+    if (dto.name !== undefined) data.name = await CryptoUtil.encrypt(dto.name);
+    if (dto.phone !== undefined)
+      data.phone = await CryptoUtil.encrypt(dto.phone);
+    if (dto.email !== undefined)
+      data.email = await CryptoUtil.encrypt(dto.email);
     if (dto.status !== undefined) data.status = dto.status;
     if (dto.source !== undefined) data.source = dto.source;
 
     const updatedLead = await this.repo.updateLeadFields(leadId, data);
 
-    // 🕒 timeline entry
     await this.repo.addActivity(leadId, LeadTimelineAction.UPDATE, {
       updatedBy: user.id,
       role: user.role,
@@ -254,44 +228,42 @@ export class LeadsService {
       data: {
         tableName: "Lead",
         action: "UPDATE",
-        oldValue: { status: lead }, // previous value
-        newValue: { status: updatedLead }, // new value
-        userId: user.id, // whoever made the change
+        oldValue: lead,
+        newValue: updatedLead,
+        userId: user.id,
       },
     });
 
-    return updatedLead;
+    return {
+      ...updatedLead,
+      name: await CryptoUtil.decrypt(updatedLead.name),
+      email: updatedLead.email
+        ? await CryptoUtil.decrypt(updatedLead.email)
+        : null,
+      phone: await CryptoUtil.decrypt(updatedLead.phone),
+    };
   }
 
   async softDeleteUser(leadId: string, user: { id: string; role: string }) {
     const lead = await this.repo.findById(leadId);
-
-    if (!lead) {
-      throw new BadRequestException("Lead not found");
-    }
+    if (!lead) throw new BadRequestException("Lead not found");
 
     if (user.role === "COUNSELLOR") {
-      // ❌ not assigned yet
       if (!lead.owner_id) {
         throw new ForbiddenException("Lead is not assigned to you yet");
       }
-
-      // ❌ assigned to someone else
       if (lead.owner_id !== user.id) {
         throw new ForbiddenException("You can update only your assigned leads");
       }
     }
 
-    // const deleteLead = await this.repo.deleteLead(leadId);
-    //return deleteLead;
-
     await this.prisma.auditLog.create({
       data: {
         tableName: "Lead",
         action: "DELETE",
-        oldValue: { status: lead }, // previous value
+        oldValue: lead,
         newValue: null,
-        userId: user.id, // whoever made the change
+        userId: user.id,
       },
     });
 
