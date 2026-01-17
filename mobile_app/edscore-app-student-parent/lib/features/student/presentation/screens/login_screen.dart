@@ -7,7 +7,7 @@ import '../../bloc/auth/login/login_state.dart';
 import '../../../../core/theme/app_colours.dart';
 import 'forgot_password_screen.dart';
 import 'student_details_screen.dart';
-import '../../../parent/presentation/pages/parent_home_screen.dart';
+import '../../../parent/presentation/screens/parent_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,12 +21,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  late final double screenHeight;
-  late final BoxDecoration cardDecoration;
-  late final BorderRadius inputBorderRadius;
-  late final BorderRadius tabBorderRadiusLeft;
-  late final BorderRadius tabBorderRadiusRight;
-  late final BorderRadius buttonBorderRadius;
+  double? _screenHeight;
+  double? _screenWidth;
+  BoxDecoration? _cardDecoration;
+  BorderRadius? _inputBorderRadius;
+  BorderRadius? _tabBorderRadiusLeft;
+  BorderRadius? _tabBorderRadiusRight;
+  BorderRadius? _buttonBorderRadius;
+
+  double get screenHeight => _screenHeight ?? MediaQuery.of(context).size.height;
+  double get screenWidth => _screenWidth ?? MediaQuery.of(context).size.width;
+  BoxDecoration get cardDecoration => _cardDecoration!;
+  BorderRadius get inputBorderRadius => _inputBorderRadius!;
+  BorderRadius get tabBorderRadiusLeft => _tabBorderRadiusLeft!;
+  BorderRadius get tabBorderRadiusRight => _tabBorderRadiusRight!;
+  BorderRadius get buttonBorderRadius => _buttonBorderRadius!;
 
   @override
   void dispose() {
@@ -38,28 +47,56 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    screenHeight = MediaQuery.of(context).size.height;
-    inputBorderRadius = BorderRadius.circular(1.5.h);
-    tabBorderRadiusLeft = BorderRadius.only(
-      topLeft: Radius.circular(1.5.h),
-      bottomLeft: Radius.circular(1.5.h),
-    );
-    tabBorderRadiusRight = BorderRadius.only(
-      topRight: Radius.circular(1.5.h),
-      bottomRight: Radius.circular(1.5.h),
-    );
-    buttonBorderRadius = BorderRadius.circular(1.5.h);
-    cardDecoration = BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(2.h),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x0D000000),
-          blurRadius: 10,
-          offset: Offset(0, 2),
-        ),
-      ],
-    );
+
+    // Only initialize once
+    if (_screenHeight == null) {
+      final size = MediaQuery.of(context).size;
+      _screenHeight = size.height;
+      _screenWidth = size.width;
+
+      _inputBorderRadius = BorderRadius.circular(1.5.h);
+      _tabBorderRadiusLeft = BorderRadius.only(
+        topLeft: Radius.circular(1.5.h),
+        bottomLeft: Radius.circular(1.5.h),
+      );
+      _tabBorderRadiusRight = BorderRadius.only(
+        topRight: Radius.circular(1.5.h),
+        bottomRight: Radius.circular(1.5.h),
+      );
+      _buttonBorderRadius = BorderRadius.circular(1.5.h);
+      _cardDecoration = BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(2.h),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      );
+    }
+  }
+
+  bool get isTablet => screenWidth > 600;
+  bool get isDesktop => screenWidth > 1024;
+
+  double get maxCardWidth {
+    if (isDesktop) return 500;
+    if (isTablet) return 600;
+    return 90.w;
+  }
+
+  double get logoWidth {
+    if (isDesktop) return 200;
+    if (isTablet) return 250;
+    return 40.w;
+  }
+
+  double get logoHeight {
+    if (isDesktop) return 80;
+    if (isTablet) return 90;
+    return 10.h;
   }
 
   void _showSnackBar(String message, Color backgroundColor) {
@@ -69,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
       SnackBar(
         content: Text(
           message,
-          style: TextStyle(fontSize: 14.sp),
+          style: TextStyle(fontSize: isDesktop ? 12.sp : 14.sp),
         ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
@@ -154,14 +191,18 @@ class _LoginScreenState extends State<LoginScreen> {
           body: Center(
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 8.w : 4.w,
+                vertical: 2.h,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Logo Container
                   Container(
-                    height: 10.h,
-                    width: 40.w,
-                    margin: EdgeInsets.only(bottom: 3.h),
+                    height: logoHeight,
+                    width: logoWidth,
+                    margin: EdgeInsets.only(bottom: isDesktop ? 4.h : 3.h),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(2.h),
@@ -177,19 +218,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         'logo',
                         style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 20.sp,
+                          fontSize: isDesktop ? 16.sp : 20.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
+
+                  // Login Card
                   Container(
-                    width: 90.w,
-                    padding: EdgeInsets.all(2.5.h),
+                    width: maxCardWidth,
+                    constraints: BoxConstraints(
+                      maxWidth: maxCardWidth,
+                    ),
+                    padding: EdgeInsets.all(isDesktop ? 4.h : 2.5.h),
                     decoration: cardDecoration,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Tab Buttons
                         Row(
                           children: [
                             Expanded(
@@ -202,6 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   }
                                 },
                                 borderRadius: tabBorderRadiusLeft,
+                                isDesktop: isDesktop,
                               ),
                             ),
                             Expanded(
@@ -214,20 +262,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                   }
                                 },
                                 borderRadius: tabBorderRadiusRight,
+                                isDesktop: isDesktop,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 3.5.h),
+
+                        SizedBox(height: isDesktop ? 4.h : 3.5.h),
+
+                        // Title
                         Text(
                           'Log In',
                           style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: isDesktop ? 14.sp : 18.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        SizedBox(height: 2.5.h),
+
+                        SizedBox(height: isDesktop ? 3.h : 2.5.h),
+
+                        // Email Field
                         BlocBuilder<LoginBloc, LoginState>(
                           buildWhen: (previous, current) =>
                           previous.isLoading != current.isLoading,
@@ -240,20 +295,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                               keyboardType: TextInputType.emailAddress,
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: isDesktop ? 11.sp : 14.sp,
                                 color: AppColors.textPrimary,
                               ),
                               decoration: InputDecoration(
                                 hintText: 'Enter your email',
                                 hintStyle: TextStyle(
                                   color: AppColors.textHint,
-                                  fontSize: 15.sp,
+                                  fontSize: isDesktop ? 11.sp : 15.sp,
                                 ),
                                 filled: true,
                                 fillColor: AppColors.surface,
                                 contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 4.w,
-                                  vertical: 2.h,
+                                  horizontal: isDesktop ? 20 : 4.w,
+                                  vertical: isDesktop ? 16 : 2.h,
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: inputBorderRadius,
@@ -278,34 +333,40 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                         ),
-                        SizedBox(height: 2.h),
+
+                        SizedBox(height: isDesktop ? 2.5.h : 2.h),
+
+                        // Password Field
                         BlocBuilder<LoginBloc, LoginState>(
                           buildWhen: (previous, current) =>
                           previous.isLoading != current.isLoading ||
-                              previous.isPasswordVisible != current.isPasswordVisible,
+                              previous.isPasswordVisible !=
+                                  current.isPasswordVisible,
                           builder: (context, state) {
                             return TextField(
                               controller: _passwordController,
                               enabled: !state.isLoading,
                               obscureText: !state.isPasswordVisible,
                               onChanged: (value) {
-                                context.read<LoginBloc>().add(PasswordChanged(value));
+                                context
+                                    .read<LoginBloc>()
+                                    .add(PasswordChanged(value));
                               },
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: isDesktop ? 11.sp : 14.sp,
                                 color: AppColors.textPrimary,
                               ),
                               decoration: InputDecoration(
                                 hintText: 'Enter Password',
                                 hintStyle: TextStyle(
                                   color: AppColors.textHint,
-                                  fontSize: 15.sp,
+                                  fontSize: isDesktop ? 11.sp : 15.sp,
                                 ),
                                 filled: true,
                                 fillColor: AppColors.surface,
                                 contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 4.w,
-                                  vertical: 2.h,
+                                  horizontal: isDesktop ? 20 : 4.w,
+                                  vertical: isDesktop ? 16 : 2.h,
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: inputBorderRadius,
@@ -332,29 +393,36 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ? Icons.visibility_outlined
                                         : Icons.visibility_off_outlined,
                                     color: AppColors.primary,
-                                    size: 22.sp,
+                                    size: isDesktop ? 18.sp : 22.sp,
                                   ),
                                   onPressed: () {
-                                    context.read<LoginBloc>().add(TogglePasswordVisibility());
+                                    context
+                                        .read<LoginBloc>()
+                                        .add(TogglePasswordVisibility());
                                   },
                                 ),
                               ),
                             );
                           },
                         ),
-                        SizedBox(height: 3.h),
+
+                        SizedBox(height: isDesktop ? 3.5.h : 3.h),
+
+                        // Login Button
                         BlocBuilder<LoginBloc, LoginState>(
                           buildWhen: (previous, current) =>
                           previous.isLoading != current.isLoading,
                           builder: (context, state) {
                             return SizedBox(
                               width: double.infinity,
-                              height: 6.5.h,
+                              height: isDesktop ? 50 : 6.5.h,
                               child: ElevatedButton(
                                 onPressed: state.isLoading
                                     ? null
                                     : () {
-                                  context.read<LoginBloc>().add(LoginSubmitted());
+                                  context
+                                      .read<LoginBloc>()
+                                      .add(LoginSubmitted());
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
@@ -367,8 +435,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 child: state.isLoading
                                     ? SizedBox(
-                                  height: 2.5.h,
-                                  width: 2.5.h,
+                                  height: isDesktop ? 20 : 2.5.h,
+                                  width: isDesktop ? 20 : 2.5.h,
                                   child: const CircularProgressIndicator(
                                     strokeWidth: 2,
                                     color: Colors.white,
@@ -377,7 +445,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     : Text(
                                   'Log In',
                                   style: TextStyle(
-                                    fontSize: 16.sp,
+                                    fontSize: isDesktop ? 12.sp : 16.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -385,7 +453,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                         ),
+
                         SizedBox(height: 1.h),
+
+                        // Forgot Password
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -393,7 +464,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const ForgotPasswordScreen(),
+                                  builder: (context) =>
+                                  const ForgotPasswordScreen(),
                                 ),
                               );
                             },
@@ -410,7 +482,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               'forgot password',
                               style: TextStyle(
                                 color: AppColors.primary,
-                                fontSize: 15.sp,
+                                fontSize: isDesktop ? 11.sp : 15.sp,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -419,14 +491,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 18.h),
+
+                  SizedBox(height: isDesktop ? 8.h : 18.h),
+
+                  // Footer
                   Column(
                     children: [
                       Text(
                         'version : v1.0',
                         style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 14.sp,
+                          fontSize: isDesktop ? 10.sp : 14.sp,
                         ),
                       ),
                       SizedBox(height: 1.h),
@@ -434,7 +509,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Get help',
                         style: TextStyle(
                           color: AppColors.primary,
-                          fontSize: 14.sp,
+                          fontSize: isDesktop ? 10.sp : 14.sp,
                         ),
                       ),
                     ],
@@ -454,12 +529,14 @@ class _TabButton extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final BorderRadius borderRadius;
+  final bool isDesktop;
 
   const _TabButton({
     required this.label,
     required this.isSelected,
     required this.onTap,
     required this.borderRadius,
+    required this.isDesktop,
   });
 
   @override
@@ -467,7 +544,9 @@ class _TabButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 1.8.h),
+        padding: EdgeInsets.symmetric(
+          vertical: isDesktop ? 14 : 1.8.h,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : Colors.transparent,
           borderRadius: borderRadius,
@@ -481,7 +560,7 @@ class _TabButton extends StatelessWidget {
             label,
             style: TextStyle(
               color: isSelected ? Colors.white : AppColors.textSecondary,
-              fontSize: 15.sp,
+              fontSize: isDesktop ? 11.sp : 15.sp,
               fontWeight: FontWeight.w600,
             ),
           ),

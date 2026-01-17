@@ -24,9 +24,9 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
   final String grade = "Grade 10-A";
   final String status = "Enrolled";
 
-  // Track expanded state for each section
+  // Track expanded state for each section - ALL CLOSED BY DEFAULT
   bool _isPersonalInfoExpanded = false;
-  bool _isGuardianInfoExpanded = true; // Default expanded as shown in Figma
+  bool _isGuardianInfoExpanded = false; // Changed from true to false
   bool _isAcademicSummaryExpanded = false;
 
   @override

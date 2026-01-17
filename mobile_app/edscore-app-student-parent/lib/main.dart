@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
-import 'package:student/features/parent/presentation/pages/parent_home_screen.dart';
+import 'package:student/features/parent/presentation/screens/parent_home_screen.dart';
 import 'package:student/features/student/presentation/screens/student_details_screen.dart';
 import 'core/theme/app_colours.dart';
 import 'core/storage/secure_token_storage.dart';
