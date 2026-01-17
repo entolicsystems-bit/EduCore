@@ -1,10 +1,13 @@
+//sidebar that shows all from steps(step1, step2, )
 const StepperSidebar = ({ steps, currentStep, setStep }) => {
   return (
+    //left sidebar container
     <div className="w-64 bg-[#f1f6ff] p-6 rounded-l-xl">
       <div className="flex flex-col gap-10">
         {steps.map((s, index) => {
           const isCompleted = s.step < currentStep;
           const isActive = s.step === currentStep;
+          const isUpcoming = s.step > currentStep;
 
           return (
             <div key={s.step} className="flex items-start">
@@ -16,6 +19,7 @@ const StepperSidebar = ({ steps, currentStep, setStep }) => {
                       : "bg-transparent text-gray-600"
                   }`}
               >
+                {/* click to move to that step */}
                 <div
                   className="flex items-center gap-2 px-2  py-1"
                   onClick={() => setStep(s.step)}

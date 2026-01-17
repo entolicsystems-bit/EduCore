@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
-import { getLeads, deleteLead } from "../services/leadService";
+import { getLeads, getLimitedLead } from "../services/leadService";
 import "./Leads.css";
 
 const ITEMS_PER_PAGE = 8;
@@ -10,50 +10,49 @@ const MAX_VISIBLE_PAGES = 7;
 const Leads = () => {
   const navigate = useNavigate();
 
-  //state
+  //data and pagination seates
   const [leads, setLeads] = useState([]);
   const [owners, setOwners] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [totalItems, setTotalItems] = useState(0);
 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [ownerFilter, setOwnerFilter] = useState("ALL");
   const [search, setSearch] = useState("");
 
+  // for action dropdown (3-dot menu)
   const [openMenuId, setOpenMenuId] = useState(null);
 
+  // Load Leads from backend
   const loadLeads = async () => {
     try {
-      const params = {};
+      const params = {
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      };
 
-      if (statusFilter !== "ALL") {
-        params.status = statusFilter;
-      }
+      if (statusFilter !== "ALL") params.status = statusFilter;
+      if (sourceFilter !== "ALL") params.source = sourceFilter;
+      if (ownerFilter !== "ALL") params.owner_id = ownerFilter; // ⚠ backend expects owner_id
+      if (search.trim() !== "") params.search = search.trim();
 
-      if (sourceFilter !== "ALL") {
-        params.source = sourceFilter;
-      }
+      const res = await getLimitedLead(params);
 
-      if (ownerFilter !== "ALL") {
-        params.owner_id = ownerFilter; // ⚠ backend expects owner_id
-      }
-      if (search.trim() !== "") {
-        params.search = search.trim();
-      }
-
-      const res = await getLeads(params);
       const data = res.data.data || res.data;
-
       setLeads(data);
-      console.log(data);
 
-      // extract unique owners (still OK)
+      const allLeads = await getLeads();
+      setTotalItems(allLeads.data.length);
+
+      // extract unique owners for filter dropdown
       const uniqueOwners = [
         ...new Set(data.map((lead) => lead.owner).filter(Boolean)),
       ];
       setOwners(uniqueOwners);
     } catch (error) {
-      console.error("failed to load leads", error);
+      alert("failed to load leads", error);
     }
   };
 
@@ -61,59 +60,41 @@ const Leads = () => {
   useEffect(() => {
     loadLeads();
 
+    // Refresh when browser tab regains focus
     window.addEventListener("focus", loadLeads);
     return () => window.removeEventListener("focus", loadLeads);
-  }, []);
+  }, [currentPage]);
 
-  // reset page on filter change
-
-  // useEffect(() => {
-  //   setCurrentPage(1);
-  // }, [statusFilter, sourceFilter, ownerFilter, search]);
   useEffect(() => {
     setCurrentPage(1);
     loadLeads(); // 🔥 call API again when filters change
   }, [statusFilter, sourceFilter, ownerFilter, search]);
 
   // delete lead
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this lead?")) return;
+  // const handleDelete = async (id) => {
+  //   if (!window.confirm("Are you sure you want to delete this lead?")) return;
 
-    try {
-      await deleteLead(id); // 🔥 API CALL
+  //   try {
+  //     await deleteLead(id); // 🔥 API CALL
 
-      // Update UI after successful delete
-      setLeads((prev) => prev.filter((lead) => lead.id !== id));
+  //     // Update UI after successful delete
+  //     setLeads((prev) => prev.filter((lead) => lead.id !== id));
 
-      setOpenMenuId(null);
-    } catch (error) {
-      console.error("Failed to delete lead", error);
-      alert("Failed to delete lead. Please try again.");
-    }
-  };
-
-  /* FILTER */
-  // const filteredLeads = leads.filter((lead) => {
-  //   const statusMatch = statusFilter === "ALL" || lead.status === statusFilter;
-
-  //   const sourceMatch = sourceFilter === "ALL" || lead.source === sourceFilter;
-
-  //   const ownerMatch = ownerFilter === "ALL" || lead.owner === ownerFilter;
-
-  //   const searchText = search.toLowerCase();
-  //   const searchMatch =
-  //     lead.name?.toLowerCase().includes(searchText) ||
-  //     lead.email?.toLowerCase().includes(searchText);
-
-  //   return statusMatch && sourceMatch && ownerMatch && searchMatch;
-  // });
+  //     setOpenMenuId(null);
+  //   } catch (error) {
+  //     console.error("Failed to delete lead", error);
+  //     alert("Failed to delete lead. Please try again.");
+  //   }
+  // };
 
   /* PAGINATION */
-  const totalItems = leads.length;
+  // const totalItems = leads.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentLeads = leads.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  // const currentLeads = leads.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const currentLeads = leads;
 
   // when api fetch that time below code not need
   const showingFrom = totalItems === 0 ? 0 : startIndex + 1;
@@ -153,37 +134,49 @@ const Leads = () => {
         </div>
 
         {/* FILTERS */}
-        <div className="filters bg-white">
-          <select onChange={(e) => setStatusFilter(e.target.value)}>
+        <div className="filters bg-[#eef3ff]">
+          <select
+            className="bg-white"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="ALL">All Status</option>
             <option value="NEW">New</option>
             <option value="FOLLOW_UP">Follow Up</option>
             <option value="CONTACTED">Contacted</option>
           </select>
 
-          <select onChange={(e) => setSourceFilter(e.target.value)}>
+          <select
+            className="bg-white"
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+          >
             <option value="ALL">All Sources</option>
-            <option value="Website">Website</option>
+            <option value="Admin">Admin</option>
+            <option value="Counselor">Counselor</option>
+            <option value="CSV Import">CSV</option>
+            <option value="website">Website</option>
             <option value="Referral">Referral</option>
             <option value="Social Media">Social Media</option>
             <option value="Email Campaign">Email Campaign</option>
           </select>
 
           <select
+            className="bg-white"
             value={ownerFilter}
             onChange={(e) => setOwnerFilter(e.target.value)}
           >
-            <option value="ALL">All Owner</option>
-            {owners.map((owner, index) => (
-              <option key={index} value={owner}>
-                {owner}
+            <option value="ALL">All Owners</option>
+            {owners.map((owner) => (
+              <option key={owner.id} value={owner.id}>
+                {owner.name}
               </option>
             ))}
           </select>
 
           {/* RIGHT ALIGNED SEARCH */}
           <input
-            className="search-input"
+            className="search-input mr-[20%] bg-white"
             placeholder="Search leads..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -245,22 +238,22 @@ const Leads = () => {
 
                     {openMenuId === lead.id && (
                       <div
-                        className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                        className="absolute text-center text-white right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
-                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          className="w-full rounded-xl px-4 py-2 bg-[#0d99ff] text-sm hover:bg-[#0f93f2] cursor-pointer"
                           onClick={() => navigate(`/users/edit/${lead.id}`)}
                         >
-                          ✏️ Edit
+                          Edit
                         </button>
 
-                        <button
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        {/* <button
+                          className="w-full rounded-xl px-4 py-2 text-sm bg-[#ff7d2d] hover:bg-[#f46d1a]"
                           onClick={() => handleDelete(lead.id)}
                         >
-                          🗑 Delete
-                        </button>
+                          Delete
+                        </button> */}
                       </div>
                     )}
                   </td>
@@ -288,7 +281,7 @@ const Leads = () => {
           <div className="pages">
             <button
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
+              onClick={() => setCurrentPage((p) => p - 1)}
             >
               ‹
             </button>
@@ -305,7 +298,7 @@ const Leads = () => {
 
             <button
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={() => setCurrentPage((p) => p + 1)}
             >
               ›
             </button>
