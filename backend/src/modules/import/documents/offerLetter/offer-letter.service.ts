@@ -9,19 +9,20 @@ import { PrismaService } from "src/database/prisma.service";
 import { htmlToPdf } from "src/utils/pdf.util";
 import { StorageService } from "./storage/awsStorage.service";
 import { ApplicationStatus } from "@prisma/client";
+import { CryptoUtil } from "src/common/crypto/crypto.util";
 
 @Injectable()
 export class OfferLetterService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly storage: StorageService
+    private readonly storage: StorageService,
   ) {}
 
   //Logo Base64
   private getLogoBase64(): string {
     const logoPath = path.join(
       process.cwd(),
-      "src/modules/import/documents/offerLetter/templates/logo.jpg"
+      "src/modules/import/documents/offerLetter/templates/logo.jpg",
     );
 
     const file = fs.readFileSync(logoPath);
@@ -30,21 +31,11 @@ export class OfferLetterService {
 
   //Build html for reviewing offerLetter
   private async buildHtml(applicationId: string): Promise<string> {
+    console.log("Building html");
     const application = await this.prisma.application.findUnique({
       where: { id: applicationId },
       include: { lead: true },
     });
-
-    //applicationId not found
-    if (!application) {
-      throw new NotFoundException("Invalid applicationId");
-    }
-
-    if (application.status !== ApplicationStatus.DOCUMENT_VERIFIED) {
-      throw new BadRequestException(
-        "Cannot create or review non verified documents offerLetter"
-      );
-    }
 
     //program currently static
     const program = {
@@ -63,7 +54,7 @@ export class OfferLetterService {
       INSTITUTION_CONTACT: "+91-9999999999",
 
       // Student
-      STUDENT_NAME: application.lead.name,
+      STUDENT_NAME: await CryptoUtil.decrypt(application.lead.name),
       STUDENT_EMAIL: application.lead.email,
       APPLICATION_ID: application.applicationRef,
 
@@ -80,7 +71,7 @@ export class OfferLetterService {
 
     const templatePath = path.join(
       process.cwd(),
-      "src/modules/import/documents/offerLetter/templates/offer-letter.html"
+      "src/modules/import/documents/offerLetter/templates/offer-letter.html",
     );
 
     let html = fs.readFileSync(templatePath, "utf8");
@@ -94,6 +85,21 @@ export class OfferLetterService {
 
   //The calling function which calls buildhtml
   async preview(applicationId: string) {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: { lead: true },
+    });
+
+    //applicationId not found
+    if (!application) {
+      throw new NotFoundException("Invalid applicationId");
+    }
+
+    if (application.status !== ApplicationStatus.APPLIED) {
+      throw new BadRequestException(
+        "Cannot preview non APPLIED documents offerLetter",
+      );
+    }
     const html = await this.buildHtml(applicationId);
 
     return {
@@ -104,6 +110,22 @@ export class OfferLetterService {
 
   //Generate offerLetter only one time
   async generate(applicationId: string, adminId: string) {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: { lead: true },
+    });
+
+    //applicationId not found
+    if (!application) {
+      throw new NotFoundException("Invalid applicationId");
+    }
+
+    
+    if (application.status !== ApplicationStatus.DOCUMENT_VERIFIED) {
+      throw new BadRequestException(
+        "Cannot Generate non verified documents offerLetter",
+      );
+    }
     const existingOffer = await this.prisma.offerLetter.findFirst({
       where: { application_id: applicationId },
     });
@@ -136,11 +158,6 @@ export class OfferLetterService {
       success: true,
       fileKey,
     };
-  }
-
-  //notify
-  async notify(applicationId: string) {
-    console.log(`Offer letter notification sent for ${applicationId}`);
   }
 
   //Helpers functions

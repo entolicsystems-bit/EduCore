@@ -46,6 +46,7 @@ model User {
   updatedAt                  DateTime?           @map("updated_at")
   branchId                   String?             @db.Uuid
   role                       String?             @db.VarChar(250)
+  //students                 Student[]
   refreshTokens              RefreshToken[]
   roles                      UserRole[]
   verifiedAdmissionDocuments AdmissionDocument[] @relation("AdmissionDocumentVerifiedBy")
@@ -112,6 +113,7 @@ model RolePermission {
 
 model Application {
   id                 String              @id @default(uuid())
+  // student            Student?
   leadId             String
   programId          String
   formData           Json
@@ -156,7 +158,11 @@ model AdmissionDocument {
 model Student {
   tenant_id      String?  @db.Uuid
   application_id String   @unique @db.Uuid
+ // application    Application @relation(fields: [application_id],references: [id])
+
   user_id        String   @db.Uuid
+  //user           User        @relation(fields: [user_id],references: [id])
+
   profile_data   Json
   status         String   @default("ENROLLED") @db.VarChar(20)
   created_at     DateTime @default(now())

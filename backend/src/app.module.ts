@@ -19,6 +19,7 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "path";
 import { StorageModule } from "./modules/import/documents/offerLetter/storage/awsStorage.module";
+import { StudentModule } from "./modules/student/student.module";
 
 @Module({
   imports: [
@@ -44,13 +45,14 @@ import { StorageModule } from "./modules/import/documents/offerLetter/storage/aw
     StorageModule,
     AuthModule,
     LeadsModule,
+    StudentModule,
     CsvModule,
     documentModule,
     verifyDocumentModule,
     AuditLogModule,
     RolesModule,
     WinstonModule.forRoot(winstonOpions),
-    ApplicationModule, 
+    ApplicationModule,
   ],
   providers: [
     {

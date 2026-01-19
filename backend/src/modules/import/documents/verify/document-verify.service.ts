@@ -57,7 +57,8 @@ export class VerifyDocumentService {
       if (dto.status === DocumentStatus.VERIFIED) {
         const allVerified = await this.handleAllDocumentsVerified(
           updatedDoc.applicationId,
-          tx
+          tx,
+          admin.id
         );
 
         if (allVerified) {
@@ -94,7 +95,8 @@ export class VerifyDocumentService {
         if (dto.status === DocumentStatus.VERIFIED) {
           const allVerified = await this.handleAllDocumentsVerified(
             doc.applicationId,
-            tx
+            tx,
+            admin.id
           );
 
           if (allVerified) {
@@ -117,7 +119,8 @@ export class VerifyDocumentService {
 
   private async handleAllDocumentsVerified(
     applicationId: string,
-    tx: Prisma.TransactionClient
+    tx: Prisma.TransactionClient,
+    adminId:string
   ): Promise<boolean> {
     const application = await tx.application.findUnique({
       where: { id: applicationId },
@@ -143,6 +146,7 @@ export class VerifyDocumentService {
     await tx.application.update({
       where: { id: applicationId },
       data: {
+        reviewedBy:adminId,
         status: ApplicationStatus.DOCUMENT_VERIFIED,
         updatedAt: new Date(),
       },
@@ -153,6 +157,7 @@ export class VerifyDocumentService {
         action: "ALL_DOCUMENTS_VERIFIED",
         entityType: "APPLICATION",
         entityId: applicationId,
+        actorId:adminId,
         metadata: {
           message: "All required documents verified",
         },
