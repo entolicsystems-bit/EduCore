@@ -9,6 +9,7 @@ import { LeadFilterDto } from "../../dto/lead-filter.dto";
 import { LeadTimelineAction } from "../../constants/lead.constants";
 import { PrismaService } from "src/database/prisma.service";
 import { CryptoUtil } from "src/common/crypto/crypto.util";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class LeadsService {
@@ -394,6 +395,31 @@ export class LeadsService {
       createdAt: updatedLead.createdAt,
     };
   }
+
+  findById(id: string) {
+    return this.prisma.lead.findUnique({
+      where: { id },
+    });
+  }
+
+  addActivity(
+    leadId: string,
+    action: string,
+    metadata?: any,
+  ) {
+    return this.prisma.leadActivity.create({
+      data: {
+        lead_id: leadId,
+        action,
+        metadata,
+      },
+    });
+  }
+
+  async searchLeads(filters: LeadFilterDto) {
+    return this.repo.findLeadsSearch(filters);
+  }
+
 
   async softDeleteUser(leadId: string, user: { id: string; role: string }) {
     const lead = await this.repo.findById(leadId);
