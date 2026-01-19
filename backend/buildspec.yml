@@ -6,23 +6,18 @@ phases:
       nodejs: 22
     commands:
       - echo "Installing dependencies..."
-      - cd backend
       - npm ci
 
   pre_build:
     commands:
-      - echo "Pre-build phase"
+      - echo "Generating Prisma Client..."
+      - npx prisma generate
 
   build:
     commands:
-      - echo "Running build (if any)..."
-      # For example, TypeScript compile
+      - echo "Building NestJS application..."
       - npm run build
 
-  post_build:
-    commands:
-      - echo "Build completed"
-      - ls -la
 artifacts:
   files:
-    - backend/**/*
+    - '**/*'
