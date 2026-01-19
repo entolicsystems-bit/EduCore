@@ -1,11 +1,15 @@
-import { ActivityTimeline } from './../../../node_modules/.prisma/client/index.d';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateApplicationDto } from '../../dto/application.dto';
 import { CryptoUtil } from 'src/common/crypto/crypto.util';
 import { ALLOWED_TRANSITIONS } from './application-flow';
 import { ApplicationStatus } from '@prisma/client';
+import { NotificationService } from '../notifications/notification.service';
+import { NotificationEvents } from '../../constants/notification-event.constant';
 
+/**
+ * Remove unsafe fields
+ */
 function sanitizeFormData(data: any) {
   const sanitized = { ...data };
   delete sanitized.password;
@@ -13,16 +17,19 @@ function sanitizeFormData(data: any) {
   delete sanitized.token;
   return sanitized;
 }
+
 /**
- * 🔒 STATIC FEE STATUS (TEMPORARY)
- * Will be replaced by payment module later
+ * 🔒 STATIC FEE STATUS (TEMPORARY – Sprint-2)
+ * Will be replaced by payment module
  */
 const STATIC_FEE_STATUS = {
   isFeeRequired: true,
-  isFeePaid: true, // set false to test validation
+  isFeePaid: true,
 };
 
-
+/**
+ * Encrypt PII
+ */
 async function encryptFormPII(formData: any) {
   const copy = { ...formData };
   if (copy.name) copy.name = await CryptoUtil.encrypt(copy.name);
@@ -33,9 +40,10 @@ async function encryptFormPII(formData: any) {
 
 @Injectable()
 export class ApplicationService {
-  constructor(private readonly prisma: PrismaService) {}
-
-
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService, // ✅ FIXED DI
+  ) {}
 
   // ===========================
   // CREATE APPLICATION (DRAFT)
@@ -107,81 +115,57 @@ export class ApplicationService {
       },
     };
   }
-// ===========================
-// EPIC-1: UPDATE APPLICATION FORM DATA (DRAFT ONLY)
-// ===========================
-async updateApplicationForm(
-  applicationId: string,
-  formData: any,
-  user: any,
-) {
-  const { tenantId, branchId } = user;
 
-  // 1️⃣ Load application (tenant-safe)
-  const application = await this.prisma.application.findFirst({
-    where: {
-      id: applicationId,
-      tenantId,
-      branchId,
-      deletedAt: null,
-    },
-  });
+  // ===========================
+  // UPDATE APPLICATION FORM (DRAFT ONLY)
+  // ===========================
+  async updateApplicationForm(
+    applicationId: string,
+    formData: any,
+    user: any,
+  ) {
+    const { tenantId, branchId } = user;
 
-  if (!application) {
-    throw new BadRequestException('Application not found');
+    const application = await this.prisma.application.findFirst({
+      where: { id: applicationId, tenantId, branchId, deletedAt: null },
+    });
+
+    if (!application) {
+      throw new BadRequestException('Application not found');
+    }
+
+    if (application.status !== ApplicationStatus.DRAFT) {
+      throw new BadRequestException(
+        'Application cannot be edited after submission',
+      );
+    }
+
+    const sanitized = sanitizeFormData(formData);
+
+    const mergedFormData = {
+      ...(application.formData as any),
+      ...sanitized,
+      _meta: {
+        ...(application.formData as any)?._meta,
+        lastUpdatedAt: new Date(),
+      },
+    };
+
+    const encrypted = await encryptFormPII(mergedFormData);
+
+    const updated = await this.prisma.application.update({
+      where: { id: applicationId },
+      data: { formData: encrypted },
+    });
+
+    return {
+      success: true,
+      data: {
+        applicationId: updated.id,
+        status: updated.status,
+      },
+    };
   }
-
-  // 2️⃣ Allow update ONLY in DRAFT
-  if (application.status !== ApplicationStatus.DRAFT) {
-    throw new BadRequestException(
-      'Application cannot be edited after submission',
-    );
-  }
-
-  // 3️⃣ Sanitize incoming data
-  const sanitized = sanitizeFormData(formData);
-
-  // 4️⃣ Merge old + new formData
-  const mergedFormData = {
-...(application.formData as Record<string, any> || {}),
-    ...sanitized,
-    _meta: {
-...((application.formData as any)?._meta || {}),
-      lastUpdatedAt: new Date(),
-    },
-  };
-
-  // 5️⃣ Encrypt PII fields if present
-  const encrypted = await encryptFormPII(mergedFormData);
-
-  // 6️⃣ Update application
-  const updated = await this.prisma.application.update({
-    where: { id: applicationId },
-    data: {
-      formData: encrypted,
-    },
-  });
-
-  return {
-    success: true,
-    data: {
-      applicationId: updated.id,
-      status: updated.status,
-    },
-  };
-  async function decryptFormPII(formData: any) {
-  if (!formData || typeof formData !== 'object') return formData;
-
-  const copy = { ...formData };
-
-  if (copy.name) copy.name = await CryptoUtil.decrypt(copy.name);
-  if (copy.email) copy.email = await CryptoUtil.decrypt(copy.email);
-  if (copy.phone) copy.phone = await CryptoUtil.decrypt(copy.phone);
-
-  return copy;
-}
-
-}
 
   // ===========================
   // SUBMIT APPLICATION
@@ -226,140 +210,130 @@ async updateApplicationForm(
       },
     });
 
+    // 🔔 EMAIL: Application Submitted
+    await this.notificationService.notify(
+      NotificationEvents.APPLICATION_SUBMITTED,
+      {
+        to: await CryptoUtil.decrypt((application.formData as any)?.email),
+        name: await CryptoUtil.decrypt((application.formData as any)?.name),
+        applicationId: application.id,
+      },
+    );
+
     return updated;
   }
 
   // ===========================
   // EPIC-3: STATUS PIPELINE
   // ===========================
- async updateApplicationStatus(
-  applicationId: string,
-  newStatus: ApplicationStatus,
-  notes: string,
-  user: any,
-) {
-  const { tenantId, branchId, id: userId, role } = user;
+  async updateApplicationStatus(
+    applicationId: string,
+    newStatus: ApplicationStatus,
+    notes: string,
+    user: any,
+  ) {
+    const { tenantId, branchId, id: userId, role } = user;
 
+    if (
+      newStatus === ApplicationStatus.APPROVED &&
+      STATIC_FEE_STATUS.isFeeRequired &&
+      !STATIC_FEE_STATUS.isFeePaid
+    ) {
+      throw new BadRequestException('Application fee not paid');
+    }
 
-  /**
- * 💰 STATIC FEE STATUS CHECK (EPIC 3.1.3)
- */
-if (
-  newStatus === ApplicationStatus.APPROVED &&
-  STATIC_FEE_STATUS.isFeeRequired &&
-  !STATIC_FEE_STATUS.isFeePaid
-) {
-  throw new BadRequestException('Application fee not paid');
-}
+    const ALLOWED_ROLES = ['ADMIN', 'COUNSELLOR'];
+    if (!ALLOWED_ROLES.includes(role)) {
+      throw new BadRequestException(
+        'You do not have permission to change application status',
+      );
+    }
 
-  /**
-   * 🔐 0️⃣ Permission enforcement
-   * Only ADMIN & COUNSELLOR can change status
-   */
-  const ALLOWED_ROLES = ['ADMIN', 'COUNSELLOR'];
-  if (!ALLOWED_ROLES.includes(role)) {
-    throw new BadRequestException(
-      'You do not have permission to change application status',
-    );
-  }
+    const application = await this.prisma.application.findFirst({
+      where: { id: applicationId, tenantId, branchId, deletedAt: null },
+    });
 
-  /**
-   * 1️⃣ Load application with tenant & branch isolation
-   */
-  const application = await this.prisma.application.findFirst({
-    where: {
-      id: applicationId,
-      tenantId,
-      branchId,
-      deletedAt: null,
-    },
-  });
+    if (!application) {
+      throw new BadRequestException('Application not found or access denied');
+    }
 
-  if (!application) {
-    throw new BadRequestException('Application not found or access denied');
-  }
+    const oldStatus = application.status;
 
-  const oldStatus = application.status;
+    const allowed = ALLOWED_TRANSITIONS[oldStatus] || [];
+    if (!allowed.includes(newStatus)) {
+      throw new BadRequestException(
+        `Invalid transition from ${oldStatus} to ${newStatus}`,
+      );
+    }
 
-  /**
-   * 2️⃣ Validate allowed transition (state machine)
-   */
-  const allowed = ALLOWED_TRANSITIONS[oldStatus] || [];
-  if (!allowed.includes(newStatus)) {
-    throw new BadRequestException(
-      `Invalid transition from ${oldStatus} to ${newStatus}`,
-    );
-  }
+    const updated = await this.prisma.application.update({
+      where: { id: applicationId },
+      data: { status: newStatus, reviewedBy: userId },
+    });
 
-  /**
-   * 3️⃣ Update application status
-   */
-  const updated = await this.prisma.application.update({
-    where: { id: applicationId },
-    data: {
-      status: newStatus,
-      reviewedBy: userId,
-    },
-  });
-
-  /**
-   * 4️⃣ Application timeline entry
-   */
-  await this.prisma.activityTimeline.create({
-    data: {
-      entityType: 'APPLICATION',
-      entityId: applicationId,
-      eventType: 'STATUS_CHANGED',
-      title: `Status changed to ${newStatus}`,
-      description: notes,
-      actorId: userId,
-    },
-  });
-
-  /**
-   * 5️⃣ Business audit log
-   */
-  await this.prisma.audit_Logs.create({
-    data: {
-      action: `STATUS_${newStatus}`,
-      entityType: 'APPLICATION',
-      entityId: applicationId,
-      actorId: userId,
-      metadata: {
-        from: oldStatus,
-        to: newStatus,
-        notes,
-        role,
+    await this.prisma.activityTimeline.create({
+      data: {
+        entityType: 'APPLICATION',
+        entityId: applicationId,
+        eventType: 'STATUS_CHANGED',
+        title: `Status changed to ${newStatus}`,
+        description: notes,
+        actorId: userId,
       },
-    },
-  });
+    });
 
-  return {
-    success: true,
-    data: {
-      applicationId: updated.id,
-      oldStatus,
-      newStatus,
-    },
-  };
-}
+    await this.prisma.audit_Logs.create({
+      data: {
+        action: `STATUS_${newStatus}`,
+        entityType: 'APPLICATION',
+        entityId: applicationId,
+        actorId: userId,
+        metadata: { from: oldStatus, to: newStatus, notes, role },
+      },
+    });
 
-// ===========================
-// EPIC 3.3 — GET APPLICATION TIMELINE
-// ===========================
-async getApplicationTimeline(applicationId: string, user: any) {
-  const { tenantId, branchId } = user;
+    // 🔔 EMAIL: Status Changed
+    await this.notificationService.notify(
+      NotificationEvents.STATUS_CHANGED,
+      {
+        to: await CryptoUtil.decrypt((application.formData as any)?.email),
+        oldStatus,
+        newStatus,
+        notes,
+      },
+    );
 
-  return this.prisma.activityTimeline.findMany({
-    where: {
-      entityType: 'APPLICATION',
-      entityId: applicationId,
-    },
-    orderBy: {
-      createdAt: 'asc',
-    },
-  });
-}
+    // 🔔 EMAIL: Offer Letter Ready
+    if (newStatus === ApplicationStatus.APPROVED) {
+      await this.notificationService.notify(
+        NotificationEvents.OFFER_LETTER_READY,
+        {
+          to: await CryptoUtil.decrypt((application.formData as any)?.email),
+          applicationId,
+        },
+      );
+    }
 
+    return {
+      success: true,
+      data: {
+        applicationId: updated.id,
+        oldStatus,
+        newStatus,
+      },
+    };
+  }
 
+  // ===========================
+  // EPIC-3.3: GET APPLICATION TIMELINE
+  // ===========================
+  async getApplicationTimeline(applicationId: string, user: any) {
+    return this.prisma.activityTimeline.findMany({
+      where: {
+        entityType: 'APPLICATION',
+        entityId: applicationId,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
 }
