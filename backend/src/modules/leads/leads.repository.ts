@@ -155,4 +155,47 @@ export class LeadsRepository {
       deleted_at: new Date(),
     };
   }
+
+  findLeadsSearch(filters: any) {
+      const page = Number(filters.page) || 1;
+      const limit = Math.min(Number(filters.limit) || 20, 50);
+      const skip = (page - 1) * limit;
+  
+      const where: any = {};
+  
+      if (filters.status) where.status = filters.status;
+      if (filters.source) where.source = filters.source;
+      if (filters.owner_id) where.owner_id = filters.owner_id;
+  
+      if (filters.fromDate || filters.toDate) {
+        where.updatedAt = {};
+        if (filters.fromDate) where.updatedAt.gte = new Date(filters.fromDate);
+        if (filters.toDate) where.updatedAt.lte = new Date(filters.toDate);
+      }
+  
+      if (filters.search) {
+        where.OR = [
+          { name: { contains: filters.search, mode: 'insensitive' } },
+          { phone: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
+  
+      return this.prisma.lead.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { updatedAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          email: true,
+          status: true,
+          source: true,
+          owner_id: true,
+          updatedAt: true,
+        },
+      });
+    }
 }

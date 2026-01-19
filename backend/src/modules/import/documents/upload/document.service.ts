@@ -44,6 +44,13 @@ export class documentService {
     const { fileName, file_type, document_type, fileSize, application_id } =
       dto;
 
+    const application = await this.prisma.application.findUnique({
+      where: { id: dto.application_id },
+    });
+    if (!application) {
+      throw new BadRequestException("Invalid application_id");
+    }
+
     if (!reqUser.tenantId || !reqUser.branchId) {
       throw new ForbiddenException("Invalid tenant or branch");
     }
@@ -70,7 +77,7 @@ export class documentService {
       throw new BadRequestException(`Files with .${extension} are blocked`);
     if (!allowedExtensions.includes(extension))
       throw new BadRequestException(
-        `Files with .${extension} are not supported`
+        `Files with .${extension} are not supported`,
       );
 
     // Double extension check (e.g., file.pdf.exe)
@@ -90,7 +97,7 @@ export class documentService {
       throw new BadRequestException("Unsupported MIME type");
 
     // File size
-    if (fileSize && fileSize > 10 * 1024 * 1024)
+    if (fileSize > 10 * 1024 * 1024)
       throw new BadRequestException("File exceeds max size of 10MB");
 
     try {

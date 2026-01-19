@@ -31,6 +31,13 @@ export class LeadsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "COUNSELLOR")
+  @Get("search-leads")
+  searchLeads(@Query() filters: LeadFilterDto) {
+    return this.service.searchLeads(filters);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
   @Get()
   getLeads(@Query() filters: LeadFilterDto, @Req() req) {
