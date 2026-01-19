@@ -7,6 +7,7 @@ export class StorageService {
   private s3 = new S3({ region: process.env.AWS_REGION });
 
   async uploadPdf(buffer: Buffer, key: string) {
+    console.log("Uploading pdf");
     await this.s3
       .putObject({
         Bucket: process.env.AWS_S3_BUCKET!,
