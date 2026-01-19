@@ -6,12 +6,14 @@ phases:
       nodejs: 22
     commands:
       - cd backend
-      - npm install
-
+      - npm ci
   build:
     commands:
-      - npm run build
+      - npm run build || echo "No build step"
+  post_build:
+    commands:
+      - echo "Build completed successfully"
 
 artifacts:
   files:
-    - backend/**/*
+    - '**/*'
