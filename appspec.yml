@@ -4,19 +4,20 @@ os: linux
 files:
   - source: /
     destination: /home/ec2-user/EduCore/backend
+    overwrite: true
 
 hooks:
   BeforeInstall:
-    - location: backend/scripts/before_install.sh
+    - location: scripts/before_install.sh
       timeout: 300
       runas: ec2-user
 
   ApplicationStart:
-    - location: backend/scripts/start_server.sh
+    - location: scripts/start_server.sh
       timeout: 300
       runas: ec2-user
 
   ApplicationStop:
-    - location: backend/scripts/stop_server.sh
+    - location: scripts/stop_server.sh
       timeout: 300
       runas: ec2-user
