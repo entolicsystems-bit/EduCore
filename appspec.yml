@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source: /
-    destination: /ec2-user/EduCore/backend
+    destination: /home/ec2-user/EduCore/backend
 
 hooks:
   BeforeInstall:
