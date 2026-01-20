@@ -12,6 +12,9 @@ import CreateLead from "./pages/CreateLead";
 import LeadDetails from "./pages/LeadDetails";
 import ImportLeads from "./pages/ImportLeads";
 import UsersRoles from "./pages/UsersRoles";
+import Course from "./pages/Course/Course";
+import CourseCreate from "./pages/Course/CourseCreate";
+import CourseEdit from "./pages/Course/CourseEdit";
 import DocumentPage from "./pages/DocumentPage";
 import StudentPage from "./pages/StudentPage";
 import { AdmissionPipeline } from "./pages/AdmissionPipeline.jsx";
@@ -29,6 +32,9 @@ function App() {
         <Route path="/otp" element={<Otp />} />
         <Route path="/reset" element={<ResetPassword />} />
         <Route path="/pipeline" element={<AdmissionPipeline />} />
+        <Route path="/course" element={<Course/>} />
+        <Route path="/course/create" element={<CourseCreate/>}/>
+        <Route path="/course/edit/:id" element={<CourseEdit/>}/>
 
         {/* PROTECTED ROUTES */}
         <Route
