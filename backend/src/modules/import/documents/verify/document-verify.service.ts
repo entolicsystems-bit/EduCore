@@ -81,7 +81,9 @@ export class VerifyDocumentService {
       });
     }
 
-    return { success: true };
+    return {
+      success: true,
+    };
   }
 
   async bulkVerifyDocuments(
