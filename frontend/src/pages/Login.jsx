@@ -33,29 +33,35 @@ const Login = () => {
   }, [email, password]);
 
   // handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitted(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!isValid) return;
+  // ✅ Prevent multiple submits
+  if (loading) return;
 
-    setLoading(true);
-    setError("");
+  setSubmitted(true);
 
-    try {
-      await loginUser({ email, password });
-      // Tokens are already stored in authService
-      // Navigate after successful login
-      navigate("/leads");
-    } catch (err) {
-      // show backend error if available, else generic message
-      setError(
-        err?.response?.data?.message || "Login failed. Please try again.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ✅ Stop if validation fails
+  if (!isValid) return;
+
+  setLoading(true);
+  setError("");
+
+  try {
+    await loginUser({ email, password });
+
+    // ✅ Navigate only after success
+    navigate("/leads", { replace: true });
+  } catch (err) {
+    setError(
+      err?.response?.data?.message ||
+        "Login failed. Please try again after some time."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // show / hide password text
   const togglePassword = () => {
@@ -116,7 +122,7 @@ const Login = () => {
               <button
                 className="btn text-lg"
                 type="submit"
-                disabled={!isValid || loading}
+                disabled={loading}
               >
                 {loading ? "Logging in..." : "Log In"}
               </button>

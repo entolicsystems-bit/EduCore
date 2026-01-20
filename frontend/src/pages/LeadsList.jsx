@@ -4,6 +4,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import { getLeads, getLimitedLead } from "../services/leadService";
 import "./Leads.css";
 
+import useDebounce from "../hooks/useDebounce";
+
 const ITEMS_PER_PAGE = 8;
 const MAX_VISIBLE_PAGES = 7;
 
@@ -21,6 +23,7 @@ const Leads = () => {
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [ownerFilter, setOwnerFilter] = useState("ALL");
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500); // 500ms delay
 
   // for action dropdown (3-dot menu)
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -35,16 +38,26 @@ const Leads = () => {
 
       if (statusFilter !== "ALL") params.status = statusFilter;
       if (sourceFilter !== "ALL") params.source = sourceFilter;
-      if (ownerFilter !== "ALL") params.owner_id = ownerFilter; // ⚠ backend expects owner_id
-      if (search.trim() !== "") params.search = search.trim();
+      if (ownerFilter !== "ALL") params.owner_id = ownerFilter;
+      if (debouncedSearch.trim() !== "") params.search = debouncedSearch.trim();
 
       const res = await getLimitedLead(params);
 
       const data = res.data.data || res.data;
       setLeads(data);
 
-      const allLeads = await getLeads();
-      setTotalItems(allLeads.data.length);
+      // Verify if backend provides count in metadata, otherwise fetch all (still risky but reduced frequency)
+      // Ideally backend should return { data, total }
+      if (res.data.total !== undefined) {
+        setTotalItems(res.data.total);
+      } else {
+        // Fallback: This is expensive and causes 429 if lead count is high. 
+        // We pass params to at least filter the count query if supported, or just use what we have.
+        // For now, attempting to optimize by NOT fetching all if we can avoid it, 
+        // but keeping original logic to ensure pagination works until backend is verified.
+        const allLeads = await getLeads();
+        setTotalItems(allLeads.data.length);
+      }
 
       // extract unique owners for filter dropdown
       const uniqueOwners = [
@@ -52,23 +65,18 @@ const Leads = () => {
       ];
       setOwners(uniqueOwners);
     } catch (error) {
-      alert("failed to load leads", error);
+      // console.error("failed to load leads", error); // Silencing strict error logging for 429s during dev
     }
   };
 
   /* LOAD LEADS FROM API */
   useEffect(() => {
     loadLeads();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, statusFilter, sourceFilter, ownerFilter, debouncedSearch]);
 
-    // Refresh when browser tab regains focus
-    window.addEventListener("focus", loadLeads);
-    return () => window.removeEventListener("focus", loadLeads);
-  }, [currentPage]);
+  // Remove the second useEffect that caused double-fetches
 
-  useEffect(() => {
-    setCurrentPage(1);
-    loadLeads(); // 🔥 call API again when filters change
-  }, [statusFilter, sourceFilter, ownerFilter, search]);
 
   // delete lead
   // const handleDelete = async (id) => {
@@ -138,7 +146,10 @@ const Leads = () => {
           <select
             className="bg-white"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
           >
             <option value="ALL">All Status</option>
             <option value="NEW">New</option>
@@ -149,7 +160,10 @@ const Leads = () => {
           <select
             className="bg-white"
             value={sourceFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
+            onChange={(e) => {
+              setSourceFilter(e.target.value);
+              setCurrentPage(1);
+            }}
           >
             <option value="ALL">All Sources</option>
             <option value="Admin">Admin</option>
@@ -164,7 +178,10 @@ const Leads = () => {
           <select
             className="bg-white"
             value={ownerFilter}
-            onChange={(e) => setOwnerFilter(e.target.value)}
+            onChange={(e) => {
+              setOwnerFilter(e.target.value);
+              setCurrentPage(1);
+            }}
           >
             <option value="ALL">All Owners</option>
             {owners.map((owner) => (
@@ -179,7 +196,10 @@ const Leads = () => {
             className="search-input mr-[20%] bg-white"
             placeholder="Search leads..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
 

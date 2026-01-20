@@ -6,37 +6,31 @@ export const loginUser = async ({ email, password }) => {
     email,
     password,
   });
-  // console.log("Admin Response", res);
+
   localStorage.setItem("accessToken", res.data.accessToken);
   localStorage.setItem("refreshToken", res.data.refreshToken);
 
-  // localStorage.setItem("user", JSON.stringify(user));
   return res.data;
 };
 
-// REFRESH TOKEN
+// REFRESH TOKEN (FIXED)
 export const refreshToken = async () => {
-  // const accessToken = localStorage.getItem("accessToken");
   const refreshToken = localStorage.getItem("refreshToken");
 
   const res = await API.post("/v1/auth/refresh", {
-    accessToken,
     refreshToken,
   });
 
   localStorage.setItem("accessToken", res.data.accessToken);
-  // localStorage.setItem("refreshToken", res.data.refreshToken);
 
-  return res.data;
+  return res.data.accessToken;
 };
 
 // LOGOUT
 export const logoutUser = async () => {
   const refreshToken = localStorage.getItem("refreshToken");
 
-  await API.post("/v1/auth/logout", {
-    refreshToken,
-  });
+  await API.post("/v1/auth/logout", { refreshToken });
 
   localStorage.clear();
 };
