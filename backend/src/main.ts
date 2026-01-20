@@ -32,6 +32,7 @@ async function bootstrap() {
       const allowedOrigins = [
         "http://localhost:3000",
         "http://3.7.212.22:3000",
+        "https://d38dmhca7zine6.cloudfront.net/",
       ];
 
       if (allowedOrigins.includes(origin)) {
