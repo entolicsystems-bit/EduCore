@@ -120,7 +120,6 @@ export class OfferLetterService {
       throw new NotFoundException("Invalid applicationId");
     }
 
-    
     if (application.status !== ApplicationStatus.DOCUMENT_VERIFIED) {
       throw new BadRequestException(
         "Cannot Generate non verified documents offerLetter",
@@ -145,7 +144,7 @@ export class OfferLetterService {
     // Upload to cloud
     await this.storage.uploadPdf(pdfBuffer, fileKey);
 
-    await this.prisma.offerLetter.create({
+    const offerLetter = await this.prisma.offerLetter.create({
       data: {
         application_id: applicationId,
         file_key: fileKey,
@@ -156,7 +155,8 @@ export class OfferLetterService {
 
     return {
       success: true,
-      fileKey,
+      offerLetter_Id: offerLetter.id,
+      FileKey: fileKey,
     };
   }
 

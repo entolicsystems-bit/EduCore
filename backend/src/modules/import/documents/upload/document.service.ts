@@ -143,6 +143,7 @@ export class documentService {
       });
 
       return {
+        document_id:document.id,
         upload_url: uploadUrl,
         file_key: fileKey,
         expires_in: 900,

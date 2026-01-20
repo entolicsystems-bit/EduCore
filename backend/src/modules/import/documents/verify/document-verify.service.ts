@@ -1,5 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { ApplicationStatus, DocumentStatus, Prisma, User } from "@prisma/client";
+import {
+  ApplicationStatus,
+  DocumentStatus,
+  Prisma,
+  User,
+} from "@prisma/client";
 import { PrismaService } from "src/database/prisma.service";
 import { VerifyDocumentDto } from "src/dto/verify-document.dto";
 import { EventEmitter2 } from "@nestjs/event-emitter";
@@ -8,13 +13,13 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 export class VerifyDocumentService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async verifyOneDocument(
     documentId: string,
     dto: VerifyDocumentDto,
-    admin: User
+    admin: User,
   ) {
     let shouldEmit = false;
     let applicationIdToEmit: string | null = null;
@@ -58,7 +63,7 @@ export class VerifyDocumentService {
         const allVerified = await this.handleAllDocumentsVerified(
           updatedDoc.applicationId,
           tx,
-          admin.id
+          admin.id,
         );
 
         if (allVerified) {
@@ -82,7 +87,7 @@ export class VerifyDocumentService {
   async bulkVerifyDocuments(
     documentIds: string[],
     dto: VerifyDocumentDto,
-    admin: User
+    admin: User,
   ) {
     let applicationsToEmit = new Set<string>();
 
@@ -96,7 +101,7 @@ export class VerifyDocumentService {
           const allVerified = await this.handleAllDocumentsVerified(
             doc.applicationId,
             tx,
-            admin.id
+            admin.id,
           );
 
           if (allVerified) {
@@ -120,7 +125,7 @@ export class VerifyDocumentService {
   private async handleAllDocumentsVerified(
     applicationId: string,
     tx: Prisma.TransactionClient,
-    adminId:string
+    adminId: string,
   ): Promise<boolean> {
     const application = await tx.application.findUnique({
       where: { id: applicationId },
@@ -146,7 +151,7 @@ export class VerifyDocumentService {
     await tx.application.update({
       where: { id: applicationId },
       data: {
-        reviewedBy:adminId,
+        reviewedBy: adminId,
         status: ApplicationStatus.DOCUMENT_VERIFIED,
         updatedAt: new Date(),
       },
@@ -157,13 +162,13 @@ export class VerifyDocumentService {
         action: "ALL_DOCUMENTS_VERIFIED",
         entityType: "APPLICATION",
         entityId: applicationId,
-        actorId:adminId,
+        actorId: adminId,
         metadata: {
           message: "All required documents verified",
         },
       },
     });
 
-    return true; // 
+    return true;
   }
 }
