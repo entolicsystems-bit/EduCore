@@ -12,7 +12,7 @@ phases:
   pre_build:
     commands:
     # - echo "Skipping prisma generate during build"
-      - export DATABASE_URL=$DATABASE_URL
+      - export DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL
       - npx prisma generate
 
   build:
