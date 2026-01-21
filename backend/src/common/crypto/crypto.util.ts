@@ -8,6 +8,19 @@ import {
 } from "node:crypto";
 import { promisify } from "node:util";
 
+import * as crypto from "crypto";
+
+//for unique email and phone hashing for leads 
+export class HashUtil {
+  static hash(value: string): string {
+    return crypto
+      .createHash("sha256")
+      .update(value.toLowerCase().trim())
+      .digest("hex");
+  }
+}
+
+
 
 export class CryptoUtil {
     private static readonly PREFIX = 'enc:'; // 👈 important

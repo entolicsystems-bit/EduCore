@@ -156,17 +156,17 @@ model AdmissionDocument {
 }
 
 model Student {
-  tenant_id      String?  @db.Uuid
-  application_id String   @unique @db.Uuid
- // application    Application @relation(fields: [application_id],references: [id])
+  tenant_id      String? @db.Uuid
+  application_id String  @unique @db.Uuid
+  // application    Application @relation(fields: [application_id],references: [id])
 
-  user_id        String   @db.Uuid
+  user_id String @db.Uuid
   //user           User        @relation(fields: [user_id],references: [id])
 
-  profile_data   Json
-  status         String   @default("ENROLLED") @db.VarChar(20)
-  created_at     DateTime @default(now())
-  id             String   @id @default(uuid()) @db.Uuid
+  profile_data Json
+  status       String   @default("ENROLLED") @db.VarChar(20)
+  created_at   DateTime @default(now())
+  id           String   @id @default(uuid()) @db.Uuid
 
   @@index([application_id], map: "idx_students_application_unique")
   @@index([user_id], map: "idx_students_user_id")
