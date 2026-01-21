@@ -14,7 +14,9 @@ mkdir -p /home/ec2-user/EduCore/backend
 
 
 
-# restore env
-mv /tmp/backend.env /home/ec2-user/EduCore/backend/.env 2>/dev/null || true
-chown ec2-user:ec2-user .env
-chmod 644 .env
+# restore env if exists
+if [ -f /tmp/backend.env ]; then
+  mv /tmp/backend.env /home/ec2-user/EduCore/backend/.env
+  chown ec2-user:ec2-user /home/ec2-user/EduCore/backend/.env
+  chmod 644 /home/ec2-user/EduCore/backend/.env
+fi
