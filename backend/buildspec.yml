@@ -10,9 +10,8 @@ phases:
       - npm ci
 
   pre_build:
-    commands:
-      - echo "Generating Prisma Client..."
-      - npx prisma generate
+   commands:
+    - echo "Skipping prisma generate during build"
 
   build:
     commands:
@@ -24,6 +23,7 @@ artifacts:
     - appspec.yml
     - backend/dist/**/*
     - backend/scripts/**/*
+    - backend/prisma/**/*
     - backend/package.json
     - backend/package-lock.json
     - backend/node_modules/**/*
