@@ -47,7 +47,7 @@ cd /home/ec2-user/EduCore/backend || exit 1
 
 echo "🔧 Received from CodeDeploy:"
 echo "DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL"
-echo "ACCELERATE_DATABASE_URL=$DATABASE_URL"
+echo "DATABASE_URL=$DATABASE_URL"
 
 export NODE_ENV=production
 
