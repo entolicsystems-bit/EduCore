@@ -13,8 +13,6 @@ import { AuditLogModule } from "./modules/logs/audit-log.module";
 import { RolesModule } from "./modules/roles/roles.module";
 import { documentModule } from "./modules/import/documents/upload/document.module";
 import { verifyDocumentModule } from "./modules/import/documents/verify/document-verify.module";
-import { seconds, ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
-import { APP_GUARD } from "@nestjs/core";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "path";
@@ -27,16 +25,16 @@ import { StudentModule } from "./modules/student/student.module";
       isGlobal: true, // 🔴 REQUIRED
       envFilePath: ".env", // root .env
     }),
-    ThrottlerModule.forRoot({
-      throttlers: [
-        {
-          name: "default",
-          ttl: seconds(60),
-          limit: 3,
-        },
-      ],
-      errorMessage: "Too many request! Please wait a minute and try again!",
-    }),
+    // ThrottlerModule.forRoot({
+    //   throttlers: [
+    //     {
+    //       name: "default",
+    //       ttl: seconds(60),
+    //       limit: 10,
+    //     },
+    //   ],
+    //   errorMessage: "Too many request! Please wait a minute and try again!",
+    // }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), "public"),
     }),
@@ -54,12 +52,12 @@ import { StudentModule } from "./modules/student/student.module";
     WinstonModule.forRoot(winstonOpions),
     ApplicationModule,
   ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-  ],
+  // providers: [
+  //   {
+  //     provide: APP_GUARD,
+  //     useClass: ThrottlerGuard,
+  //   },
+  // ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

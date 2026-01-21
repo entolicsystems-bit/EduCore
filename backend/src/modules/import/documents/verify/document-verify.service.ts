@@ -99,6 +99,21 @@ export class VerifyDocumentService {
       });
 
       for (const doc of documents) {
+        if (doc.status !== DocumentStatus.UPLOADED) {
+          throw new BadRequestException(`Document ${doc.id} already processed`);
+        }
+      //   await tx.audit_Logs.create({
+      //   data: {
+      //     action: "Bulk_VERIFY_DOCUMENT",
+      //     entityType: "ADMISSION_DOCUMENT",
+      //     entityId: doc.id,
+      //     actorId: admin.id,
+      //     metadata: {
+      //       status: dto.status,
+      //       comments: dto.comments,
+      //     },
+      //   },
+      // });
         if (dto.status === DocumentStatus.VERIFIED) {
           const allVerified = await this.handleAllDocumentsVerified(
             doc.applicationId,

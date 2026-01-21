@@ -184,11 +184,11 @@
 //   }
 // }
 
-
 import {
   Injectable,
   UnauthorizedException,
   ForbiddenException,
+  BadRequestException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/database/prisma.service";
@@ -233,15 +233,20 @@ export class AuthService {
   // }
 
   async login(identifier: string, password: string) {
-    // Fetch all users (encrypted fields)
+    // Fetch all users (encrypted)
     const users = await this.prisma.user.findMany({
       select: { id: true, email: true, phone: true, passwordHash: true },
     });
 
     let matchedUser = null;
+
     for (const user of users) {
-      const decryptedEmail = user.email ? await CryptoUtil.decrypt(user.email) : null;
-      const decryptedPhone = user.phone ? await CryptoUtil.decrypt(user.phone) : null;
+      const decryptedEmail = user.email
+        ? await CryptoUtil.decrypt(user.email)
+        : null;
+      const decryptedPhone = user.phone
+        ? await CryptoUtil.decrypt(user.phone)
+        : null;
 
       if (decryptedEmail === identifier || decryptedPhone === identifier) {
         matchedUser = user;
@@ -249,10 +254,17 @@ export class AuthService {
       }
     }
 
-    if (!matchedUser) throw new UnauthorizedException("Invalid credentials");
+    // 🚨 User not found → record failure + throw
+    if (!matchedUser) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
 
+    // Check password
     const isValid = await bcrypt.compare(password, matchedUser.passwordHash);
-    if (!isValid) throw new UnauthorizedException("Invalid credentials");
+
+    if (!isValid) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
 
     return this.issueTokens(matchedUser.id);
   }
@@ -275,7 +287,10 @@ export class AuthService {
         tenantId: user.tenantId,
         branchId: user.branchId,
       },
-      { secret: jwtConfig.accessSecret, expiresIn: jwtConfig.accessTokenExpiresIn }
+      {
+        secret: jwtConfig.accessSecret,
+        expiresIn: jwtConfig.accessTokenExpiresIn,
+      },
     );
 
     // REFRESH TOKEN
@@ -287,7 +302,10 @@ export class AuthService {
         branchId: user.branchId,
         jti,
       },
-      { secret: jwtConfig.refreshSecret, expiresIn: jwtConfig.refreshTokenExpiresIn }
+      {
+        secret: jwtConfig.refreshSecret,
+        expiresIn: jwtConfig.refreshTokenExpiresIn,
+      },
     );
 
     await this.prisma.$transaction([
@@ -322,7 +340,8 @@ export class AuthService {
     });
 
     if (!stored) throw new ForbiddenException("Refresh token not recognized");
-    if (stored.expiresAt < new Date()) throw new ForbiddenException("Refresh token expired");
+    if (stored.expiresAt < new Date())
+      throw new ForbiddenException("Refresh token expired");
 
     const valid = await bcrypt.compare(oldToken, stored.tokenHash);
     if (!valid) throw new ForbiddenException("Invalid refresh token");
@@ -347,7 +366,10 @@ export class AuthService {
           tenantId: user.tenantId,
           branchId: user.branchId,
         },
-        { secret: jwtConfig.accessSecret, expiresIn: jwtConfig.accessTokenExpiresIn }
+        {
+          secret: jwtConfig.accessSecret,
+          expiresIn: jwtConfig.accessTokenExpiresIn,
+        },
       );
 
       const newRefreshToken = this.jwt.sign(
@@ -358,7 +380,10 @@ export class AuthService {
           branchId: user.branchId,
           jti: newJti,
         },
-        { secret: jwtConfig.refreshSecret, expiresIn: jwtConfig.refreshTokenExpiresIn }
+        {
+          secret: jwtConfig.refreshSecret,
+          expiresIn: jwtConfig.refreshTokenExpiresIn,
+        },
       );
 
       await tx.refreshToken.create({
@@ -378,12 +403,16 @@ export class AuthService {
   async logout(refreshToken: string) {
     let payload: any;
     try {
-      payload = this.jwt.verify(refreshToken, { secret: jwtConfig.refreshSecret });
+      payload = this.jwt.verify(refreshToken, {
+        secret: jwtConfig.refreshSecret,
+      });
     } catch {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
-    await this.prisma.refreshToken.deleteMany({ where: { userId: payload.sub } });
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId: payload.sub },
+    });
     return { message: "Logged out successfully" };
   }
 }

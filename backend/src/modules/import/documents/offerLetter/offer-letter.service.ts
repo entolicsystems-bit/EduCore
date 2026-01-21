@@ -100,12 +100,17 @@ export class OfferLetterService {
         "Cannot preview non APPLIED documents offerLetter",
       );
     }
-    const html = await this.buildHtml(applicationId);
+    try {
+      const html = await this.buildHtml(applicationId);
 
-    return {
-      success: true,
-      html,
-    };
+      return {
+        success: true,
+        html,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   //Generate offerLetter only one time
