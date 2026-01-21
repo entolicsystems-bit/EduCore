@@ -1,8 +1,5 @@
 version: 0.0
 os: linux
-env:
-  variables:
-    DIRECT_DATABASE_URL: "{{DIRECT_DATABASE_URL}}"
 files:
   - source: backend/
     destination: /home/ec2-user/EduCore/backend
@@ -23,3 +20,6 @@ hooks:
     - location: backend/scripts/start_server.sh
       timeout: 300
       runas: ec2-user
+      env:
+        variables:
+          DIRECT_DATABASE_URL: "{{DIRECT_DATABASE_URL}}"
