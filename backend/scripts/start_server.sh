@@ -51,7 +51,7 @@ echo "DATABASE_URL=$DATABASE_URL"
 
 export NODE_ENV=production
 # 1️⃣ Install dependencies on EC2 (FIXES WASM ISSUE)
-npm ci --omit=dev
+npm ci 
 
 # 2️⃣ Generate Prisma client on EC2
 npx prisma generate
