@@ -33,10 +33,8 @@ import { ConfigService } from '@nestjs/config';
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly config: ConfigService) {
     super({
-      datasources: {
-        db: {
-          url: config.get<string>('DATABASE_URL'),
-        },
+      overrides: {
+        datasourceUrl: config.get<string>('DATABASE_URL'),
       },
     });
   }
