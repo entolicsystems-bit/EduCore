@@ -13,7 +13,7 @@
 
 #!/bin/bash
 cd /home/ec2-user/EduCore/backend || exit 1
-export DATABASE_URL="$DATABASE_URL"
+export DIRECT_DATABASE_URL="$DIRECT_DATABASE_URL"
 pm2 delete backend || true
 pm2 start dist/main.js --name backend
 pm2 save
