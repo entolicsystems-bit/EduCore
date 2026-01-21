@@ -34,9 +34,7 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    super({
-      datasourceUrl: process.env.DATABASE_URL,
-    });
+    super(); // v7 picks up DATABASE_URL automatically
   }
 
   async onModuleInit() {
