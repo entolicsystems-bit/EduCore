@@ -4,7 +4,7 @@ try {
   require('dotenv').config();
 } catch (_) {}
 
-require("newrelic");
+//require("newrelic");
 // import newRelic from 'newrelic';
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
