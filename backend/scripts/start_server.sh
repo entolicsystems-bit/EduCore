@@ -46,19 +46,26 @@
 cd /home/ec2-user/EduCore/backend || exit 1
 
 echo "🔧 Received from CodeDeploy:"
-export DIRECT_DATABASE_URL="${DIRECT_DATABASE_URL}"      # still keep direct
-export DATABASE_URL="${DATABASE_URL}"
-echo "DATABASE_URL=$DIRECT_DATABASE_URL"
+echo "DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL"
+echo "ACCELERATE_DATABASE_URL=$DATABASE_URL"
 
-export NODE_ENV=dev
+export NODE_ENV=production
 
+# 1️⃣ MIGRATION
+echo "📦 Running Prisma migrate deploy..."
+export DATABASE_URL="$DIRECT_DATABASE_URL"
+npx prisma migrate deploy --schema prisma/schema.prisma || {
+  echo "❌ Migration failed"
+  exit 1
+}
 
-# If using Prisma
-echo "📦 Running Prisma migrate..."
-npx prisma migrate deploy || true
+# 2️⃣ RUNTIME
+echo "🚀 Starting backend with Accelerate..."
+export DATABASE_URL="$DATABASE_URL"
+export DIRECT_DATABASE_URL="$DIRECT_DATABASE_URL"
 
 pm2 delete backend >/dev/null 2>&1 || true
-
-echo "🚀 Starting backend..."
 pm2 start dist/main.js --name backend --update-env
+
+echo "✔ Backend started successfully (pipeline mode)"
 
