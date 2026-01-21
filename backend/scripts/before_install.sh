@@ -4,15 +4,15 @@
 # rm -rf /home/ec2-user/EduCore/backend
 # mkdir -p /home/ec2-user/EduCore/backend
 #!/bin/bash
-echo "Running BeforeInstall..."
-set -e
+echo "BeforeInstall..."
+# keep .env safe
+mv /home/ec2-user/EduCore/backend/.env /tmp/backend.env 2>/dev/null || true
 
-# ensure folder exists
+rm -rf /home/ec2-user/EduCore/backend
 mkdir -p /home/ec2-user/EduCore/backend
 
-# delete everything except .env
-find /home/ec2-user/EduCore/backend \
-  -mindepth 1 \
-  ! -name ".env" \
-  -exec rm -rf {} +
 
+
+
+# restore env
+mv /tmp/backend.env /home/ec2-user/EduCore/backend/.env 2>/dev/null || true
