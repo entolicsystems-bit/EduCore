@@ -7,5 +7,5 @@
 cd /home/ec2-user/EduCore/backend
 npm ci --omit=dev
 npx prisma generate
-pm2 reload backend || pm2 start dist/main.js --name backend
+pm2 restart backend || pm2 start dist/main.js --name backend
 pm2 save
