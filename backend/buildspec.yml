@@ -11,7 +11,8 @@ phases:
 
   pre_build:
    commands:
-    - echo "Skipping prisma generate during build"
+    # - echo "Skipping prisma generate during build"
+    - npx prisma generate
 
   build:
     commands:
