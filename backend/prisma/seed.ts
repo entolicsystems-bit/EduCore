@@ -5,8 +5,13 @@ import { CryptoUtil } from "./../src/common/crypto/crypto.util";
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
+// const prisma = new PrismaClient({
+//   accelerateUrl: process.env.DATABASE_URL, // ✅ works for Prisma Accelerate
+// });
 const prisma = new PrismaClient({
-  accelerateUrl: process.env.DATABASE_URL, // ✅ works for Prisma Accelerate
+  datasource: {
+    url: process.env.DIRECT_DATABASE_URL,
+  },
 });
 
 async function seedAdmin() {
