@@ -50,7 +50,7 @@ echo "🔧 Received from CodeDeploy:"
 echo "DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL"
 echo "DATABASE_URL=$DATABASE_URL"
 
-export NODE_ENV=production
+export NODE_ENV=dev
 # 1️⃣ Install dependencies on EC2 (FIXES WASM ISSUE)
 npm i
 
@@ -58,7 +58,7 @@ npm i
 npx prisma generate
 # 1️⃣ MIGRATION
 echo "📦 Running Prisma migrate deploy..."
-export DATABASE_URL="$DIRECT_DATABASE_URL"
+DATABASE_URL="$DIRECT_DATABASE_URL"
 npx prisma migrate deploy --schema prisma/schema.prisma || {
   echo "❌ Migration failed"
   exit 1
@@ -67,8 +67,8 @@ npx prisma migrate deploy --schema prisma/schema.prisma || {
 
 # 2️⃣ RUNTIME
 echo "🚀 Starting backend with Accelerate..."
-export DATABASE_URL="$DATABASE_URL"
-export DIRECT_DATABASE_URL="$DIRECT_DATABASE_URL"
+# export DATABASE_URL="$DATABASE_URL"
+# export DIRECT_DATABASE_URL="$DIRECT_DATABASE_URL"
 
 pm2 delete backend >/dev/null 2>&1 || true
 pm2 start dist/main.js --name backend --update-env
