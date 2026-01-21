@@ -34,7 +34,9 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    super(); // v7 picks up DATABASE_URL automatically
+    super({
+      databaseUrl: process.env.DATABASE_URL,
+    });
   }
 
   async onModuleInit() {
@@ -45,3 +47,4 @@ export class PrismaService
     await this.$disconnect();
   }
 }
+
