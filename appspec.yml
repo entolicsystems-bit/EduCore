@@ -24,3 +24,4 @@ hooks:
       env:
         variables:
           DIRECT_DATABASE_URL: "{{DIRECT_DATABASE_URL}}"
+          DATABASE_URL: "{{DATABASE_URL}}"
