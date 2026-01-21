@@ -23,4 +23,4 @@ hooks:
       runas: ec2-user
       env:
         variables:
-          DATABASE_URL: "{{DATABASE_URL}}"
+          DIRECT_DATABASE_URL: "{{DIRECT_DATABASE_URL}}"
