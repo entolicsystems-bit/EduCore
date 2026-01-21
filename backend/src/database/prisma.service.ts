@@ -16,7 +16,7 @@ export class PrismaService
   // }
   constructor() {
   super({
-    directUrl: process.env.DIRECT_DATABASE_URL,
+    datasourceUrl: process.env.DIRECT_DATABASE_URL,
   });
 }
 
