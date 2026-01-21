@@ -70,7 +70,7 @@ echo "🚀 Starting backend with Accelerate..."
 # export DIRECT_DATABASE_URL="$DIRECT_DATABASE_URL"
 
 pm2 delete backend >/dev/null 2>&1 || true
-pm2 start dist/main.js --name backend --update-env
+pm2 start dist/main.js --name backend 
 
 echo "✔ Backend started successfully (pipeline mode)"
 
