@@ -12,16 +12,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 @Injectable()
 export class VerifyDocumentService {
   constructor(
-<<<<<<< HEAD
-  private readonly prisma: PrismaService,
-  private readonly eventEmitter: EventEmitter2,
-) {}
 
-=======
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
->>>>>>> 8cc402e601a3ec20463ea2a9ea082e3dda52cdfc
+
 
   async verifyOneDocument(
     documentId: string,
@@ -198,12 +193,8 @@ export class VerifyDocumentService {
       },
     });
 
-<<<<<<< HEAD
-
-    return true; // 
-=======
     return true;
->>>>>>> 8cc402e601a3ec20463ea2a9ea082e3dda52cdfc
+
   }
 }
 
