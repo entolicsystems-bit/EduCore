@@ -1,28 +1,33 @@
-// import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
-// import { PrismaClient } from "@prisma/client";
-// import { ConfigService } from "@nestjs/config";
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
+import { ConfigService } from "@nestjs/config";
 
-// @Injectable()
-// export class PrismaService
-//   extends PrismaClient
-//   implements OnModuleInit, OnModuleDestroy
-// {
-//   constructor(private readonly config: ConfigService) {
-//     super({
-//       accelerateUrl: config.get<string>("DATABASE_URL"),
-//     });
-//     // super();
+@Injectable()
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
+  // constructor(private readonly config: ConfigService) {
+  //   super({
+  //     accelerateUrl: config.get<string>("DATABASE_URL"),
+  //   });
+  //   // super();
 
-//   }
+  // }
+  constructor() {
+  super({
+    directUrl: process.env.DIRECT_DATABASE_URL,
+  });
+}
 
-//   async onModuleInit() {
-//     await this.$connect();
-//   }
+  async onModuleInit() {
+    await this.$connect();
+  }
 
-//   async onModuleDestroy() {
-//     await this.$disconnect();
-//   }
-// }
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
+}
 
 
 // import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
@@ -47,23 +52,27 @@
 //     await this.$disconnect();
 //   }
 // }
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
 
-@Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy {
+// import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+// import { PrismaClient } from '@prisma/client';
 
-  constructor() {
-    super(); // ⬅️ NO options, this is REQUIRED for Prisma v7
-  }
+// @Injectable()
+// export class PrismaService
+//   extends PrismaClient
+//   implements OnModuleInit, OnModuleDestroy {
 
-  async onModuleInit() {
-    await this.$connect();
-  }
+//   constructor() {
+//   super({
+//     databaseUrl: process.env.DIRECT_DATABASE_URL,
+//   });
+// }
 
-  async onModuleDestroy() {
-    await this.$disconnect();
-  }
-}
+
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+
+//   async onModuleDestroy() {
+//     await this.$disconnect();
+//   }
+// }
