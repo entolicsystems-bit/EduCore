@@ -7,16 +7,16 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  // constructor(private readonly config: ConfigService) {
-  //   super({
-  //     accelerateUrl: config.get<string>("DATABASE_URL"),
-  //   });
-  //   // super();
+  constructor(private readonly config: ConfigService) {
+    super({
+      accelerateUrl: config.get<string>("DATABASE_URL"),
+    });
+    // super();
 
-  // }
-  constructor() {
-    super(); // <-- Prisma v7 runtime uses config from prisma.config.ts
   }
+  // constructor() {
+  //   super(); // <-- Prisma v7 runtime uses config from prisma.config.ts
+  // }
 
 
   async onModuleInit() {
