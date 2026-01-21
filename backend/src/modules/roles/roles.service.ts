@@ -302,7 +302,13 @@ export class RolesService {
         ? dto.role.map((r) => r.toUpperCase())
         : [dto.role.toUpperCase()];
 
-      const allowedRoles = ["COUNSELLOR", "TEACHER", "ACCOUNTANT"];
+      const allowedRoles = [
+        "COUNSELLOR",
+        "TEACHER",
+        "ACCOUNTANT",
+        "PARENT",
+        "STUDENT",
+      ];
       for (const role of roles) {
         if (!allowedRoles.includes(role)) {
           throw new BadRequestException("Invalid role");
@@ -352,6 +358,8 @@ export class RolesService {
         COUNSELLOR: 2,
         TEACHER: 3,
         ACCOUNTANT: 4,
+        PARENT: 5,
+        STUDENT: 6,
       };
 
       await this.assignRole(user.id, roleMap[roles[0]]);
@@ -393,7 +401,7 @@ export class RolesService {
         role: u.role,
         status: u.status,
         createdAt: u.createdAt,
-      }))
+      })),
     );
   }
 

@@ -9,6 +9,7 @@ import { DatabaseModule } from "src/database/database.module";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
 
+
 @Module({
   imports: [
     DatabaseModule,

@@ -1,5 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { ApplicationStatus, DocumentStatus, Prisma, User } from "@prisma/client";
+import {
+  ApplicationStatus,
+  DocumentStatus,
+  Prisma,
+  User,
+} from "@prisma/client";
 import { PrismaService } from "src/database/prisma.service";
 import { VerifyDocumentDto } from "src/dto/verify-document.dto";
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -7,15 +12,21 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 @Injectable()
 export class VerifyDocumentService {
   constructor(
+<<<<<<< HEAD
   private readonly prisma: PrismaService,
   private readonly eventEmitter: EventEmitter2,
 ) {}
 
+=======
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
+>>>>>>> 8cc402e601a3ec20463ea2a9ea082e3dda52cdfc
 
   async verifyOneDocument(
     documentId: string,
     dto: VerifyDocumentDto,
-    admin: User
+    admin: User,
   ) {
     let shouldEmit = false;
     let applicationIdToEmit: string | null = null;
@@ -59,7 +70,7 @@ export class VerifyDocumentService {
         const allVerified = await this.handleAllDocumentsVerified(
           updatedDoc.applicationId,
           tx,
-          admin.id
+          admin.id,
         );
 
         if (allVerified) {
@@ -77,13 +88,15 @@ export class VerifyDocumentService {
       });
     }
 
-    return { success: true };
+    return {
+      success: true,
+    };
   }
 
   async bulkVerifyDocuments(
     documentIds: string[],
     dto: VerifyDocumentDto,
-    admin: User
+    admin: User,
   ) {
     let applicationsToEmit = new Set<string>();
 
@@ -93,11 +106,26 @@ export class VerifyDocumentService {
       });
 
       for (const doc of documents) {
+        if (doc.status !== DocumentStatus.UPLOADED) {
+          throw new BadRequestException(`Document ${doc.id} already processed`);
+        }
+      //   await tx.audit_Logs.create({
+      //   data: {
+      //     action: "Bulk_VERIFY_DOCUMENT",
+      //     entityType: "ADMISSION_DOCUMENT",
+      //     entityId: doc.id,
+      //     actorId: admin.id,
+      //     metadata: {
+      //       status: dto.status,
+      //       comments: dto.comments,
+      //     },
+      //   },
+      // });
         if (dto.status === DocumentStatus.VERIFIED) {
           const allVerified = await this.handleAllDocumentsVerified(
             doc.applicationId,
             tx,
-            admin.id
+            admin.id,
           );
 
           if (allVerified) {
@@ -126,7 +154,7 @@ export class VerifyDocumentService {
   private async handleAllDocumentsVerified(
     applicationId: string,
     tx: Prisma.TransactionClient,
-    adminId:string
+    adminId: string,
   ): Promise<boolean> {
     const application = await tx.application.findUnique({
       where: { id: applicationId },
@@ -152,7 +180,7 @@ export class VerifyDocumentService {
     await tx.application.update({
       where: { id: applicationId },
       data: {
-        reviewedBy:adminId,
+        reviewedBy: adminId,
         status: ApplicationStatus.DOCUMENT_VERIFIED,
         updatedAt: new Date(),
       },
@@ -163,15 +191,19 @@ export class VerifyDocumentService {
         action: "ALL_DOCUMENTS_VERIFIED",
         entityType: "APPLICATION",
         entityId: applicationId,
-        actorId:adminId,
+        actorId: adminId,
         metadata: {
           message: "All required documents verified",
         },
       },
     });
 
+<<<<<<< HEAD
 
     return true; // 
+=======
+    return true;
+>>>>>>> 8cc402e601a3ec20463ea2a9ea082e3dda52cdfc
   }
 }
 
