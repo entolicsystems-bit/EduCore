@@ -16,9 +16,12 @@ export class PrismaService
   // }
   constructor() {
   super({
-    datasourceUrl: process.env.DIRECT_DATABASE_URL,
+    datasource: {
+      url: process.env.DIRECT_DATABASE_URL,
+    },
   });
 }
+
 
   async onModuleInit() {
     await this.$connect();
