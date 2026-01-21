@@ -64,7 +64,6 @@ npx prisma migrate deploy --schema prisma/schema.prisma || {
   exit 1
 }
 
-
 # 2️⃣ RUNTIME
 echo "🚀 Starting backend with Accelerate..."
 # export DATABASE_URL="$DATABASE_URL"
