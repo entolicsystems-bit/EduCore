@@ -50,7 +50,11 @@ echo "DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL"
 echo "DATABASE_URL=$DATABASE_URL"
 
 export NODE_ENV=production
+# 1️⃣ Install dependencies on EC2 (FIXES WASM ISSUE)
+npm ci --omit=dev
 
+# 2️⃣ Generate Prisma client on EC2
+npx prisma generate
 # 1️⃣ MIGRATION
 echo "📦 Running Prisma migrate deploy..."
 export DATABASE_URL="$DIRECT_DATABASE_URL"
