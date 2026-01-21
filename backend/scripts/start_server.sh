@@ -46,10 +46,10 @@
 cd /home/ec2-user/EduCore/backend || exit 1
 
 echo "🔧 Received from CodeDeploy:"
-echo "DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL"
+echo "DATABASE_URL=$DATABASE_URL"
 
 export NODE_ENV=dev
-export DATABASE_URL="$DIRECT_DATABASE_URL"
+export DATABASE_URL="$DATABASE_URL"
 
 # If using Prisma
 echo "📦 Running Prisma migrate..."
