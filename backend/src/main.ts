@@ -1,8 +1,8 @@
 import * as dotenv from "dotenv";
-// dotenv.config();
-try {
-  require('dotenv').config();
-} catch (_) {}
+dotenv.config();
+// try {
+//   require('dotenv').config();
+// } catch (_) {}
 
 //require("newrelic");
 // import newRelic from 'newrelic';
