@@ -42,6 +42,7 @@
 
 
 #!/bin/bash
+sudo chown -R ec2-user:ec2-user /home/ec2-user/EduCore
 
 cd /home/ec2-user/EduCore/backend || exit 1
 
