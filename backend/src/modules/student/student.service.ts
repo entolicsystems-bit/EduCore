@@ -146,6 +146,7 @@ export class StudentService {
           student_id: student.id,
           roll_number: rollNumber,
           application_id: application.id,
+          program_id: application.programId,
         };
       });
     } catch (error) {

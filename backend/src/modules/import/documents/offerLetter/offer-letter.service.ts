@@ -39,7 +39,7 @@ export class OfferLetterService {
 
     //program currently static
     const program = {
-      name: "Bachelor of Computer Science",
+      name: application.programId,
       duration: "4 Years",
       startDate: new Date(),
       totalFee: "₹4,00,000",
