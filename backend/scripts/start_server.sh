@@ -36,7 +36,7 @@ fi
 
 # Mandatory runtime vars
 export NODE_ENV=dev
-export DIRECT_DATABASE_URL="$DIRECT_DATABASE_URL"
+export DIRECT_DATABASE_URL="${DIRECT_DATABASE_URL}"
 
 echo "🔧 Environment loaded"
 echo "DIRECT_DATABASE_URL=$DIRECT_DATABASE_URL"
