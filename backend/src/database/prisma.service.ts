@@ -15,12 +15,8 @@ export class PrismaService
 
   // }
   constructor() {
-  super({
-    datasource: {
-      url: process.env.DIRECT_DATABASE_URL,
-    },
-  });
-}
+    super(); // <-- Prisma v7 runtime uses config from prisma.config.ts
+  }
 
 
   async onModuleInit() {
