@@ -5,7 +5,7 @@ import "dotenv/config";
 export default defineConfig({
   datasource: {
     // CLI commands must use a direct database connection
-    url: process.env.DIRECT_DATABASE_URL,
+    url: process.env.DATABASE_URL,
   },
   migrations: {
     seed: "ts-node prisma/seed.ts",
