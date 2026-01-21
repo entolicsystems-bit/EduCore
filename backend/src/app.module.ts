@@ -1,3 +1,4 @@
+import { NotificationModule } from './modules/notifications/notification.module';
 import { ApplicationModule } from "./modules/application/application.module";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
@@ -19,12 +20,17 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "path";
 import { StorageModule } from "./modules/import/documents/offerLetter/storage/awsStorage.module";
+import { StudentModule } from "./modules/student/student.module";
+import { OfferLetterModule } from './modules/import/documents/offerLetter/offer-letter.module';
+
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // 🔴 REQUIRED
-      envFilePath: ".env", // root .env
+      isGlobal: true,
+      envFilePath: ".env",
+     
     }),
     ThrottlerModule.forRoot({
       throttlers: [
@@ -42,21 +48,30 @@ import { StorageModule } from "./modules/import/documents/offerLetter/storage/aw
     EventEmitterModule.forRoot(),
     DatabaseModule,
     StorageModule,
+
+    /* ✅ ADDED */
+    NotificationModule,
+
     AuthModule,
     LeadsModule,
+    StudentModule,
     CsvModule,
     documentModule,
     verifyDocumentModule,
     AuditLogModule,
     RolesModule,
     WinstonModule.forRoot(winstonOpions),
-    ApplicationModule, 
+    ApplicationModule,
+    OfferLetterModule
+   
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+      
     },
+    
   ],
 })
 export class AppModule implements NestModule {

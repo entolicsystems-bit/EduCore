@@ -47,6 +47,12 @@ export class documentService {
     if (!reqUser.tenantId || !reqUser.branchId) {
       throw new ForbiddenException("Invalid tenant or branch");
     }
+    const application = await this.prisma.application.findUnique({
+      where: { id: dto.application_id },
+    });
+    if (!application) {
+      throw new BadRequestException("Invalid application_id");
+    }
 
     // Extensions
     const blockedExtensions = [

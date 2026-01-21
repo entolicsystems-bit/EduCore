@@ -49,6 +49,7 @@ export class EmailService {
   }
 
   async sendDocumentVerified(payload: any) {
+    console.log('📧 sendOfferLetter called with', payload);
     return this.sendTemplate(
       payload.to,
       'Documents Verified',

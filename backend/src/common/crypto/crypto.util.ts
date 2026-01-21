@@ -8,7 +8,10 @@ import {
 } from "node:crypto";
 import { promisify } from "node:util";
 
+
 export class CryptoUtil {
+    private static readonly PREFIX = 'enc:'; // 👈 important
+
   private static async getKey(): Promise<Buffer> {
     if (!cryptoConfig.secret) {
       throw new Error("CRYPTO_SECRET is missing in environment variables");
@@ -19,6 +22,11 @@ export class CryptoUtil {
       "crypto_salt",
       32,
     )) as Buffer;
+  }
+
+   // ✅ ADD THIS
+  static isEncrypted(value: string): boolean {
+    return typeof value === 'string' && value.startsWith(this.PREFIX);
   }
 
   static async encrypt(text: string): Promise<string> {
