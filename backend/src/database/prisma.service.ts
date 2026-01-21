@@ -8,9 +8,11 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor(private readonly config: ConfigService) {
-    super({
-      accelerateUrl: config.get<string>("DATABASE_URL"),
-    });
+    // super({
+    //   accelerateUrl: config.get<string>("DATABASE_URL"),
+    // });
+    super();
+
   }
 
   async onModuleInit() {
