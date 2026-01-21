@@ -10,9 +10,9 @@ phases:
       - npm ci
 
   pre_build:
-   commands:
+    commands:
     # - echo "Skipping prisma generate during build"
-    - npx prisma generate
+      - npx prisma generate
 
   build:
     commands:
@@ -27,4 +27,5 @@ artifacts:
     - backend/prisma/**/*
     - backend/package.json
     - backend/package-lock.json
+    
     # - backend/node_modules/**/*
