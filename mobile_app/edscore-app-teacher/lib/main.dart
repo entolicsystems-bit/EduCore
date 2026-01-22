@@ -1,13 +1,16 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:educore/presentation/bloc/auth/locale/locale_bloc.dart';
 import 'package:educore/presentation/bloc/auth/locale/locale_state.dart';
 import 'package:educore/presentation/screen/login_screen.dart';
 import 'package:educore/core/storage/secure_token_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'l10n/app_localizations.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(
     BlocProvider(
       create: (_) => LocaleBloc(),
@@ -31,55 +34,85 @@ class MyApp extends StatelessWidget {
             Locale('mr'),
             Locale('hi'),
           ],
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: const AuthCheck(), // ← FIXED: Check auth first
+          localizationsDelegates:
+          AppLocalizations.localizationsDelegates,
+          home: const AuthGate(),
         );
       },
     );
   }
 }
 
-// Auth Check Widget
-class AuthCheck extends StatelessWidget {
-  const AuthCheck({Key? key}) : super(key: key);
+/// ================= AUTH GATE =================
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
+    return FutureBuilder<AuthResult>(
       future: _checkAuthStatus(),
       builder: (context, snapshot) {
-        // Show loading while checking
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+          return const SplashScreen();
         }
 
-        // Check if user is authenticated
-        final isLoggedIn = snapshot.data ?? false;
+        final result = snapshot.data ?? AuthResult.loggedOut;
 
-        if (isLoggedIn) {
-          // Navigate to teacher dashboard
-          return const Scaffold(
-            body: Center(
-              child: Text('Teacher Dashboard - Coming Soon'),
-            ),
-          );
+        switch (result) {
+          case AuthResult.teacher:
+            return const TeacherDashboard();
+
+          case AuthResult.loggedOut:
+          default:
+            return const LoginScreen();
         }
-
-        // Show login screen
-        return const LoginScreen();
       },
     );
   }
 
-  Future<bool> _checkAuthStatus() async {
+  Future<AuthResult> _checkAuthStatus() async {
     final isLoggedIn = await SecureTokenStorage.isLoggedIn();
-    final isTeacher = await SecureTokenStorage.isTeacher();
+    if (!isLoggedIn) return AuthResult.loggedOut;
 
-    // Only logged in if token exists, not expired, and is teacher
-    return isLoggedIn && isTeacher;
+    final isTeacher = await SecureTokenStorage.isTeacher();
+    if (isTeacher) return AuthResult.teacher;
+
+    return AuthResult.loggedOut;
+  }
+}
+
+/// ================= ENUM =================
+enum AuthResult {
+  loggedOut,
+  teacher,
+}
+
+/// ================= SCREENS =================
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}
+
+class TeacherDashboard extends StatelessWidget {
+  const TeacherDashboard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Text(
+          'Teacher Dashboard - Coming Soon',
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+    );
   }
 }

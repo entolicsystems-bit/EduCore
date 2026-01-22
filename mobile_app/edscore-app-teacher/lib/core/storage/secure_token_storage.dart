@@ -1,17 +1,20 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SecureTokenStorage {
+  // Keys for storage
   static const _accessTokenKey = 'accessToken';
   static const _refreshTokenKey = 'refreshToken';
   static const _roleKey = 'userRole';
   static const _expiryKey = 'tokenExpiry';
 
+  // Flutter secure storage instance
   static const FlutterSecureStorage _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
-  /// Save access and refresh tokens with expiry
+  /// ================= Save tokens =================
+  /// Saves access + refresh token along with expiry time
   static Future<void> saveTokens(
       String accessToken,
       String refreshToken, {
@@ -26,16 +29,16 @@ class SecureTokenStorage {
     ]);
   }
 
-  /// Get access token
+  /// ================= Get tokens =================
   static Future<String?> getAccessToken() async {
-    return await _storage.read(key: _accessTokenKey);
+    return _storage.read(key: _accessTokenKey);
   }
 
-  /// Get refresh token
   static Future<String?> getRefreshToken() async {
-    return await _storage.read(key: _refreshTokenKey);
+    return _storage.read(key: _refreshTokenKey);
   }
 
+  /// ================= Role =================
   /// Save user role
   static Future<void> saveRole(String role) async {
     await _storage.write(key: _roleKey, value: role);
@@ -43,13 +46,19 @@ class SecureTokenStorage {
 
   /// Get user role
   static Future<String?> getRole() async {
-    return await _storage.read(key: _roleKey);
+    return _storage.read(key: _roleKey);
   }
 
+  /// Check if user role is TEACHER
+  static Future<bool> isTeacher() async {
+    final role = await getRole();
+    return role?.toUpperCase() == 'TEACHER';
+  }
+
+  /// ================= Token expiry =================
   /// Check if token is expired
   static Future<bool> isTokenExpired() async {
     final expiryString = await _storage.read(key: _expiryKey);
-
     if (expiryString == null) return true;
 
     try {
@@ -60,23 +69,14 @@ class SecureTokenStorage {
     }
   }
 
-  /// Check if user is logged in (with expiry check)
+  /// Check if user is logged in (access token exists + not expired)
   static Future<bool> isLoggedIn() async {
     final token = await getAccessToken();
     if (token == null) return false;
-
-    // Check if token is expired
-    final expired = await isTokenExpired();
-    return !expired;
+    return !(await isTokenExpired());
   }
 
-  /// Check if user is a teacher
-  static Future<bool> isTeacher() async {
-    final role = await getRole();
-    return role?.toUpperCase() == 'TEACHER';
-  }
-
-  /// Clear all stored data (logout)
+  /// ================= Logout / Clear =================
   static Future<void> clear() async {
     await _storage.deleteAll();
   }

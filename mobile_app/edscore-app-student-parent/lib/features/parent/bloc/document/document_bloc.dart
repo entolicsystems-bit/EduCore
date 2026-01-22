@@ -68,17 +68,18 @@
 //   }
 // }
 
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../../data/models/document_model.dart';
+import '../../../../core/services/document_api_service.dart';
 import 'document_event.dart';
 import 'document_state.dart';
 
-
 class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   List<DocumentModel> _documents = [];
+  final DocumentApiService apiService;
 
-  DocumentBloc() : super(DocumentInitial()) {
+  DocumentBloc({required this.apiService}) : super(DocumentInitial()) {
     on<LoadDocumentsEvent>(_onLoadDocuments);
     on<UploadDocumentEvent>(_onUploadDocument);
   }
@@ -110,14 +111,59 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     emit(DocumentLoaded(_documents));
   }
 
-  void _onUploadDocument(
-      UploadDocumentEvent event, Emitter<DocumentState> emit) {
-    _documents[event.index] = DocumentModel(
-      name: _documents[event.index].name,
-      status: "uploaded",
-      uploadDate: DateTime.now().toString().substring(0, 10),
-    );
+  Future<void> _onUploadDocument(
+      UploadDocumentEvent event, Emitter<DocumentState> emit) async {
+    try {
+      // Emit uploading state
+      emit(DocumentUploading(index: event.index));
 
-    emit(DocumentLoaded(List.from(_documents)));
+      // Get file info
+      final file = File(event.filePath);
+      final fileName = file.path.split('/').last;
+      final fileType = _getFileType(fileName);
+
+      // Upload document
+      final fileKey = await apiService.uploadDocument(
+        file: file,
+        fileName: fileName,
+        fileType: fileType,
+        applicationId: event.applicationId,
+        documentType: event.documentType,
+      );
+
+      // Update document status
+      _documents[event.index] = DocumentModel(
+        name: _documents[event.index].name,
+        status: "uploaded",
+        uploadDate: DateTime.now().toString().substring(0, 10),
+      );
+
+      emit(DocumentLoaded(List.from(_documents)));
+      emit(DocumentUploadSuccess(
+        message: "Document uploaded successfully",
+        fileKey: fileKey,
+      ));
+    } catch (e) {
+      emit(DocumentError(e.toString()));
+      // Re-emit loaded state to keep UI intact
+      emit(DocumentLoaded(List.from(_documents)));
+    }
+  }
+
+  String _getFileType(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'png':
+        return 'image/png';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      default:
+        return 'application/octet-stream';
+    }
   }
 }

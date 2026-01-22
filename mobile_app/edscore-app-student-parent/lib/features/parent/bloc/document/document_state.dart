@@ -55,6 +55,19 @@ class DocumentLoaded extends DocumentState {
   DocumentLoaded(this.documents);
 }
 
+class DocumentUploading extends DocumentState {
+  final int index;
+
+  DocumentUploading({required this.index});
+}
+
+class DocumentUploadSuccess extends DocumentState {
+  final String message;
+  final String fileKey;
+
+  DocumentUploadSuccess({required this.message, required this.fileKey});
+}
+
 class DocumentError extends DocumentState {
   final String message;
 

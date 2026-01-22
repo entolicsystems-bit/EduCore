@@ -1,15 +1,20 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:student/core/theme/app_colours.dart';
-
 import '../../../../core/utils/status_mapper.dart';
-
+import '../../bloc/document/document_bloc.dart';
+import '../../bloc/document/document_event.dart';
+import '../../bloc/document/document_state.dart';
 
 class DocumentPreviewCard extends StatelessWidget {
   final String title;
   final DocumentStatus status;
   final String uploadDate;
   final int index;
+  final String applicationId; // Add this
+  final String documentType; // Add this
 
   const DocumentPreviewCard({
     super.key,
@@ -17,6 +22,8 @@ class DocumentPreviewCard extends StatelessWidget {
     required this.status,
     required this.uploadDate,
     required this.index,
+    required this.applicationId,
+    required this.documentType,
   });
 
   @override
@@ -26,114 +33,168 @@ class DocumentPreviewCard extends StatelessWidget {
 
     switch (status) {
       case DocumentStatus.verified:
-        statusColor = Colors.green;
+        statusColor = AppColors.success;
         statusText = "Verified";
         break;
       case DocumentStatus.uploaded:
-        statusColor = Colors.blue;
+        statusColor = AppColors.info;
         statusText = "Uploaded";
         break;
       case DocumentStatus.pending:
-        statusColor = Colors.orange;
+        statusColor = AppColors.error;
         statusText = "Pending";
         break;
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header
-                Container(
-                  height: 50,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF2196F3),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
+    return BlocListener<DocumentBloc, DocumentState>(
+      listener: (context, state) {
+        if (state is DocumentUploadSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (state is DocumentError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
+                  Container(
+                    height: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2196F3),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(Icons.close, color: Colors.white),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
+
+                  const SizedBox(height: 40),
+
+                  // Document Preview Box
+                  Container(
+                    height: 511,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: AppColors.textGrey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: BlocBuilder<DocumentBloc, DocumentState>(
+                      builder: (context, state) {
+                        if (state is DocumentUploading &&
+                            state.index == index) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 16),
+                              Text(
+                                "Uploading $title...",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.description_outlined,
+                              size: 100,
+                              color: Color(0xFF2196F3),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              "$title\nPDF",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 40),
+                  const SizedBox(height: 50),
 
-                // Document Preview Box
-                Container(
-                  height: 400,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.textGrey),
-                    borderRadius: BorderRadius.circular(8),
+                  // Status row
+                  _row("Status", statusText, statusColor),
+                  const SizedBox(height: 12),
+
+                  // Upload Date row
+                  _row("Upload Date", uploadDate, Colors.black),
+
+                  const SizedBox(height: 40),
+
+                  // Upload Document Button
+                  BlocBuilder<DocumentBloc, DocumentState>(
+                    builder: (context, state) {
+                      final isUploading = state is DocumentUploading &&
+                          state.index == index;
+
+                      return _blueButton(
+                        isUploading ? "Uploading..." : "Download Document",
+                        isUploading
+                            ? null
+                            : () async {
+                          await _pickAndUploadFile(context);
+                        },
+                      );
+                    },
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.description_outlined,
-                        size: 100,
-                        color: Color(0xFF2196F3),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "$title\nPDF",
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                const SizedBox(height: 50),
+                  const SizedBox(height: 12),
 
-                // Status row
-                _row("Status", statusText, statusColor),
-                const SizedBox(height: 12),
+                  // Close Button
+                  _blueButton("Close", () {
+                    Navigator.pop(context);
+                  }),
 
-                // Upload Date row
-                _row("Upload Date", uploadDate, Colors.black),
-
-                const SizedBox(height: 40),
-
-                // File Picker Button (Upload / Pick File)
-                _blueButton("Download Document", () async {
-                  await _pickFile(context);
-                }),
-
-                const SizedBox(height: 12),
-
-                // Close Button
-                _blueButton("Close", () {
-                  Navigator.pop(context);
-                }),
-
-                const SizedBox(height: 30),
-              ],
+                  const SizedBox(height: 30),
+                ],
+              ),
             ),
           ),
         ),
@@ -141,32 +202,57 @@ class DocumentPreviewCard extends StatelessWidget {
     );
   }
 
-  // ================= FILE PICKER FUNCTION =================
-  Future<void> _pickFile(BuildContext context) async {
+  // ================= FILE PICKER & UPLOAD FUNCTION =================
+  Future<void> _pickAndUploadFile(BuildContext context) async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'png'],
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'docx'],
       );
 
       if (result != null) {
-        PlatformFile file = result.files.first;
+        PlatformFile platformFile = result.files.first;
 
-        debugPrint("File name: ${file.name}");
-        debugPrint("File path: ${file.path}");
+        // Validate file
+        if (platformFile.path == null) {
+          throw Exception("File path is null");
+        }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Selected: ${file.name}")),
-        );
+        final file = File(platformFile.path!);
+
+        // Check if file exists
+        if (!await file.exists()) {
+          throw Exception("File does not exist");
+        }
+
+        debugPrint("File name: ${platformFile.name}");
+        debugPrint("File size: ${platformFile.size} bytes");
+
+        // Trigger upload event
+        if (context.mounted) {
+          context.read<DocumentBloc>().add(
+            UploadDocumentEvent(
+              index: index,
+              filePath: platformFile.path!,
+              applicationId: applicationId,
+              documentType: documentType,
+            ),
+          );
+        }
       } else {
         debugPrint("User canceled file picking");
       }
     } catch (e) {
       debugPrint("File picker error: $e");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error picking file: $e")),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
   // =======================================================
@@ -184,7 +270,7 @@ class DocumentPreviewCard extends StatelessWidget {
     );
   }
 
-  Widget _blueButton(String text, VoidCallback onTap) {
+  Widget _blueButton(String text, VoidCallback? onTap) {
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -194,6 +280,7 @@ class DocumentPreviewCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
+          disabledBackgroundColor: Colors.grey,
         ),
         onPressed: onTap,
         child: Text(

@@ -1,0 +1,19 @@
+/* RESET VITE DEFAULT STYLES */
+/* This file must NOT control layout */
+
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* (optional) keep demo styles if you want, but they won't affect layout */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+}
+
+.card {
+  padding: 2em;
+}

@@ -5,55 +5,47 @@ import '../storage/secure_token_storage.dart';
 class AuthHttpClient {
   static const String baseUrl = "http://3.7.212.22:3000/v1";
 
+  bool _isRefreshing = false;
+
+  // ================= GET =================
   Future<http.Response> get(String endpoint) async {
     String? token = await SecureTokenStorage.getAccessToken();
+    final expired = await SecureTokenStorage.isTokenExpired();
 
-    // If access token is expired, try refreshing
-    if (token == null) {
+    if (token == null || expired) {
       final refreshed = await _refreshToken();
-      if (refreshed) {
-        token = await SecureTokenStorage.getAccessToken();
+      if (!refreshed) {
+        throw Exception("Session expired. Please login again.");
       }
+      token = await SecureTokenStorage.getAccessToken();
     }
 
-    final response = await http.get(
+    return http.get(
       Uri.parse(baseUrl + endpoint),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
-
-    // If server still returns 401, try refreshing once more
-    if (response.statusCode == 401) {
-      final refreshed = await _refreshToken();
-      if (refreshed) {
-        token = await SecureTokenStorage.getAccessToken();
-        return await http.get(
-          Uri.parse(baseUrl + endpoint),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        );
-      }
-    }
-
-    return response;
   }
 
-  Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
+  // ================= POST =================
+  Future<http.Response> post(
+      String endpoint,
+      Map<String, dynamic> body,
+      ) async {
     String? token = await SecureTokenStorage.getAccessToken();
+    final expired = await SecureTokenStorage.isTokenExpired();
 
-    // Refresh if token expired
-    if (token == null) {
+    if (token == null || expired) {
       final refreshed = await _refreshToken();
-      if (refreshed) {
-        token = await SecureTokenStorage.getAccessToken();
+      if (!refreshed) {
+        throw Exception("Session expired. Please login again.");
       }
+      token = await SecureTokenStorage.getAccessToken();
     }
 
-    final response = await http.post(
+    return http.post(
       Uri.parse(baseUrl + endpoint),
       headers: {
         'Content-Type': 'application/json',
@@ -61,33 +53,19 @@ class AuthHttpClient {
       },
       body: jsonEncode(body),
     );
-
-    if (response.statusCode == 401) {
-      final refreshed = await _refreshToken();
-      if (refreshed) {
-        token = await SecureTokenStorage.getAccessToken();
-        return await http.post(
-          Uri.parse(baseUrl + endpoint),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-          body: jsonEncode(body),
-        );
-      }
-    }
-
-    return response;
   }
 
-  /// Refresh access token using refresh token
+  // ================= REFRESH TOKEN =================
   Future<bool> _refreshToken() async {
+    if (_isRefreshing) return false;
+    _isRefreshing = true;
+
     try {
       final refreshToken = await SecureTokenStorage.getRefreshToken();
       if (refreshToken == null) return false;
 
       final response = await http.post(
-        Uri.parse(baseUrl + "/auth/refresh"),
+        Uri.parse("$baseUrl/auth/refresh"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({"refreshToken": refreshToken}),
       );
@@ -95,11 +73,10 @@ class AuthHttpClient {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
 
-        // Save new tokens with expiration (optional: 15 min for access, 7 days for refresh)
         await SecureTokenStorage.saveTokens(
-          accessToken: data['accessToken'],
-          refreshToken: data['refreshToken'],
-          accessTokenExpirySeconds: data['expiresIn'] ?? 900, // 15 min default
+          data['accessToken'],
+          data['refreshToken'],
+          expirySeconds: data['expiresIn'] ?? 900,
         );
 
         return true;
@@ -107,8 +84,10 @@ class AuthHttpClient {
 
       return false;
     } catch (e) {
-      print('Token refresh error: $e');
+      print("Refresh token error: $e");
       return false;
+    } finally {
+      _isRefreshing = false;
     }
   }
 }

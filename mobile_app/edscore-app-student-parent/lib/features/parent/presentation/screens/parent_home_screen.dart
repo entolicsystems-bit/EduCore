@@ -378,7 +378,7 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
                   MaterialPageRoute(
                     builder: (_) => StudentProfileScreen(
                       studentId: id,
-                      studentName: name,
+                      studentName: name, token: '',
                     ),
                   ),
                 );

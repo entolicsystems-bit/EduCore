@@ -21,6 +21,13 @@ class LoadDocumentsEvent extends DocumentEvent {}
 class UploadDocumentEvent extends DocumentEvent {
   final int index;
   final String filePath;
+  final String applicationId;
+  final String documentType; // ID_PROOF, MARKSHEET, BIRTH_CERTIFICATE, etc.
 
-  UploadDocumentEvent({required this.index, required this.filePath});
+  UploadDocumentEvent({
+    required this.index,
+    required this.filePath,
+    required this.applicationId,
+    required this.documentType,
+  });
 }
