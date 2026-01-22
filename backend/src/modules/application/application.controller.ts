@@ -21,6 +21,8 @@ export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
   // EPIC-1: Create Draft
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
   @Post("create")
   create(@Body() dto: CreateApplicationDto, @Req() req: any) {
     return this.applicationService.createApplication(dto, req.user);
@@ -30,6 +32,8 @@ export class ApplicationController {
   // EPIC-1: UPDATE APPLICATION FORM (STEP-WISE)
   // ===========================
   @Patch(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
   updateApplicationForm(
     @Param("id") applicationId: string,
     @Body("formData") formData: any,
@@ -43,6 +47,8 @@ export class ApplicationController {
   }
 
   // EPIC-1: Submit Application
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
   @Post(":id/submit")
   submit(@Param("id") id: string, @Req() req: any) {
     return this.applicationService.submitApplication(id, req.user);
@@ -50,7 +56,8 @@ export class ApplicationController {
 
   // EPIC-3: Pipeline Status
   @Patch(":id/status")
-  @Roles("COUNSELOR", "ADMIN")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
   updateStatus(
     @Param("id") id: string,
     @Body("status") status: ApplicationStatus,
@@ -68,6 +75,8 @@ export class ApplicationController {
   // ===========================
   // EPIC 3.3 — APPLICATION TIMELINE
   // ===========================
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
   @Get(":id/timeline")
   getTimeline(@Param("id") applicationId: string, @Req() req: any) {
     return this.applicationService.getApplicationTimeline(
