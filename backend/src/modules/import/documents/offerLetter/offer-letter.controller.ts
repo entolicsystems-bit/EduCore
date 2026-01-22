@@ -1,3 +1,4 @@
+import { OfferLetterService } from './offer-letter.service';
 import {
   Controller,
   Get,
@@ -12,7 +13,9 @@ import { StorageService } from "./storage/awsStorage.service";
 export class offerLetterController {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly storage: StorageService
+    private readonly storage: StorageService,
+    private readonly offerLetterService: OfferLetterService, // ✅ FIX
+
   ) {}
 
 
@@ -27,6 +30,14 @@ export class offerLetterController {
     }
 
     const signedUrl = this.storage.getSignedUrl(offerLetter.file_key);
+  
+
+
+  // ✅ MAIL इथेच
+  this.offerLetterService.emitOfferLetterMail(
+    applicationId,
+    signedUrl
+  );
 
     return {
       success: true,

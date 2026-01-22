@@ -54,6 +54,7 @@ export class documentService {
     if (!reqUser.tenantId || !reqUser.branchId) {
       throw new ForbiddenException("Invalid tenant or branch");
     }
+    
 
     // Extensions
     const blockedExtensions = [

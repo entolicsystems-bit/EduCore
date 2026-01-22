@@ -6,9 +6,10 @@ import { ApplicationListener } from "../offerLetter/application.listener";
 import { offerLetterpreviewController } from "../offerLetter/offer-letter-preview.controller";
 import { StorageService } from "../offerLetter/storage/awsStorage.service";
 import { StorageModule } from "../offerLetter/storage/awsStorage.module";
+import { NotificationModule } from "src/modules/notifications/notification.module";
 
 @Module({
-  imports: [StorageModule],
+  imports: [StorageModule, NotificationModule],
   controllers: [VerifyDocumentController, offerLetterpreviewController],
   providers: [VerifyDocumentService, OfferLetterService, ApplicationListener],
   exports: [OfferLetterService],

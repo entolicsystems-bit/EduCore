@@ -8,9 +8,9 @@ import { CreateLeadDto } from "../../dto/create-lead.dto";
 import { LeadFilterDto } from "../../dto/lead-filter.dto";
 import { LeadTimelineAction } from "../../constants/lead.constants";
 import { PrismaService } from "src/database/prisma.service";
-import { CryptoUtil } from "src/common/crypto/crypto.util";
 import { Prisma } from "@prisma/client";
 import { hash } from "bcrypt";
+import { CryptoUtil } from "src/common/crypto/crypto.util";
 
 @Injectable()
 export class LeadsService {
@@ -47,8 +47,30 @@ export class LeadsService {
     };
   }
 
+  private async checkDuplicateLead(email: string, phone: string) {
+    console.log("function called");
+    const leads = await this.prisma.lead.findMany({
+      select: {
+        email: true,
+        phone: true,
+      },
+    });
+
+    for (const lead of leads) {
+      const dbEmail = await CryptoUtil.decrypt(lead.email);
+      console.log(dbEmail);
+      const dbPhone = await CryptoUtil.decrypt(lead.phone);
+      console.log(dbPhone);
+      if (dbEmail === email || dbPhone === phone) {
+        throw new BadRequestException("User already exists");
+      }
+    }
+  }
+
   async createWebsiteLead(dto: CreateLeadDto) {
     try {
+      await this.checkDuplicateLead(dto.email, dto.phone);
+
       const lead = await this.repo.createLead({
         ...dto,
         name: await CryptoUtil.encrypt(dto.name),

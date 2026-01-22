@@ -1,10 +1,15 @@
 import * as dotenv from "dotenv";
 dotenv.config();
+
 // try {
 //   require('dotenv').config();
 // } catch (_) {}
 
 //require("newrelic");
+
+
+require("newrelic");
+
 // import newRelic from 'newrelic';
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
@@ -18,11 +23,13 @@ import { ThrottlerGuard } from "@nestjs/throttler";
 
 // console.log('CRYPTO_SECRET:', process.env.CRYPTO_SECRET);
 
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
     logger: ["error", "warn", "log"], //hidding debug logs
   });
+
 
   // app.setGlobalPrefix('v1');
 
@@ -36,6 +43,7 @@ async function bootstrap() {
       const allowedOrigins = [
         "http://localhost:3000",
         "http://3.7.212.22:3000",
+
         "https://d38dmhca7zine6.cloudfront.net",
       ];
 
@@ -64,5 +72,7 @@ async function bootstrap() {
   app.useGlobalFilters(new PrismaExceptionFilter());
 
   await app.listen(3000);
+
+  
 }
 bootstrap();

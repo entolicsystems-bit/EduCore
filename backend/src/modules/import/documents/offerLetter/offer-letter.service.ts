@@ -1,3 +1,4 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   BadRequestException,
   Injectable,
@@ -11,12 +12,14 @@ import { StorageService } from "./storage/awsStorage.service";
 import { ApplicationStatus } from "@prisma/client";
 import { CryptoUtil } from "src/common/crypto/crypto.util";
 
+
 @Injectable()
 export class OfferLetterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
-  ) {}
+  private readonly eventEmitter: EventEmitter2, // ✅ correct
+  ) {console.log("OfferLetterService initialized");}
 
   //Logo Base64
   private getLogoBase64(): string {
@@ -39,7 +42,7 @@ export class OfferLetterService {
 
     //program currently static
     const program = {
-      name: "Bachelor of Computer Science",
+      name: application.programId,
       duration: "4 Years",
       startDate: new Date(),
       totalFee: "₹4,00,000",
@@ -100,12 +103,17 @@ export class OfferLetterService {
         "Cannot preview non APPLIED documents offerLetter",
       );
     }
-    const html = await this.buildHtml(applicationId);
+    try {
+      const html = await this.buildHtml(applicationId);
 
-    return {
-      success: true,
-      html,
-    };
+      return {
+        success: true,
+        html,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   //Generate offerLetter only one time
@@ -153,12 +161,24 @@ export class OfferLetterService {
       },
     });
 
+  //   console.log(
+  // '🚀 EMITTING application.offer_letter_ready',
+  // applicationId,
+
+
     return {
       success: true,
       offerLetter_Id: offerLetter.id,
       FileKey: fileKey,
     };
   }
+//Emit event to send offer letter email
+  emitOfferLetterMail(applicationId: string, signedUrl: string) {
+  this.eventEmitter.emit("application.offer_letter_ready", {
+    applicationId,
+    signedUrl,
+  });
+}
 
   //Helpers functions
   private formatDate(date: Date) {
