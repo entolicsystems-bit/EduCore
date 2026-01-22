@@ -24,8 +24,8 @@ export class CreateLeadDto {
   @IsEmail({}, { message: "Invalid email address" })
   email?: string;
 
-  @IsString({ message: "Name must be a string" })
-  @IsNotEmpty({ message: "Name is required" })
+  @IsString({ message: "Source must be a string" })
+  @IsNotEmpty({ message: "Source is required" })
   @Matches(/^[A-Za-z]+$/, {
     message: "Source must contain only letters",
   })

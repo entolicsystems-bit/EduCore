@@ -89,7 +89,7 @@ export class CsvController {
 
     return {
       message: "CSV processed successfully",
-      totalRows: rows.length,
+      totalRows: imported+skipped+errors.length,
       imported,
       skipped,
       failed: errors.length,

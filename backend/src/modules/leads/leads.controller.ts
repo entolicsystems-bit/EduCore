@@ -19,7 +19,6 @@ import { LeadTimelineDto } from "../../dto/lead-timeline.dto";
 import { JwtAuthGuard } from "../../guards/jwt-auth.guard";
 import { Roles } from "../../common/decorator/roles.decorator";
 import { RolesGuard } from "../../guards/roles.guard";
-import { Throttle } from "@nestjs/throttler";
 
 @Controller("v1/leads")
 export class LeadsController {
@@ -38,7 +37,7 @@ export class LeadsController {
     return this.service.searchLeads(filters);
   }
 
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  // @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "COUNSELLOR", "TEACHER", "ACCOUNTANT")
   @Get()
