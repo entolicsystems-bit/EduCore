@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/database/prisma.service";
 import { CreateStudentCsvDto } from "src/dto/csv-import-dto";
 import { CryptoUtil } from "src/common/crypto/crypto.util";
+import { hashValue } from "src/utils/hash.util";
 
 @Injectable()
 export class CsvService {
@@ -17,16 +18,20 @@ export class CsvService {
         },
       });
 
-      // 2️⃣ Decrypt existing values into sets
+      // 2️⃣ Decrypt existing values into sets for duplicate checking
       const existingEmails = new Set<string>();
       const existingPhones = new Set<string>();
 
       for (const lead of existingLeads) {
         if (lead.email) {
-          existingEmails.add(await CryptoUtil.decrypt(lead.email));
+          existingEmails.add(
+            (await CryptoUtil.decrypt(lead.email)).trim().toLowerCase(),
+          );
         }
         if (lead.phone) {
-          existingPhones.add(await CryptoUtil.decrypt(lead.phone));
+          existingPhones.add(
+            (await CryptoUtil.decrypt(lead.phone)).replace(/\D/g, ""),
+          );
         }
       }
 
@@ -36,36 +41,52 @@ export class CsvService {
 
       // 3️⃣ Compare CSV data with decrypted values
       for (const student of data) {
-        if (existingEmails.has(student.email)) {
+        const normalizedEmail = student.email?.trim().toLowerCase();
+        const normalizedPhone = student.phone.replace(/\D/g, "");
+
+        if (normalizedEmail && existingEmails.has(normalizedEmail)) {
           skippedData.push({ student, reason: "Duplicate email" });
           continue;
         }
 
-        if (existingPhones.has(student.phone)) {
+        if (existingPhones.has(normalizedPhone)) {
           skippedData.push({ student, reason: "Duplicate phone" });
           continue;
         }
 
+        // Add to valid data
         validData.push(student);
+        // Also add to sets to prevent duplicates within the CSV itself
+        if (normalizedEmail) existingEmails.add(normalizedEmail);
+        existingPhones.add(normalizedPhone);
       }
 
-      // 4️⃣ Encrypt before insert
+      // 4️⃣ Encrypt + hash before insert
       const usersToInsert = await Promise.all(
-        validData.map(async (student) => ({
-          email: await CryptoUtil.encrypt(student.email),
-          phone: await CryptoUtil.encrypt(student.phone),
-          name: await CryptoUtil.encrypt(student.name),
-          source: "CSV Import",
-          status: "NEW",
-          owner_id: userId,
-        })),
+        validData.map(async (student) => {
+          const normalizedEmail = student.email?.trim().toLowerCase();
+          const normalizedPhone = student.phone.replace(/\D/g, "");
+
+          return {
+            email: await CryptoUtil.encrypt(student.email),
+            phone: await CryptoUtil.encrypt(student.phone),
+            name: await CryptoUtil.encrypt(student.name),
+            source: "CSV Import",
+            status: "NEW",
+            owner_id: userId,
+            emailHash: normalizedEmail ? hashValue(normalizedEmail) : null,
+            phoneHash: hashValue(normalizedPhone),
+          };
+        }),
       );
 
+      // 5️⃣ Insert into DB
       const result = await this.prisma.lead.createMany({
         data: usersToInsert,
-        skipDuplicates: true,
+        skipDuplicates: true, // DB-level uniqueness check
       });
 
+      // 6️⃣ Audit log
       await this.prisma.auditLog.create({
         data: {
           tableName: "Lead",
@@ -76,13 +97,14 @@ export class CsvService {
         },
       });
 
+      // 7️⃣ Return summary
       return {
         insertedCount: result.count,
         skippedCount: skippedData.length,
         skippedData: skippedData.map((d) => d.student),
       };
     } catch (error) {
-      console.error(error);
+      console.error("CSV BULK CREATE ERROR 👉", error);
       throw new BadRequestException("Failed to import students");
     }
   }

@@ -74,42 +74,32 @@ import { RegisterDto } from "src/dto/register.dto";
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  // ======================================================
-  // REGISTER STAFF
-  // ======================================================
+  //Register staff
   @Post("register")
   registerStaff(@Body() dto: RegisterDto, @Req() req) {
     // req.user.id comes from JWT
     return this.rolesService.registerStaff(dto, req.user.id);
   }
 
-  // ======================================================
-  // ASSIGN MULTIPLE ROLES TO EXISTING USER
-  // ======================================================
+  //add roles to existing user
   @Post("add-role")
   addRole(@Body() body: { userId: string; role: string }) {
     return this.rolesService.addRoleToExistingUser(body.userId, body.role);
   }
 
-  // ======================================================
-  // GET ALL STAFF
-  // ======================================================
+  //get all staff
   @Get("staff")
   getAllStaff() {
     return this.rolesService.getAllStaff();
   }
 
-  // ======================================================
-  // SEARCH STAFF BY ID
-  // ======================================================
+  //get user by id
   @Get("staff/by-id")
   getStaffById(@Query("id") id: string) {
     return this.rolesService.searchStaffById(id);
   }
 
-  // ======================================================
-  // SEARCH STAFF BY NAME
-  // ======================================================
+  //get user by name
   @Get("staff/by-name")
   searchStaffByName(@Query("name") name: string) {
     return this.rolesService.searchStaffByName(name);

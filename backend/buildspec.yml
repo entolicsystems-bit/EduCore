@@ -30,4 +30,3 @@ artifacts:
     # - backend/node_modules/**/*
     - backend/prisma.config.ts
     - .env
-

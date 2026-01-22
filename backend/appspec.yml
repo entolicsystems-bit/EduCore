@@ -1,0 +1,32 @@
+version: 0.0
+os: linux
+
+files:
+  - source: backend/
+    destination: /home/ec2-user/EduCore/backend
+    overwrite: true
+
+hooks:
+  ApplicationStop:
+    - location: backend/scripts/stop_server.sh
+      timeout: 300
+      runas: ec2-user
+
+  BeforeInstall:
+    - location: backend/scripts/before_install.sh
+      timeout: 300
+      runas: root
+
+  ApplicationStart:
+    - location: backend/scripts/start_server.sh
+      timeout: 300
+      runas: ec2-user
+      environment:
+        - name: DIRECT_DATABASE_URL
+          valueFrom: /EduCore/DIRECT_DATABASE_URL
+        - name: DATABASE_URL
+          valueFrom: /EduCore/DATABASE_URL
+      # env:
+      #   variables:
+      #     DIRECT_DATABASE_URL: "{{DIRECT_DATABASE_URL}}"
+      #     DATABASE_URL: "{{DATABASE_URL}}"

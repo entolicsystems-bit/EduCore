@@ -1,5 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "../../database/prisma.service";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class LeadsRepository {
@@ -9,81 +10,83 @@ export class LeadsRepository {
     return this.prisma.lead.create({ data });
   }
 
- findLeads(filters: any, user: { id: string; role: string; tenantId: string; branchId: string }) {
-  const page = Number(filters.page) || 1;
-  const limit = Math.min(Number(filters.limit) || 20, 50);
-  const skip = (page - 1) * limit;
-
-  /**
-   * 🔐 MULTI-TENANT + IDOR PROTECTION
-   * --------------------------------------------------
-   * Every query must be scoped to tenant and branch.
-   * This prevents cross-tenant data leakage.
-   */
-  const where: any = {
-    deleted_at: null,
-    tenantId: user.tenantId,
-    branchId: user.branchId,
-  };
-
-  /**
-   * 🔐 ROLE-BASED OWNERSHIP ENFORCEMENT
-   * --------------------------------------------------
-   * Counsellors can only see their own leads.
-   * Admins can filter by owner_id.
-   */
-  if (user.role === "COUNSELLOR") {
-    where.owner_id = user.id;
-  } else if (filters.owner_id) {
-    where.owner_id = filters.owner_id;
-  }
-
-  /**
-   * 🔐 FILTER VALIDATION
-   */
-  if (filters.status) {
-    where.status = filters.status;
-  }
-
-  if (filters.source) {
-    where.source = filters.source;
-  }
-
-  /**
-   * 🔐 DATE RANGE VALIDATION (optional but recommended)
-   */
-  if (filters.fromDate && filters.toDate) {
-    where.updatedAt = {
-      gte: new Date(filters.fromDate),
-      lte: new Date(filters.toDate),
-    };
-  }
-
-  return this.prisma.lead.findMany({
-    where,
-    skip,
-    take: limit,
-    orderBy: {
-      updatedAt: "desc",
-    },
+  findLeads(
+    filters: any,
+    user: { id: string; role: string; tenantId: string; branchId: string },
+  ) {
+    const page = Number(filters.page) || 1;
+    const limit = Math.min(Number(filters.limit) || 20, 50);
+    const skip = (page - 1) * limit;
 
     /**
-     * 🔐 DATA MINIMIZATION
+     * 🔐 MULTI-TENANT + IDOR PROTECTION
      * --------------------------------------------------
-     * Never expose tenantId, branchId, or deleted_at
+     * Every query must be scoped to tenant and branch.
+     * This prevents cross-tenant data leakage.
      */
-    select: {
-      id: true,
-      name: true,
-      phone: true,
-      email: true,
-      status: true,
-      source: true,
-      updatedAt: true,
-    },
-  });
-}
+    const where: any = {
+      deleted_at: null,
+      tenantId: user.tenantId,
+      branchId: user.branchId,
+    };
 
+    /**
+     * 🔐 ROLE-BASED OWNERSHIP ENFORCEMENT
+     * --------------------------------------------------
+     * Counsellors can only see their own leads.
+     * Admins can filter by owner_id.
+     */
+    if (user.role === "COUNSELLOR") {
+      where.owner_id = user.id;
+    } else if (filters.owner_id) {
+      where.owner_id = filters.owner_id;
+    }
+
+    /**
+     * 🔐 FILTER VALIDATION
+     */
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    if (filters.source) {
+      where.source = filters.source;
+    }
+
+    /**
+     * 🔐 DATE RANGE VALIDATION (optional but recommended)
+     */
+    if (filters.fromDate && filters.toDate) {
+      where.updatedAt = {
+        gte: new Date(filters.fromDate),
+        lte: new Date(filters.toDate),
+      };
+    }
+
+    return this.prisma.lead.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: {
+        updatedAt: "desc",
+      },
+
+      /**
+       * 🔐 DATA MINIMIZATION
+       * --------------------------------------------------
+       * Never expose tenantId, branchId, or deleted_at
+       */
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        email: true,
+        status: true,
+        source: true,
+        updatedAt: true,
+      },
+    });
+  }
 
   findById(id: string) {
     return this.prisma.lead.findUnique({
@@ -136,10 +139,24 @@ export class LeadsRepository {
   }
 
   updateLeadFields(leadId: string, data: any) {
-    return this.prisma.lead.update({
-      where: { id: leadId },
-      data,
-    });
+    try {
+      return this.prisma.lead.update({
+        where: { id: leadId },
+        data,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        // You can also inspect which field caused the violation:
+        const field = error.meta?.target;
+        throw new BadRequestException(
+          "Lead with same credentials already exists",
+        );
+      }
+      throw error;
+    }
   }
 
   async sdelete(leadId: string) {
@@ -157,45 +174,45 @@ export class LeadsRepository {
   }
 
   findLeadsSearch(filters: any) {
-      const page = Number(filters.page) || 1;
-      const limit = Math.min(Number(filters.limit) || 20, 50);
-      const skip = (page - 1) * limit;
-  
-      const where: any = {};
-  
-      if (filters.status) where.status = filters.status;
-      if (filters.source) where.source = filters.source;
-      if (filters.owner_id) where.owner_id = filters.owner_id;
-  
-      if (filters.fromDate || filters.toDate) {
-        where.updatedAt = {};
-        if (filters.fromDate) where.updatedAt.gte = new Date(filters.fromDate);
-        if (filters.toDate) where.updatedAt.lte = new Date(filters.toDate);
-      }
-  
-      if (filters.search) {
-        where.OR = [
-          { name: { contains: filters.search, mode: 'insensitive' } },
-          { phone: { contains: filters.search, mode: 'insensitive' } },
-          { email: { contains: filters.search, mode: 'insensitive' } },
-        ];
-      }
-  
-      return this.prisma.lead.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { updatedAt: 'desc' },
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          email: true,
-          status: true,
-          source: true,
-          owner_id: true,
-          updatedAt: true,
-        },
-      });
+    const page = Number(filters.page) || 1;
+    const limit = Math.min(Number(filters.limit) || 20, 50);
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (filters.status) where.status = filters.status;
+    if (filters.source) where.source = filters.source;
+    if (filters.owner_id) where.owner_id = filters.owner_id;
+
+    if (filters.fromDate || filters.toDate) {
+      where.updatedAt = {};
+      if (filters.fromDate) where.updatedAt.gte = new Date(filters.fromDate);
+      if (filters.toDate) where.updatedAt.lte = new Date(filters.toDate);
     }
+
+    if (filters.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: "insensitive" } },
+        { phone: { contains: filters.search, mode: "insensitive" } },
+        { email: { contains: filters.search, mode: "insensitive" } },
+      ];
+    }
+
+    return this.prisma.lead.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        email: true,
+        status: true,
+        source: true,
+        owner_id: true,
+        updatedAt: true,
+      },
+    });
+  }
 }
