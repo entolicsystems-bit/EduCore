@@ -58,7 +58,7 @@ npx prisma generate
 # 1️⃣ MIGRATION
 echo "📦 Running Prisma migrate deploy..."
 DATABASE_URL="$DIRECT_DATABASE_URL"
-npx prisma migrate resolve --applied 20251218051251_make_email_unique
+# npx prisma migrate resolve --applied 20251218051251_make_email_unique
 
 
 
