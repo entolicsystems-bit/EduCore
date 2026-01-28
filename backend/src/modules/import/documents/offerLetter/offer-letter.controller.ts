@@ -33,7 +33,7 @@ export class offerLetterController {
   
 
 
-  // ✅ MAIL इथेच
+  // ✅ MAIL 
   this.offerLetterService.emitOfferLetterMail(
     applicationId,
     signedUrl

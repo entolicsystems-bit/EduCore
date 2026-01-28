@@ -3,12 +3,14 @@ import { PrismaService } from "src/database/prisma.service";
 import { CreateStudentCsvDto } from "src/dto/csv-import-dto";
 import { CryptoUtil } from "src/common/crypto/crypto.util";
 import { hashValue } from "src/utils/hash.util";
+import { userInfo } from "node:os";
+import { User } from "@prisma/client";
 
 @Injectable()
 export class CsvService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async bulkCreate(data: CreateStudentCsvDto[], userId: string) {
+  async bulkCreate(data: CreateStudentCsvDto[], user: User) {
     try {
       // 1️⃣ Fetch all existing encrypted emails & phones
       const existingLeads = await this.prisma.lead.findMany({
@@ -61,10 +63,13 @@ export class CsvService {
         existingPhones.add(normalizedPhone);
       }
 
+      const tenantId = user.tenantId;
+      const branchId = user.branchId;
+
       // 4️⃣ Encrypt + hash before insert
       const usersToInsert = await Promise.all(
         validData.map(async (student) => {
-          const normalizedEmail = student.email?.trim().toLowerCase();
+          const normalizedEmail = student.email.trim().toLowerCase();
           const normalizedPhone = student.phone.replace(/\D/g, "");
 
           return {
@@ -73,8 +78,10 @@ export class CsvService {
             name: await CryptoUtil.encrypt(student.name),
             source: "CSV Import",
             status: "NEW",
-            owner_id: userId,
-            emailHash: normalizedEmail ? hashValue(normalizedEmail) : null,
+            owner_id: user.id,
+            tenantId: tenantId,
+            branchId: branchId,
+            emailHash: hashValue(normalizedEmail),
             phoneHash: hashValue(normalizedPhone),
           };
         }),
@@ -93,7 +100,7 @@ export class CsvService {
           action: "CREATE",
           oldValue: null,
           newValue: `CSV Import (${result.count} leads)`,
-          userId,
+          userId: user.id,
         },
       });
 
