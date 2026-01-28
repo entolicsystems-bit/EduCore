@@ -81,7 +81,7 @@ export class CsvController {
 
     for (let i = 0; i < rows.length; i += BATCH_SIZE) {
       const batch = rows.slice(i, i + BATCH_SIZE);
-      const result = await this.csvService.bulkCreate(batch, req.user.id);
+      const result = await this.csvService.bulkCreate(batch, req.user);
 
       imported += result.insertedCount;
       skipped += result.skippedCount;
@@ -89,7 +89,7 @@ export class CsvController {
 
     return {
       message: "CSV processed successfully",
-      totalRows: rows.length,
+      totalRows: imported+skipped+errors.length,
       imported,
       skipped,
       failed: errors.length,
