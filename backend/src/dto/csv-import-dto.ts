@@ -30,8 +30,4 @@ export class CreateStudentCsvDto {
     message: "Phone must be a valid 10-digit mobile number",
   })
   phone: string;
-
-  source: string;
-
-  status: string;
 }

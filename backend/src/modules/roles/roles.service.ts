@@ -183,7 +183,13 @@ export class RolesService {
   // ======================================================
   async addRoleToExistingUser(userId: string, newRole: string) {
     try {
-      const allowedRoles = ["COUNSELLOR", "TEACHER", "ACCOUNTANT"];
+      const allowedRoles = [
+        "COUNSELLOR",
+        "TEACHER",
+        "ACCOUNTANT",
+        "PARENT",
+        "STUDENT",
+      ];
 
       const role = newRole.toUpperCase();
       if (!allowedRoles.includes(role)) {
@@ -221,6 +227,8 @@ export class RolesService {
         COUNSELLOR: 2,
         TEACHER: 3,
         ACCOUNTANT: 4,
+        PARENT: 5,
+        STUDENT: 6,
       };
 
       await this.assignRole(userId, roleMap[role]); // ✅ NOW EXISTS
