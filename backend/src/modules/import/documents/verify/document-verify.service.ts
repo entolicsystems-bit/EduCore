@@ -194,9 +194,8 @@ export class VerifyDocumentService {
     });
 
 
-
     return true; // 
 
 }
-}
 
+}

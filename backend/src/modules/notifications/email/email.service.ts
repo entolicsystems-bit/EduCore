@@ -1,8 +1,8 @@
-import { NotificationEvents } from '../../../constants/notification-event.constant';
-import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import * as fs from 'fs';
-import * as path from 'path';
+import { NotificationEvents } from "../../../constants/notification-event.constant";
+import { Injectable, Logger } from "@nestjs/common";
+import * as nodemailer from "nodemailer";
+import * as fs from "fs";
+import * as path from "path";
 
 @Injectable()
 export class EmailService {
@@ -28,8 +28,8 @@ export class EmailService {
     await this.transporter.sendMail({
       from: '"EduCore Test" <sakshikohale.rkinfynova@gmail.com>',
       to,
-      subject: 'Test Email from EduCore',
-      text: 'Email service is working correctly 🎉',
+      subject: "Test Email from EduCore",
+      text: "Email service is working correctly 🎉",
     });
 
     this.logger.log(`✅ Test email sent to ${to}`);
@@ -42,18 +42,18 @@ export class EmailService {
   async sendApplicationSubmitted(payload: any) {
     return this.sendTemplate(
       payload.to,
-      'Application Submitted',
-      'application-submitted.html',
+      "Application Submitted",
+      "application-submitted.html",
       payload,
     );
   }
 
   async sendDocumentVerified(payload: any) {
-    console.log('📧 sendOfferLetter called with', payload);
+    console.log("📧 sendOfferLetter called with", payload);
     return this.sendTemplate(
       payload.to,
-      'Documents Verified',
-      'document-verified.html',
+      "Documents Verified",
+      "document-verified.html",
       payload,
     );
   }
@@ -61,8 +61,8 @@ export class EmailService {
   async sendStatusChanged(payload: any) {
     return this.sendTemplate(
       payload.to,
-      'Application Status Updated',
-      'status-changed.html',
+      "Application Status Updated",
+      "status-changed.html",
       payload,
     );
   }
@@ -70,8 +70,8 @@ export class EmailService {
   async sendOfferLetter(payload: any) {
     return this.sendTemplate(
       payload.to,
-      'Offer Letter Available',
-      'offer-letter.html',
+      "Offer Letter Available",
+      "offer-letter.html",
       payload,
     );
   }
@@ -79,8 +79,8 @@ export class EmailService {
   async sendStudentEnrolled(payload: any) {
     return this.sendTemplate(
       payload.to,
-      'Welcome to EduCore 🎓',
-      'welcome-student.html',
+      "Welcome to EduCore 🎓",
+      "welcome-student.html",
       payload,
     );
   }
@@ -94,11 +94,11 @@ export class EmailService {
     templateName: string,
     data: Record<string, any>,
   ) {
-    if (!to) throw new Error('Recipient email missing');
+    if (!to) throw new Error("Recipient email missing");
 
     const templatePath = path.resolve(
       process.cwd(),
-      'src/modules/notifications/email/templates',
+      "src/modules/notifications/email/templates",
       templateName,
     );
 
@@ -106,13 +106,13 @@ export class EmailService {
       throw new Error(`Email template not found: ${templateName}`);
     }
 
-    let html = fs.readFileSync(templatePath, 'utf8');
+    let html = fs.readFileSync(templatePath, "utf8");
 
     // Replace {{key}} placeholders
-    for (const key of Object.keys(data)) {
+    for (const [key, value] of Object.entries(data)) {
       html = html.replace(
-        new RegExp(`{{${key}}}`, 'g'),
-        String(data[key] ?? ''),
+        new RegExp(`{{\\s*${key}\\s*}}`, "g"),
+        String(value ?? ""),
       );
     }
 
