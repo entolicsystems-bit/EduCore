@@ -117,7 +117,7 @@ export class LeadsService {
     user: { id: string; role: string; tenantId: string; branchId: string },
   ) {
     const page = Number(filters.page) || 1;
-    const limit =  100 //Math.min(Number(filters.limit) || 10, 50);
+    const limit =  Math.min(Number(filters.limit) || 10, 50);
 
     const leads = await this.repo.findLeads(
       {
