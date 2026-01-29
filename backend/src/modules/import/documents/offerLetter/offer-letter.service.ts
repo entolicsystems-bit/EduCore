@@ -23,15 +23,16 @@ export class OfferLetterService {
   }
 
   //Logo Base64
-  // private getLogoBase64(): string {
-  //   const logoPath = path.join(
-  //     process.cwd(),
-  //     "src/modules/import/documents/offerLetter/templates/logo.jpg",
-  //   );
+  private getLogoBase64(): string {
+    const logoPath = path.join(__dirname, "templates", "logo.jpg");
 
-  //   const file = fs.readFileSync(logoPath);
-  //   return `data:image/jpeg;base64,${file.toString("base64")}`;
-  // }
+    if (!fs.existsSync(logoPath)) {
+      throw new Error(`Logo not found at ${logoPath}`);
+    }
+
+    const file = fs.readFileSync(logoPath);
+    return `data:image/jpeg;base64,${file.toString("base64")}`;
+  }
 
   //Build html for reviewing offerLetter
   private async buildHtml(applicationId: string): Promise<string> {
@@ -52,7 +53,7 @@ export class OfferLetterService {
     //data to fill offerLetter
     const data = {
       // Institution
-      INSTITUTION_LOGO: "Logo",
+      INSTITUTION_LOGO: this.getLogoBase64(),
       INSTITUTION_NAME: "Entolic System",
       INSTITUTION_ADDRESS: "Pune, India",
       INSTITUTION_CONTACT: "+91-9999999999",
@@ -73,10 +74,7 @@ export class OfferLetterService {
       ACCEPTANCE_DEADLINE: this.formatDate(this.addDays(new Date(), 10)),
     };
 
-    const templatePath = path.join(
-      process.cwd(),
-      "src/modules/import/documents/offerLetter/templates/offer-letter.html",
-    );
+    const templatePath = path.join(__dirname, "templates", "offer-letter.html");
 
     let html = fs.readFileSync(templatePath, "utf8");
 
