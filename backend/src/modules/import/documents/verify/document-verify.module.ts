@@ -7,11 +7,12 @@ import { offerLetterpreviewController } from "../offerLetter/offer-letter-previe
 import { StorageService } from "../offerLetter/storage/awsStorage.service";
 import { StorageModule } from "../offerLetter/storage/awsStorage.module";
 import { NotificationModule } from "src/modules/notifications/notification.module";
+import { OfferLetterModule } from "../offerLetter/offer-letter.module";
 
 @Module({
-  imports: [StorageModule, NotificationModule],
-  controllers: [VerifyDocumentController, offerLetterpreviewController],
-  providers: [VerifyDocumentService, OfferLetterService, ApplicationListener],
-  exports: [OfferLetterService],
+  imports: [StorageModule, NotificationModule,OfferLetterModule],
+  controllers: [VerifyDocumentController],
+  providers: [VerifyDocumentService],
+  exports: [],
 })
 export class verifyDocumentModule {}
