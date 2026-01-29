@@ -52,7 +52,6 @@ export class OfferLetterService {
     //data to fill offerLetter
     const data = {
       // Institution
-      INSTITUTION_LOGO: "Logo",
       INSTITUTION_NAME: "Entolic System",
       INSTITUTION_ADDRESS: "Pune, India",
       INSTITUTION_CONTACT: "+91-9999999999",
@@ -73,10 +72,9 @@ export class OfferLetterService {
       ACCEPTANCE_DEADLINE: this.formatDate(this.addDays(new Date(), 10)),
     };
 
-    const templatePath = path.resolve(
-      __dirname,
-      "templates",
-      "offer-letter.html",
+    const templatePath = path.join(
+      process.cwd(),
+      "src/modules/import/documents/offerLetter/templates/offer-letter.html",
     );
 
     let html = fs.readFileSync(templatePath, "utf8");
@@ -154,7 +152,6 @@ export class OfferLetterService {
     // Upload to cloud
     await this.storage.uploadPdf(pdfBuffer, fileKey);
 
-    console.log("OfferLetter saved ");
     const offerLetter = await this.prisma.offerLetter.create({
       data: {
         application_id: applicationId,
@@ -163,6 +160,10 @@ export class OfferLetterService {
         generated_at: new Date(),
       },
     });
+
+    //   console.log(
+    // '🚀 EMITTING application.offer_letter_ready',
+    // applicationId,
 
     return {
       success: true,
