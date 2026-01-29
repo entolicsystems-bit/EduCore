@@ -8,17 +8,21 @@ export class StorageService {
 
   async uploadPdf(buffer: Buffer, key: string) {
     console.log("Uploading pdf");
-    await this.s3
-      .putObject({
-        Bucket: process.env.AWS_S3_BUCKET!,
-        Key: key,
-        Body: buffer,
-        ContentType: "application/pdf",
-        ACL: "private",
-      })
-      .promise();
+    try {
+      await this.s3
+        .putObject({
+          Bucket: process.env.AWS_S3_BUCKET!,
+          Key: key,
+          Body: buffer,
+          ContentType: "application/pdf",
+          ACL: "private",
+        })
+        .promise();
 
-    return key;
+      return key;
+    } catch (error) {
+      throw error;
+    }
   }
 
   getSignedUrl(key: string) {

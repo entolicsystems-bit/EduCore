@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
 import { OfferLetterService } from "./offer-letter.service";
+import { writeFileSync } from "fs";
 
 @Injectable()
 export class ApplicationListener {
@@ -15,10 +16,9 @@ export class ApplicationListener {
 
     try {
       console.log("Starting offer letter generation...");
-
       const result = await this.offerLetterService.generate(
         payload.applicationId,
-        payload.adminId
+        payload.adminId,
       );
 
       return result;

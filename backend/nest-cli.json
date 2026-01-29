@@ -5,7 +5,7 @@
     "assets": [
       {
         "include": "modules/import/documents/offerLetter/templates/**/*",
-        "outDir": "dist"
+        "outDir": "dist/modules/import/documents/offerLetter/templates"
       }
     ]
   }
