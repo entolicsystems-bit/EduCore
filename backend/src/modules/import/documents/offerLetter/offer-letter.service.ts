@@ -153,6 +153,7 @@ export class OfferLetterService {
     // Upload to cloud
     await this.storage.uploadPdf(pdfBuffer, fileKey);
 
+    console.log("OfferLetter saved ");
     const offerLetter = await this.prisma.offerLetter.create({
       data: {
         application_id: applicationId,
@@ -161,10 +162,6 @@ export class OfferLetterService {
         generated_at: new Date(),
       },
     });
-
-    //   console.log(
-    // '🚀 EMITTING application.offer_letter_ready',
-    // applicationId,
 
     return {
       success: true,
