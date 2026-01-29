@@ -1,4 +1,4 @@
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   BadRequestException,
   Injectable,
@@ -12,25 +12,26 @@ import { StorageService } from "./storage/awsStorage.service";
 import { ApplicationStatus } from "@prisma/client";
 import { CryptoUtil } from "src/common/crypto/crypto.util";
 
-
 @Injectable()
 export class OfferLetterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
-  private readonly eventEmitter: EventEmitter2, // ✅ correct
-  ) {console.log("OfferLetterService initialized");}
+    private readonly eventEmitter: EventEmitter2, // ✅ correct
+  ) {
+    console.log("OfferLetterService initialized");
+  }
 
   //Logo Base64
-  private getLogoBase64(): string {
-    const logoPath = path.join(
-      process.cwd(),
-      "src/modules/import/documents/offerLetter/templates/logo.jpg",
-    );
+  // private getLogoBase64(): string {
+  //   const logoPath = path.join(
+  //     process.cwd(),
+  //     "src/modules/import/documents/offerLetter/templates/logo.jpg",
+  //   );
 
-    const file = fs.readFileSync(logoPath);
-    return `data:image/jpeg;base64,${file.toString("base64")}`;
-  }
+  //   const file = fs.readFileSync(logoPath);
+  //   return `data:image/jpeg;base64,${file.toString("base64")}`;
+  // }
 
   //Build html for reviewing offerLetter
   private async buildHtml(applicationId: string): Promise<string> {
@@ -51,7 +52,7 @@ export class OfferLetterService {
     //data to fill offerLetter
     const data = {
       // Institution
-      INSTITUTION_LOGO: this.getLogoBase64(),
+      INSTITUTION_LOGO: "Logo",
       INSTITUTION_NAME: "Entolic System",
       INSTITUTION_ADDRESS: "Pune, India",
       INSTITUTION_CONTACT: "+91-9999999999",
@@ -161,10 +162,9 @@ export class OfferLetterService {
       },
     });
 
-  //   console.log(
-  // '🚀 EMITTING application.offer_letter_ready',
-  // applicationId,
-
+    //   console.log(
+    // '🚀 EMITTING application.offer_letter_ready',
+    // applicationId,
 
     return {
       success: true,
@@ -172,13 +172,13 @@ export class OfferLetterService {
       FileKey: fileKey,
     };
   }
-//Emit event to send offer letter email
+  //Emit event to send offer letter email
   emitOfferLetterMail(applicationId: string, signedUrl: string) {
-  this.eventEmitter.emit("application.offer_letter_ready", {
-    applicationId,
-    signedUrl,
-  });
-}
+    this.eventEmitter.emit("application.offer_letter_ready", {
+      applicationId,
+      signedUrl,
+    });
+  }
 
   //Helpers functions
   private formatDate(date: Date) {
