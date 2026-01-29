@@ -72,10 +72,7 @@ export class OfferLetterService {
       ACCEPTANCE_DEADLINE: this.formatDate(this.addDays(new Date(), 10)),
     };
 
-    const templatePath = path.join(
-      process.cwd(),
-      "src/modules/import/documents/offerLetter/templates/offer-letter.html",
-    );
+    const templatePath = path.join(__dirname, "templates", "offer-letter.html");
 
     let html = fs.readFileSync(templatePath, "utf8");
 
