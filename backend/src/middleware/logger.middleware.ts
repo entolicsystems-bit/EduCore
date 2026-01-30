@@ -12,13 +12,20 @@ export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction): void {
     const start = Date.now();
 
+
+    const clientIp =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      req.socket.remoteAddress;
+
+    
     res.on("finish", () => {
       this.logger.log("HTTP Request", {
         method: req.method,
         url: req.originalUrl,
         statusCode: res.statusCode,
         responseTime: `${Date.now() - start}ms`,
-        response,
+        //response,
+        ip: clientIp,
       });
     });
 
