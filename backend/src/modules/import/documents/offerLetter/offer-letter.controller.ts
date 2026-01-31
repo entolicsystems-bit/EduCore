@@ -1,4 +1,4 @@
-import { OfferLetterService } from './offer-letter.service';
+import { OfferLetterService } from "./offer-letter.service";
 import {
   Controller,
   Get,
@@ -15,9 +15,7 @@ export class offerLetterController {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly offerLetterService: OfferLetterService, // ✅ FIX
-
   ) {}
-
 
   @Get(":applicationId/download")
   async downloadOfferLetter(@Param("applicationId") applicationId: string) {
@@ -30,14 +28,9 @@ export class offerLetterController {
     }
 
     const signedUrl = this.storage.getSignedUrl(offerLetter.file_key);
-  
 
-
-  // ✅ MAIL 
-  this.offerLetterService.emitOfferLetterMail(
-    applicationId,
-    signedUrl
-  );
+    // ✅ MAIL
+    this.offerLetterService.emitOfferLetterMail(applicationId, signedUrl);
 
     return {
       success: true,

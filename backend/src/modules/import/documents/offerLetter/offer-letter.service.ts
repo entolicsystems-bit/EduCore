@@ -140,39 +140,35 @@ export class OfferLetterService {
       throw new BadRequestException("Offer letter already generated");
     }
 
-    try {
-      const html = await this.buildHtml(applicationId);
+    const html = await this.buildHtml(applicationId);
 
-      // Convert HTML → PDF
-      const pdfBuffer = await htmlToPdf(html);
+    // Convert HTML → PDF
+    const pdfBuffer = await htmlToPdf(html);
 
-      // Generate secure storage key
-      const fileKey = `OfferLetters/${applicationId}_${Date.now()}.pdf`;
+    // Generate secure storage key
+    const fileKey = `OfferLetters/${applicationId}_${Date.now()}.pdf`;
 
-      // Upload to cloud
-      await this.storage.uploadPdf(pdfBuffer, fileKey);
+    // Upload to cloud
+    await this.storage.uploadPdf(pdfBuffer, fileKey);
 
-      const offerLetter = await this.prisma.offerLetter.create({
-        data: {
-          application_id: applicationId,
-          file_key: fileKey,
-          generated_by: adminId,
-          generated_at: new Date(),
-        },
-      });
+    const offerLetter = await this.prisma.offerLetter.create({
+      data: {
+        application_id: applicationId,
+        file_key: fileKey,
+        generated_by: adminId,
+        generated_at: new Date(),
+      },
+    });
 
-      //   console.log(
-      // '🚀 EMITTING application.offer_letter_ready',
-      // applicationId,
+    //   console.log(
+    // '🚀 EMITTING application.offer_letter_ready',
+    // applicationId,
 
-      return {
-        success: true,
-        offerLetter_Id: offerLetter.id,
-        FileKey: fileKey,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      success: true,
+      offerLetter_Id: offerLetter.id,
+      FileKey: fileKey,
+    };
   }
   //Emit event to send offer letter email
   emitOfferLetterMail(applicationId: string, signedUrl: string) {
