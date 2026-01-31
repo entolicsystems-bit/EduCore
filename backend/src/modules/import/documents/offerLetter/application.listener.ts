@@ -24,6 +24,7 @@ export class ApplicationListener {
       return result;
     } catch (error) {
       console.error("Offer letter generation failed:", error);
+      throw error;
     }
   }
 }
