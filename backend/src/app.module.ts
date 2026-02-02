@@ -20,6 +20,7 @@ import { join } from "path";
 import { StorageModule } from "./modules/import/documents/offerLetter/storage/awsStorage.module";
 import { StudentModule } from "./modules/student/student.module";
 import { OfferLetterModule } from './modules/import/documents/offerLetter/offer-letter.module';
+import { HealthController } from './modules/health.controller.ts';
 
 
 
@@ -63,6 +64,7 @@ import { OfferLetterModule } from './modules/import/documents/offerLetter/offer-
     OfferLetterModule
    
   ],
+  controllers: [HealthController],
 
   // providers: [
   //   {
