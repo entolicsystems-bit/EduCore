@@ -8,6 +8,11 @@ import * as bcrypt from "bcrypt";
 const prisma = new PrismaClient({
   accelerateUrl: process.env.DATABASE_URL, // ✅ works for Prisma Accelerate
 });
+// const prisma = new PrismaClient({
+//   datasource: {
+//     url: process.env.DIRECT_DATABASE_URL,
+//   },
+// });
 
 async function seedAdmin() {
   console.log("CRYPTO_SECRET from seed:", process.env.CRYPTO_SECRET);

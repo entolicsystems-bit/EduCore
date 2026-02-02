@@ -9,8 +9,6 @@
 # npx prisma generate
 # pm2 restart backend || pm2 start dist/main.js --name backend
 # pm2 save
-
-
 # #!/bin/bash
 # cd /home/ec2-user/EduCore/backend || exit 1
 # export $(grep -v '^#' .env | xargs)
@@ -59,6 +57,10 @@ npx prisma generate
 # 1️⃣ MIGRATION
 echo "📦 Running Prisma migrate deploy..."
 DATABASE_URL="$DIRECT_DATABASE_URL"
+# npx prisma migrate resolve --applied 20251218051251_make_email_unique
+
+
+
 npx prisma migrate deploy --schema prisma/schema.prisma || {
   echo "❌ Migration failed"
   exit 1
