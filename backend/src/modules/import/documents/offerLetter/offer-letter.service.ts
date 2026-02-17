@@ -160,10 +160,6 @@ export class OfferLetterService {
       },
     });
 
-    //   console.log(
-    // '🚀 EMITTING application.offer_letter_ready',
-    // applicationId,
-
     return {
       success: true,
       offerLetter_Id: offerLetter.id,
