@@ -11,8 +11,6 @@ model Lead {
   name         String
   phone        String         @unique
   email        String         @unique
-  phoneHash    String         @unique
-  emailHash    String         @unique
   source       String
   status       String         @default("NEW")
   owner_id     String?
@@ -21,6 +19,8 @@ model Lead {
   deleted_at   DateTime?
   branchId     String?        @db.Uuid
   tenantId     String?        @db.Uuid
+  emailHash    String         @unique
+  phoneHash    String         @unique
   applications Application[]
   activities   LeadActivity[]
 }
@@ -48,7 +48,6 @@ model User {
   updatedAt                  DateTime?           @map("updated_at")
   branchId                   String?             @db.Uuid
   role                       String?             @db.VarChar(250)
-  //students                 Student[]
   refreshTokens              RefreshToken[]
   roles                      UserRole[]
   verifiedAdmissionDocuments AdmissionDocument[] @relation("AdmissionDocumentVerifiedBy")
@@ -115,7 +114,6 @@ model RolePermission {
 
 model Application {
   id                 String              @id @default(uuid())
-  // student            Student?
   leadId             String
   programId          String
   formData           Json
@@ -160,15 +158,13 @@ model AdmissionDocument {
 model Student {
   tenant_id      String?  @db.Uuid
   application_id String   @unique @db.Uuid
- // application    Application @relation(fields: [application_id],references: [id])
-
   user_id        String   @db.Uuid
-  //user           User        @relation(fields: [user_id],references: [id])
-
   profile_data   Json
   status         String   @default("ENROLLED") @db.VarChar(20)
   created_at     DateTime @default(now())
   id             String   @id @default(uuid()) @db.Uuid
+  updated_at     DateTime @updatedAt
+  branch_id      String   @db.Uuid
 
   @@index([application_id], map: "idx_students_application_unique")
   @@index([user_id], map: "idx_students_user_id")
@@ -220,6 +216,65 @@ model AuditLog {
   newValue  Json?
   userId    String?
   createdAt DateTime @default(now())
+}
+
+model Course {
+  title       String   @db.VarChar(150)
+  description String?
+  duration    Int
+  subjects    Json
+  status      String   @default("ACTIVE") @db.VarChar(20)
+  branch_id   String?  @db.Uuid
+  created_at  DateTime @default(now())
+  tenant_id   String?  @db.Uuid
+  updated_at  DateTime @updatedAt
+  id          String   @id @default(uuid()) @db.Uuid
+
+  @@index([branch_id])
+}
+
+model Batch {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenant_id  String?  @db.Uuid
+  branch_id  String?  @db.Uuid
+  course_id  String   @db.Uuid
+  name       String   @db.VarChar(100)
+  start_date DateTime
+  end_date   DateTime
+  capacity   Int
+  timetable  Json?
+  status     String   @default("ACTIVE") @db.VarChar(20)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([course_id])
+  @@index([branch_id])
+}
+
+model TeacherAssignment {
+  id          String      @id @default(uuid()) @db.Uuid
+  teacher_id  String      @db.VarChar(250)
+  batch_id    String      @db.Uuid
+  role        TeacherRole
+  assigned_at DateTime    @default(now())
+
+  @@unique([teacher_id, batch_id])
+  @@index([batch_id])
+}
+
+model Enrollment {
+  id          String   @id @default(uuid()) @db.Uuid
+  student_id  String   @db.Uuid
+  batch_id    String   @db.Uuid
+  enrolled_at DateTime @default(now())
+
+  @@unique([student_id, batch_id])
+  @@index([batch_id])
+}
+
+enum TeacherRole {
+  PRIMARY
+  ASSISTANT
 }
 
 enum ApplicationStatus {

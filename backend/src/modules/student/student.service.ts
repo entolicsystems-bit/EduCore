@@ -22,7 +22,6 @@
 //           },
 //         });
 
-
 //         //If application not found trow error
 //         if (!application) {
 //           throw new BadRequestException("Application not found");
@@ -153,8 +152,6 @@
 //         };
 //       });
 
-
-
 //     } catch (error) {
 //       console.log(error);
 //       throw error;
@@ -163,9 +160,7 @@
 
 // }
 
-
-
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../database/prisma.service";
 import { ApplicationStatus } from "@prisma/client";
@@ -229,7 +224,9 @@ export class StudentService {
             application_id: application.id,
             user_id: application.reviewedBy ?? user.id,
             tenant_id: application.tenantId,
+            branch_id: application.branchId ?? user.branchId,
             status: "ENROLLED",
+
             profile_data: {
               roll_number: rollNumber,
               personal: {
@@ -306,7 +303,7 @@ export class StudentService {
       });
 
       // 🔔 STUDENT ENROLLED EVENT (AFTER COMMIT)
-      this.eventEmitter.emit('application.student_enrolled', {
+      this.eventEmitter.emit("application.student_enrolled", {
         applicationId: result.application_id,
         studentId: result.student_id,
       });
@@ -318,4 +315,3 @@ export class StudentService {
     }
   }
 }
-
