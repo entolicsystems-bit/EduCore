@@ -11,82 +11,62 @@ export class LeadsRepository {
   }
 
   findLeads(
-    filters: any,
-    user: { id: string; role: string; tenantId: string; branchId: string },
-  ) {
-    const page = Number(filters.page) || 1;
-    const limit = Math.min(Number(filters.limit) || 20, 50);
-    const skip = (page - 1) * limit;
+  filters: any,
+  user: { id: string; role: string; tenantId: string; branchId: string },
+) {
+  const page = Number(filters.page) || 1;
+  const limit = Math.min(Number(filters.limit) || 20, 50);
+  const skip = (page - 1) * limit;
 
-    /**
-     * 🔐 MULTI-TENANT + IDOR PROTECTION
-     * --------------------------------------------------
-     * Every query must be scoped to tenant and branch.
-     * This prevents cross-tenant data leakage.
-     */
-    const where: any = {
-      deleted_at: null,
-      tenantId: user.tenantId,
-      branchId: user.branchId,
-    };
+  const where: any = {
+    deleted_at: null,
+    OR:[
+   { tenantId: user.tenantId }, // tenant isolation ALWAYS
+    {tenantId: null}            // admin can access all leads admin and public
+    ]
+  };
 
-    /**
-     * 🔐 ROLE-BASED OWNERSHIP ENFORCEMENT
-     * --------------------------------------------------
-     * Counsellors can only see their own leads.
-     * Admins can filter by owner_id.
-     */
-    if (user.role === "COUNSELLOR") {
-      where.owner_id = user.id;
-    } else if (filters.owner_id) {
-      where.owner_id = filters.owner_id;
-    }
 
-    /**
-     * 🔐 FILTER VALIDATION
-     */
-    if (filters.status) {
-      where.status = filters.status;
-    }
-
-    if (filters.source) {
-      where.source = filters.source;
-    }
-
-    /**
-     * 🔐 DATE RANGE VALIDATION (optional but recommended)
-     */
-    if (filters.fromDate && filters.toDate) {
-      where.updatedAt = {
-        gte: new Date(filters.fromDate),
-        lte: new Date(filters.toDate),
-      };
-    }
-
-    return this.prisma.lead.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: {
-        updatedAt: "desc",
-      },
-
-      /**
-       * 🔐 DATA MINIMIZATION
-       * --------------------------------------------------
-       * Never expose tenantId, branchId, or deleted_at
-       */
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        email: true,
-        status: true,
-        source: true,
-        updatedAt: true,
-      },
-    });
+  // 🔀 Branch isolation (ADMIN can see all branches)
+  if (user.role !== "ADMIN") {
+    where.branchId = user.branchId;
   }
+
+  // 👤 Counsellor: only own leads
+  if (user.role === "COUNSELLOR") {
+    where.owner_id = user.id;
+  } else if (filters.owner_id) {
+    where.owner_id = filters.owner_id;
+  }
+
+  // Filters
+  if (filters.status) where.status = filters.status;
+  if (filters.source) where.source = filters.source;
+
+  if (filters.fromDate && filters.toDate) {
+    where.updatedAt = {
+      gte: new Date(filters.fromDate),
+      lte: new Date(filters.toDate),
+    };
+  }
+
+  return this.prisma.lead.findMany({
+    where,
+    skip,
+    take: limit,
+    orderBy: { updatedAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      email: true,
+      status: true,
+      source: true,
+      updatedAt: true,
+    },
+  });
+}
+
 
   findById(id: string) {
     return this.prisma.lead.findUnique({
