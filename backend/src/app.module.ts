@@ -1,4 +1,4 @@
-import { NotificationModule } from './modules/notifications/notification.module';
+import { NotificationModule } from "./modules/notifications/notification.module";
 import { ApplicationModule } from "./modules/application/application.module";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
@@ -19,16 +19,13 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "path";
 import { StorageModule } from "./modules/import/documents/offerLetter/storage/awsStorage.module";
 import { StudentModule } from "./modules/student/student.module";
-import { OfferLetterModule } from './modules/import/documents/offerLetter/offer-letter.module';
-
-
+import { OfferLetterModule } from "./modules/import/documents/offerLetter/offer-letter.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",
-     
     }),
     // ThrottlerModule.forRoot({
     //   throttlers: [
@@ -43,7 +40,7 @@ import { OfferLetterModule } from './modules/import/documents/offerLetter/offer-
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), "public"),
     }),
-    EventEmitterModule.forRoot(),
+    EventEmitterModule.forRoot({ wildcard: true, verboseMemoryLeak: true }),
     DatabaseModule,
     StorageModule,
 
@@ -55,13 +52,12 @@ import { OfferLetterModule } from './modules/import/documents/offerLetter/offer-
     StudentModule,
     CsvModule,
     documentModule,
-    verifyDocumentModule,
     AuditLogModule,
     RolesModule,
     WinstonModule.forRoot(winstonOpions),
     ApplicationModule,
-    OfferLetterModule
-   
+    OfferLetterModule,
+    verifyDocumentModule,
   ],
 
   // providers: [

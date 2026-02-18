@@ -7,7 +7,7 @@ import {
 } from "@prisma/client";
 import { PrismaService } from "src/database/prisma.service";
 import { VerifyDocumentDto } from "src/dto/verify-document.dto";
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 @Injectable()
 export class VerifyDocumentService {
@@ -16,7 +16,6 @@ export class VerifyDocumentService {
   private readonly prisma: PrismaService,
   private readonly eventEmitter: EventEmitter2,
 ) {}
-
 
   async verifyOneDocument(
     documentId: string,
@@ -38,54 +37,58 @@ export class VerifyDocumentService {
       throw new BadRequestException("Document already processed");
     }
 
-    await this.prisma.$transaction(async (tx) => {
-      const updatedDoc = await tx.admissionDocument.update({
-        where: { id: documentId },
-        data: {
-          status: dto.status,
-          verifiedBy: admin.id,
-          verifiedAt: new Date(),
-        },
-      });
-
-      await tx.audit_Logs.create({
-        data: {
-          action: "VERIFY_DOCUMENT",
-          entityType: "ADMISSION_DOCUMENT",
-          entityId: documentId,
-          actorId: admin.id,
-          metadata: {
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const updatedDoc = await tx.admissionDocument.update({
+          where: { id: documentId },
+          data: {
             status: dto.status,
-            comments: dto.comments,
+            verifiedBy: admin.id,
+            verifiedAt: new Date(),
           },
-        },
-      });
+        });
 
-      if (dto.status === DocumentStatus.VERIFIED) {
-        const allVerified = await this.handleAllDocumentsVerified(
-          updatedDoc.applicationId,
-          tx,
-          admin.id,
-        );
+        await tx.audit_Logs.create({
+          data: {
+            action: "VERIFY_DOCUMENT",
+            entityType: "ADMISSION_DOCUMENT",
+            entityId: documentId,
+            actorId: admin.id,
+            metadata: {
+              status: dto.status,
+              comments: dto.comments,
+            },
+          },
+        });
 
-        if (allVerified) {
-          shouldEmit = true;
-          applicationIdToEmit = updatedDoc.applicationId;
+        if (dto.status === DocumentStatus.VERIFIED) {
+          const allVerified = await this.handleAllDocumentsVerified(
+            updatedDoc.applicationId,
+            tx,
+            admin.id,
+          );
+
+          if (allVerified) {
+            shouldEmit = true;
+            applicationIdToEmit = updatedDoc.applicationId;
+          }
         }
-      }
-    });
-
-    // EVENT AFTER TRANSACTION COMMIT
-    if (shouldEmit && applicationIdToEmit) {
-      this.eventEmitter.emit("application.document_verified", {
-        applicationId: applicationIdToEmit,
-        adminId: admin.id,
       });
-    }
 
-    return {
-      success: true,
-    };
+      // EVENT AFTER TRANSACTION COMMIT
+      if (shouldEmit && applicationIdToEmit) {
+        this.eventEmitter.emit("application.document_verified", {
+          applicationId: applicationIdToEmit,
+          adminId: admin.id,
+        });
+      }
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async bulkVerifyDocuments(
@@ -104,18 +107,18 @@ export class VerifyDocumentService {
         if (doc.status !== DocumentStatus.UPLOADED) {
           throw new BadRequestException(`Document ${doc.id} already processed`);
         }
-      //   await tx.audit_Logs.create({
-      //   data: {
-      //     action: "Bulk_VERIFY_DOCUMENT",
-      //     entityType: "ADMISSION_DOCUMENT",
-      //     entityId: doc.id,
-      //     actorId: admin.id,
-      //     metadata: {
-      //       status: dto.status,
-      //       comments: dto.comments,
-      //     },
-      //   },
-      // });
+        //   await tx.audit_Logs.create({
+        //   data: {
+        //     action: "Bulk_VERIFY_DOCUMENT",
+        //     entityType: "ADMISSION_DOCUMENT",
+        //     entityId: doc.id,
+        //     actorId: admin.id,
+        //     metadata: {
+        //       status: dto.status,
+        //       comments: dto.comments,
+        //     },
+        //   },
+        // });
         if (dto.status === DocumentStatus.VERIFIED) {
           const allVerified = await this.handleAllDocumentsVerified(
             doc.applicationId,
@@ -131,9 +134,9 @@ export class VerifyDocumentService {
     });
 
     console.log(
-  '🚀 EMITTING application.document_verified',
-  applicationsToEmit,
-);
+      "🚀 EMITTING application.document_verified",
+      applicationsToEmit,
+    );
 
     //Emit AFTER commit
     for (const applicationId of applicationsToEmit) {
@@ -199,3 +202,4 @@ export class VerifyDocumentService {
 }
 
 }
+

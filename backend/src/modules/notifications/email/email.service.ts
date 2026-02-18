@@ -1,43 +1,31 @@
-import { NotificationEvents } from "../../../constants/notification-event.constant";
 import { Injectable, Logger } from "@nestjs/common";
-import * as nodemailer from "nodemailer";
+import { Resend } from "resend";
 import * as fs from "fs";
 import * as path from "path";
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private transporter: nodemailer.Transporter;
+  private resend: Resend;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.logger.log("✅ Resend Initialized");
   }
 
   // ===========================
-  // TEST EMAIL
+  // Sender Email Selector
   // ===========================
-  async sendTestEmail(to: string) {
-    await this.transporter.sendMail({
-      from: '"EduCore Test" <sakshikohale.rkinfynova@gmail.com>',
-      to,
-      subject: "Test Email from EduCore",
-      text: "Email service is working correctly 🎉",
-    });
-
-    this.logger.log(`✅ Test email sent to ${to}`);
+  private getEmailAddress(type: "contact" | "hr"): string {
+    if (type === "contact") {
+      return "contact@entolicsystems.com";
+    }
+    return "hr@entolicsystems.com";
   }
 
-  // ======================================================
-  // PUBLIC METHODS CALLED BY NotificationHandler ✅
-  // ======================================================
+  // ===========================
+  // PUBLIC METHODS
+  // ===========================
 
   async sendApplicationSubmitted(payload: any) {
     return this.sendTemplate(
@@ -45,16 +33,17 @@ export class EmailService {
       "Application Submitted",
       "application-submitted.html",
       payload,
+      "hr"
     );
   }
 
   async sendDocumentVerified(payload: any) {
-    console.log("📧 sendOfferLetter called with", payload);
     return this.sendTemplate(
       payload.to,
       "Documents Verified",
       "document-verified.html",
       payload,
+      "hr"
     );
   }
 
@@ -64,6 +53,7 @@ export class EmailService {
       "Application Status Updated",
       "status-changed.html",
       payload,
+      "hr"
     );
   }
 
@@ -73,6 +63,7 @@ export class EmailService {
       "Offer Letter Available",
       "offer-letter.html",
       payload,
+      "hr"
     );
   }
 
@@ -82,24 +73,29 @@ export class EmailService {
       "Welcome to EduCore 🎓",
       "welcome-student.html",
       payload,
+      "contact"
     );
   }
 
   // ===========================
   // INTERNAL TEMPLATE HANDLER
   // ===========================
+
   private async sendTemplate(
     to: string,
     subject: string,
     templateName: string,
     data: Record<string, any>,
+    senderType: "contact" | "hr"
   ) {
-    if (!to) throw new Error("Recipient email missing");
+    if (!to) {
+      throw new Error("Recipient email missing");
+    }
 
     const templatePath = path.resolve(
       process.cwd(),
       "src/modules/notifications/email/templates",
-      templateName,
+      templateName
     );
 
     if (!fs.existsSync(templatePath)) {
@@ -112,17 +108,23 @@ export class EmailService {
     for (const [key, value] of Object.entries(data)) {
       html = html.replace(
         new RegExp(`{{\\s*${key}\\s*}}`, "g"),
-        String(value ?? ""),
+        String(value ?? "")
       );
     }
 
-    await this.transporter.sendMail({
-      from: '"EduCore Admissions" <sakshikohale.rkinfynova@gmail.com>',
+    const response = await this.resend.emails.send({
+      from: `EduCore <${this.getEmailAddress(senderType)}>`,
       to,
       subject,
       html,
     });
 
-    this.logger.log(`✅ Email sent to ${to} | ${subject}`);
+    if (response.data) {
+      this.logger.log(`✅ Email sent to ${to} | ID: ${response.data.id}`);
+    } else {
+      this.logger.error(`❌ Email failed`, response.error);
+    }
+
+    return response;
   }
 }

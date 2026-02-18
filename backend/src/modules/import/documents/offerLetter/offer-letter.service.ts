@@ -1,4 +1,4 @@
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   BadRequestException,
   Injectable,
@@ -12,21 +12,23 @@ import { StorageService } from "./storage/awsStorage.service";
 import { ApplicationStatus } from "@prisma/client";
 import { CryptoUtil } from "src/common/crypto/crypto.util";
 
-
 @Injectable()
 export class OfferLetterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
-  private readonly eventEmitter: EventEmitter2, // ✅ correct
-  ) {console.log("OfferLetterService initialized");}
+    private readonly eventEmitter: EventEmitter2, // ✅ correct
+  ) {
+    console.log("OfferLetterService initialized");
+  }
 
   //Logo Base64
   private getLogoBase64(): string {
-    const logoPath = path.join(
-      process.cwd(),
-      "src/modules/import/documents/offerLetter/templates/logo.jpg",
-    );
+    const logoPath = path.join(__dirname, "templates", "logo.jpg");
+
+    if (!fs.existsSync(logoPath)) {
+      throw new Error(`Logo not found at ${logoPath}`);
+    }
 
     const file = fs.readFileSync(logoPath);
     return `data:image/jpeg;base64,${file.toString("base64")}`;
@@ -72,10 +74,7 @@ export class OfferLetterService {
       ACCEPTANCE_DEADLINE: this.formatDate(this.addDays(new Date(), 10)),
     };
 
-    const templatePath = path.join(
-      process.cwd(),
-      "src/modules/import/documents/offerLetter/templates/offer-letter.html",
-    );
+    const templatePath = path.join(__dirname, "templates", "offer-letter.html");
 
     let html = fs.readFileSync(templatePath, "utf8");
 
@@ -161,24 +160,19 @@ export class OfferLetterService {
       },
     });
 
-  //   console.log(
-  // '🚀 EMITTING application.offer_letter_ready',
-  // applicationId,
-
-
     return {
       success: true,
       offerLetter_Id: offerLetter.id,
       FileKey: fileKey,
     };
   }
-//Emit event to send offer letter email
+  //Emit event to send offer letter email
   emitOfferLetterMail(applicationId: string, signedUrl: string) {
-  this.eventEmitter.emit("application.offer_letter_ready", {
-    applicationId,
-    signedUrl,
-  });
-}
+    this.eventEmitter.emit("application.offer_letter_ready", {
+      applicationId,
+      signedUrl,
+    });
+  }
 
   //Helpers functions
   private formatDate(date: Date) {
