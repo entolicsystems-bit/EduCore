@@ -50,6 +50,7 @@ model User {
   role                       String?             @db.VarChar(250)
   refreshTokens              RefreshToken[]
   roles                      UserRole[]
+  students_updated           Student[]
   verifiedAdmissionDocuments AdmissionDocument[] @relation("AdmissionDocumentVerifiedBy")
 
   @@map("User")
@@ -128,6 +129,7 @@ model Application {
   branchId           String?             @db.Uuid
   applicationRef     String?             @unique @db.VarChar(30)
   lead               Lead                @relation(fields: [leadId], references: [id])
+  student            Student?
   admissionDocuments AdmissionDocument[]
 
   @@index([tenantId, leadId])
@@ -156,18 +158,21 @@ model AdmissionDocument {
 }
 
 model Student {
-  tenant_id      String?  @db.Uuid
-  application_id String   @unique @db.Uuid
-  user_id        String   @db.Uuid
+  tenant_id      String?      @db.Uuid
+  application_id String       @unique 
+  application    Application  @relation(fields: [application_id], references: [id])
+  created_by     String       @db.Uuid
   profile_data   Json
-  status         String   @default("ENROLLED") @db.VarChar(20)
-  created_at     DateTime @default(now())
-  id             String   @id @default(uuid()) @db.Uuid
-  updated_at     DateTime @updatedAt
-  branch_id      String   @db.Uuid
+  status         String       @default("ENROLLED") @db.VarChar(20)
+  created_at     DateTime     @default(now())
+  id             String       @id @default(uuid()) @db.Uuid
+  updated_at     DateTime     @updatedAt
+  updated_by_id  String?      
+  updated_by     User?        @relation(fields: [updated_by_id],references: [id])
+  branch_id      String       @db.Uuid
 
   @@index([application_id], map: "idx_students_application_unique")
-  @@index([user_id], map: "idx_students_user_id")
+  @@index([created_by], map: "idx_students_user_id")
 }
 
 model OfferLetter {
