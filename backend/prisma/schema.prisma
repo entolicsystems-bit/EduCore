@@ -170,7 +170,6 @@ model Student {
   updated_by_id  String?      
   updated_by     User?        @relation(fields: [updated_by_id],references: [id])
   branch_id      String       @db.Uuid
-  timetable      Timetable[]
 
   @@index([application_id], map: "idx_students_application_unique")
   @@index([created_by], map: "idx_students_user_id")
@@ -266,18 +265,6 @@ model TeacherAssignment {
 
   @@unique([teacher_id, batch_id])
   @@index([batch_id])
-}
-
-model Timetable {
-  id         String   @id @default(uuid()) @db.Uuid
-  studentId  String   @db.Uuid
-  day        String   
-  slot       String   
-  subject    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  student    Student  @relation(fields: [studentId], references: [id])
 }
 
 model Enrollment {
