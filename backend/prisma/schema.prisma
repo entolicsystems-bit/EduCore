@@ -158,19 +158,18 @@ model AdmissionDocument {
 }
 
 model Student {
-  tenant_id      String?      @db.Uuid
-  application_id String       @unique 
-  application    Application  @relation(fields: [application_id], references: [id])
-  created_by     String       @db.Uuid
+  tenant_id      String?     @db.Uuid
+  application_id String      @unique
+  application    Application @relation(fields: [application_id], references: [id])
+  created_by     String      @db.Uuid
   profile_data   Json
-  status         String       @default("ENROLLED") @db.VarChar(20)
-  created_at     DateTime     @default(now())
-  id             String       @id @default(uuid()) @db.Uuid
-  updated_at     DateTime     @updatedAt
-  updated_by_id  String?      
-  updated_by     User?        @relation(fields: [updated_by_id],references: [id])
-  branch_id      String       @db.Uuid
-  timetable      Timetable[]
+  status         String      @default("ENROLLED") @db.VarChar(20)
+  created_at     DateTime    @default(now())
+  id             String      @id @default(uuid()) @db.Uuid
+  updated_at     DateTime    @updatedAt
+  updated_by_id  String?
+  updated_by     User?       @relation(fields: [updated_by_id], references: [id])
+  branch_id      String      @db.Uuid
 
   @@index([application_id], map: "idx_students_application_unique")
   @@index([created_by], map: "idx_students_user_id")
@@ -236,6 +235,8 @@ model Course {
   updated_at  DateTime @updatedAt
   id          String   @id @default(uuid()) @db.Uuid
 
+  batches Batch[]
+
   @@index([branch_id])
 }
 
@@ -253,8 +254,14 @@ model Batch {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  course Course @relation(fields: [course_id], references: [id])
+
+  // 2. THIS LINE ALLOWS: include: { enrollments: true }
+  enrollments Enrollment[]
+
   @@index([course_id])
   @@index([branch_id])
+  @@map("batches")
 }
 
 model TeacherAssignment {
@@ -268,23 +275,13 @@ model TeacherAssignment {
   @@index([batch_id])
 }
 
-model Timetable {
-  id         String   @id @default(uuid()) @db.Uuid
-  studentId  String   @db.Uuid
-  day        String   
-  slot       String   
-  subject    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  student    Student  @relation(fields: [studentId], references: [id])
-}
-
 model Enrollment {
   id          String   @id @default(uuid()) @db.Uuid
   student_id  String   @db.Uuid
   batch_id    String   @db.Uuid
   enrolled_at DateTime @default(now())
+
+  batch Batch? @relation(fields: [batch_id], references: [id])
 
   @@unique([student_id, batch_id])
   @@index([batch_id])
