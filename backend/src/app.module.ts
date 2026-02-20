@@ -21,6 +21,7 @@ import { StorageModule } from "./modules/import/documents/offerLetter/storage/aw
 import { StudentModule } from "./modules/student/student.module";
 import { OfferLetterModule } from "./modules/import/documents/offerLetter/offer-letter.module";
 import { CourseModule } from "./modules/course/course.module";
+import { ParentModule } from "./modules/parent/parent.module";
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { CourseModule } from "./modules/course/course.module";
     OfferLetterModule,
     verifyDocumentModule,
     CourseModule,
+    ParentModule,
   ],
 
   // providers: [

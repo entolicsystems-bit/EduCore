@@ -2,7 +2,8 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
-  InternalServerErrorException
+  InternalServerErrorException,
+  Req
 } from "@nestjs/common";
 import { PrismaService } from "src/database/prisma.service";
 import { CreateCourseDto } from "src/dto/create-course.dto";
