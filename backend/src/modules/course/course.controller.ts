@@ -6,11 +6,15 @@ import {
   Delete,
   Param,
   Body,
-  Query
+  Query,
+  UseGuards
 } from "@nestjs/common";
 import { CourseService } from "./course.service";
 import { CreateCourseDto } from "src/dto/create-course.dto";
 import { UpdateCourseDto } from "src/dto/update-course.dto";
+import { JwtAuthGuard } from "src/guards/jwt-auth.guard";
+import { RolesGuard } from "src/guards/roles.guard";
+import { Roles } from "src/common/decorator/roles.decorator";
 
 @Controller("courses")
 export class CourseController {
@@ -18,6 +22,8 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   // ================= CREATE COURSE =================
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
   @Post()
   async create(@Body() dto: CreateCourseDto) {
     return this.courseService.create(dto);

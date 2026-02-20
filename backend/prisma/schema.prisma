@@ -7,7 +7,7 @@ datasource db {
 }
 
 model Lead {
-  id           String         @id @default(uuid())
+  id           String         @id @default(uuid()) @db.Uuid
   name         String
   phone        String         @unique
   email        String         @unique
@@ -26,8 +26,8 @@ model Lead {
 }
 
 model LeadActivity {
-  id        String   @id @default(uuid())
-  lead_id   String
+  id        String   @id @default(uuid()) @db.Uuid
+  lead_id   String   @db.Uuid
   action    String
   metadata  Json?
   createdAt DateTime @default(now())
@@ -37,7 +37,8 @@ model LeadActivity {
 }
 
 model User {
-  id                         String              @id @default(uuid()) @db.VarChar(250)
+  //id                       String              @id @default(uuid()) @db.VarChar(250)
+  id                         String              @id @default(uuid()) @db.Uuid
   name                       String              @db.VarChar(250)
   email                      String              @unique @db.VarChar(250)
   createdAt                  DateTime            @default(now())
@@ -52,14 +53,17 @@ model User {
   roles                      UserRole[]
   students_updated           Student[]
   verifiedAdmissionDocuments AdmissionDocument[] @relation("AdmissionDocumentVerifiedBy")
+  teacherAssignments         TeacherAssignment[]
+  staffs                     Staff[]
+  parents                    Parent[]
 
   @@map("User")
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
   tokenHash String
-  userId    String
   expiresAt DateTime
   createdAt DateTime @default(now())
   jti       String   @unique
@@ -80,11 +84,11 @@ model Role {
 }
 
 model UserRole {
-  id     Int    @id @default(autoincrement())
-  userId String
+  userId String  @db.Uuid
   roleId Int
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffs Staff[]
 
   @@unique([userId, roleId])
   @@index([userId])
@@ -114,14 +118,16 @@ model RolePermission {
 }
 
 model Application {
-  id                 String              @id @default(uuid())
-  leadId             String
-  programId          String
+  id         String  @id @default(uuid()) @db.Uuid
+  leadId     String  @db.Uuid
+  programId  String  @db.Uuid
+  reviewedBy String? @db.Uuid
+
   formData           Json
   status             ApplicationStatus   @default(DRAFT)
   submittedAt        DateTime?
-  reviewedBy         String?
   notes              String?
+  leadImageUrl       String?             @db.VarChar(500)
   deletedAt          DateTime?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
@@ -138,15 +144,15 @@ model Application {
 }
 
 model AdmissionDocument {
-  id            String         @id @default(uuid())
-  applicationId String
+  id            String         @id @default(uuid()) @db.Uuid
+  applicationId String         @db.Uuid
   documentType  DocumentType
   fileKey       String
   fileName      String?
   fileSize      BigInt
   fileType      String
   status        DocumentStatus @default(UPLOADED)
-  verifiedBy    String?        @db.VarChar(250)
+ verifiedBy String? @db.Uuid
   verifiedAt    DateTime?
   createdAt     DateTime       @default(now())
   application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
@@ -158,21 +164,25 @@ model AdmissionDocument {
 }
 
 model Student {
-  tenant_id      String?      @db.Uuid
-  application_id String       @unique 
-  application    Application  @relation(fields: [application_id], references: [id])
-  created_by     String       @db.Uuid
+  tenant_id      String?           @db.Uuid
+  application_id String            @unique @db.Uuid
+  application    Application       @relation(fields: [application_id], references: [id])
+  created_by     String            @db.Uuid
   profile_data   Json
-  status         String       @default("ENROLLED") @db.VarChar(20)
-  created_at     DateTime     @default(now())
-  id             String       @id @default(uuid()) @db.Uuid
-  updated_at     DateTime     @updatedAt
-  updated_by_id  String?      
-  updated_by     User?        @relation(fields: [updated_by_id],references: [id])
-  branch_id      String       @db.Uuid
+  created_at     DateTime          @default(now())
+  id             String            @id @default(uuid()) @db.Uuid
+  updated_at     DateTime          @updatedAt
+  status         ApplicationStatus @default(ENROLLED)
+  student_status StudentStatus     @default(ACTIVE)
+  updated_by_id  String? @db.Uuid
+  updated_by     User?             @relation(fields: [updated_by_id], references: [id])
+  branch_id      String            @db.Uuid
+  is_deleted           Boolean                   @default(false) 
+  deleted_at          DateTime?     
 
-  timetable      Timetable[]
-
+  timetable         Timetable[]
+  parentStudentMaps PARENT_STUDENT_MAP[]
+  enrollments       Enrollment[]
 
   @@index([application_id], map: "idx_students_application_unique")
   @@index([created_by], map: "idx_students_user_id")
@@ -189,7 +199,7 @@ model OfferLetter {
 }
 
 model ActivityTimeline {
-  id          String             @id @default(uuid())
+  id          String             @id @default(uuid()) @db.Uuid
   entityType  TimelineEntityType
   entityId    String             @db.Uuid
   eventType   TimelineEventType
@@ -203,7 +213,7 @@ model ActivityTimeline {
 }
 
 model Audit_Logs {
-  id         String   @id @default(uuid())
+  id         String   @id @default(uuid()) @db.Uuid
   action     String   @db.VarChar(100)
   entityType String   @db.VarChar(50)
   entityId   String   @db.Uuid
@@ -226,71 +236,134 @@ model AuditLog {
   createdAt DateTime @default(now())
 }
 
-model Course {
-  title       String   @db.VarChar(150)
-  description String?
-  duration    Int
-  subjects    Json
-  status      String   @default("ACTIVE") @db.VarChar(20)
-  branch_id   String?  @db.Uuid
-  created_at  DateTime @default(now())
-  tenant_id   String?  @db.Uuid
-  updated_at  DateTime @updatedAt
-  id          String   @id @default(uuid()) @db.Uuid
+//sprint 3 
 
-  @@index([branch_id])
+model Staff {
+  id         String      @id @default(uuid()) @db.Uuid
+  tenantId   String      @db.Uuid
+  branchId   String      @db.Uuid
+  userId     String      @db.Uuid
+  name       String      @db.VarChar(150)
+  role       String      @db.VarChar(50)
+  department String?     @db.VarChar(100)
+  status     StaffStatus @default(ACTIVE)
+  createdAt  DateTime    @default(now())
+
+  user           User                @relation(fields: [userId], references: [id])
+  assignments    TeacherAssignment[]
+  userRoleId     Int
+  userRole       UserRole?           @relation(fields: [userRoleUserId, userRoleRoleId], references: [userId, roleId])
+  userRoleUserId String?             @db.Uuid
+  userRoleRoleId Int?
+
+  @@map("staff")
+}
+
+model Parent {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  branchId     String   @db.Uuid
+  userId       String?  @db.Uuid
+  name         String   @db.VarChar(150)
+  phone        String?  @unique @db.VarChar(20)
+  email        String?  @unique @db.VarChar(150)
+  relationship String   @db.VarChar(50) // FATHER / MOTHER / GUARDIAN
+  status       String   @default("ACTIVE") @db.VarChar(20)
+  createdAt    DateTime @default(now())
+
+  user     User?                @relation(fields: [userId], references: [id])
+  students PARENT_STUDENT_MAP[]
+
+  @@map("parents")
+}
+
+model PARENT_STUDENT_MAP {
+  id        String   @id @default(uuid()) @db.Uuid
+  parentId  String   @db.Uuid
+  studentId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  parent  Parent  @relation(fields: [parentId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("parent_students")
+}
+
+model Course {
+  id           String        @id @default(uuid()) @db.Uuid
+  tenantId     String        @db.Uuid
+  name         String        @db.VarChar(150)
+  description  String?
+  subjects     Json?
+  status       CourseStatus  @default(ACTIVE)
+  duration     Int?
+  durationType DurationType?
+  createdAt    DateTime      @default(now())
+
+  batches Batch[]
+
+  @@map("courses")
 }
 
 model Batch {
-  id         String   @id @default(uuid()) @db.Uuid
-  tenant_id  String?  @db.Uuid
-  branch_id  String?  @db.Uuid
-  course_id  String   @db.Uuid
-  name       String   @db.VarChar(100)
-  start_date DateTime
-  end_date   DateTime
-  capacity   Int
-  timetable  Json?
-  status     String   @default("ACTIVE") @db.VarChar(20)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  courseId  String    @db.Uuid
+  tenantId  String    @db.Uuid
+  branchId  String    @db.Uuid
+  name      String    @db.VarChar(100)
+  capacity  Int
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
 
-  @@index([course_id])
-  @@index([branch_id])
+  course      Course              @relation(fields: [courseId], references: [id])
+  enrollments Enrollment[]
+  assignments TeacherAssignment[]
+  timetable   Timetable?
+
+  @@map("batches")
 }
 
 model TeacherAssignment {
-  id          String      @id @default(uuid()) @db.Uuid
-  teacher_id  String      @db.VarChar(250)
-  batch_id    String      @db.Uuid
-  role        TeacherRole
-  assigned_at DateTime    @default(now())
+  id        String   @id @default(uuid()) @db.Uuid
+  teacherId String   @db.Uuid
+  batchId   String   @db.Uuid
+  role      String   @db.VarChar(20) // PRIMARY / ASSISTANT
+  createdAt DateTime @default(now())
 
-  @@unique([teacher_id, batch_id])
-  @@index([batch_id])
+  teacher Staff   @relation(fields: [teacherId], references: [id])
+  batch   Batch   @relation(fields: [batchId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+ userId String? @db.Uuid
+
+  @@map("teacher_assignments")
 }
 
 model Timetable {
-  id         String   @id @default(uuid()) @db.Uuid
-  studentId  String   @db.Uuid
-  day        String   
-  slot       String   
-  subject    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String   @id @default(uuid()) @db.Uuid
+  batchId       String   @unique @db.Uuid
+  timetableJson Json
+  updatedAt     DateTime @updatedAt
 
-  student    Student  @relation(fields: [studentId], references: [id])
+  batch     Batch    @relation(fields: [batchId], references: [id])
+  student   Student? @relation(fields: [studentId], references: [id])
+  studentId String?  @db.Uuid
+
+  @@map("timetables")
 }
 
-
 model Enrollment {
-  id          String   @id @default(uuid()) @db.Uuid
-  student_id  String   @db.Uuid
-  batch_id    String   @db.Uuid
-  enrolled_at DateTime @default(now())
+  id         String           @id @default(uuid()) @db.Uuid
+  studentId  String           @db.Uuid
+  batchId    String           @db.Uuid
+  status     EnrollmentStatus @default(ENROLLED)
+  enrolledAt DateTime         @default(now())
 
-  @@unique([student_id, batch_id])
-  @@index([batch_id])
+  student Student @relation(fields: [studentId], references: [id])
+  batch   Batch   @relation(fields: [batchId], references: [id])
+
+  @@unique([studentId, batchId])
+  @@map("enrollments")
 }
 
 enum TeacherRole {
@@ -306,6 +379,11 @@ enum ApplicationStatus {
   REJECTED
   ENROLLED
   DRAFT
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
 }
 
 enum DocumentStatus {
@@ -337,4 +415,24 @@ enum DocumentType {
   ACADEMIC_RECORD
   PHOTO
   OTHER
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  DROPPED
+}
+
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CourseStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum DurationType {
+  MONTH
+  YEAR
 }
