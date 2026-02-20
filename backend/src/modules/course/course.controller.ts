@@ -6,7 +6,6 @@ import {
   Delete,
   Param,
   Body,
-  Query,
   UseGuards
 } from "@nestjs/common";
 import { CourseService } from "./course.service";
@@ -22,38 +21,37 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   // ================= CREATE COURSE =================
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN")
+  //@UseGuards(JwtAuthGuard, RolesGuard)
+  //@Roles("ADMIN")
   @Post()
   async create(@Body() dto: CreateCourseDto) {
     return this.courseService.create(dto);
   }
 
   // ================= GET ALL COURSES =================
-  // Example → /courses?tenantId=uuid
   @Get()
-  async findAll(@Query("tenantId") tenantId: string) {
-    return this.courseService.findAll(tenantId);
+  async getAll() {
+    return this.courseService.getAll();
   }
 
-  // ================= GET COURSE BY ID =================
+  // ================= GET COURSE BY COURSE ID =================
   @Get(":id")
-  async findOne(@Param("id") id: string) {
-    return this.courseService.findOne(id);
+  async getById(@Param("id") id: string) {
+    return this.courseService.getById(id);
   }
 
-  // ================= UPDATE COURSE =================
+  // ================= UPDATE COURSE BY COURSE ID =================
   @Put(":id")
-  async update(
+  async updateById(
     @Param("id") id: string,
     @Body() dto: UpdateCourseDto
   ) {
-    return this.courseService.update(id, dto);
+    return this.courseService.updateById(id, dto);
   }
 
-  // ================= DELETE COURSE =================
+  // ================= DELETE COURSE BY COURSE ID =================
   @Delete(":id")
-  async delete(@Param("id") id: string) {
-    return this.courseService.delete(id);
+  async deleteById(@Param("id") id: string) {
+    return this.courseService.deleteById(id);
   }
 }

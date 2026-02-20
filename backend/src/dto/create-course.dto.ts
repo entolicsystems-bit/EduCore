@@ -4,42 +4,41 @@ import {
   IsInt,
   IsArray,
   ValidateNested,
-  IsUUID
+  IsUUID,
+  IsEnum
 } from "class-validator";
 import { Type } from "class-transformer";
-
-class SubjectJsonDto {
-
-  @IsString()
-  name: string;
-
-  @IsString()
-  code: string;
-
-  @IsInt()
-  credits: number;
-}
+import { CourseStatus, DurationType } from "@prisma/client";
+import { SubjectJsonDto } from "./subject-json.dto";
+//import { SubjectJsonDto } from "./subject-json.dto.ts";
 
 export class CreateCourseDto {
 
+  @IsUUID()
+  tenantId: string;
+
   @IsString()
-  title: string;
+  name: string;
 
   @IsOptional()
   @IsString()
   description?: string;
 
-  @IsInt()
-  duration: number;
-
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SubjectJsonDto)
-  subjects: SubjectJsonDto[];
+  subjects?: SubjectJsonDto[];
 
-  @IsUUID()
-  branch_id: string;
+  @IsOptional()
+  @IsEnum(CourseStatus)
+  status?: CourseStatus;
 
-  @IsUUID()
-  tenant_id: string;
+  @IsOptional()
+  @IsInt()
+  duration?: number;
+
+  @IsOptional()
+  @IsEnum(DurationType)
+  durationType?: DurationType;
 }

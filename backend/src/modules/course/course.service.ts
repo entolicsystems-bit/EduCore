@@ -14,36 +14,36 @@ export class CourseService {
 
   constructor(private prisma: PrismaService) {}
 
+  // ================= HELPER =================
+  private toJson(value: any): Prisma.InputJsonValue {
+    return JSON.parse(JSON.stringify(value));
+  }
+
   // ================= CREATE =================
   async create(dto: CreateCourseDto) {
     try {
 
-      const codes = dto.subjects.map(s => s.code);
-      if (new Set(codes).size !== codes.length) {
-        throw new BadRequestException("Duplicate subject codes not allowed");
+      // Validate duplicate subject codes
+      if (dto.subjects?.length) {
+        const codes = dto.subjects.map(s => s.code);
+        if (new Set(codes).size !== codes.length) {
+          throw new BadRequestException("Duplicate subject codes not allowed");
+        }
       }
 
-      const course = await this.prisma.course.create({
+      return await this.prisma.course.create({
         data: {
-          title: dto.title,
+          tenantId: dto.tenantId,
+          name: dto.name,
           description: dto.description,
           duration: dto.duration,
-          subjects: dto.subjects as unknown as Prisma.InputJsonValue,
-          branch_id: dto.branch_id,
-          tenant_id: dto.tenant_id
+          durationType: dto.durationType,
+          status: dto.status,
+          subjects: dto.subjects
+            ? this.toJson(dto.subjects)
+            : undefined,
         }
       });
-
-      await this.prisma.audit_Logs.create({
-        data: {
-          action: "CREATE",
-          entityType: "COURSE",
-          entityId: course.id,
-          metadata: dto as unknown as Prisma.InputJsonValue
-        }
-      });
-
-      return course;
 
     } catch (error) {
       this.handlePrismaError(error);
@@ -51,12 +51,11 @@ export class CourseService {
   }
 
   // ================= GET ALL =================
-  async findAll(tenantId: string) {
+  async getAll() {
     try {
 
       return await this.prisma.course.findMany({
-        where: { tenant_id: tenantId },
-        orderBy: { created_at: "desc" }
+        orderBy: { createdAt: "desc" }
       });
 
     } catch (error) {
@@ -64,12 +63,12 @@ export class CourseService {
     }
   }
 
-  // ================= GET BY ID =================
-  async findOne(id: string) {
+  // ================= GET BY COURSE ID =================
+  async getById(courseId: string) {
     try {
 
       const course = await this.prisma.course.findUnique({
-        where: { id }
+        where: { id: courseId }
       });
 
       if (!course) {
@@ -83,65 +82,46 @@ export class CourseService {
     }
   }
 
-  // ================= UPDATE =================
-  async update(id: string, dto: UpdateCourseDto) {
+  // ================= UPDATE BY COURSE ID =================
+  async updateById(courseId: string, dto: UpdateCourseDto) {
     try {
 
-      await this.findOne(id);
+      await this.getById(courseId);
 
-      if (dto.subjects) {
+      if (dto.subjects?.length) {
         const codes = dto.subjects.map(s => s.code);
         if (new Set(codes).size !== codes.length) {
           throw new BadRequestException("Duplicate subject codes not allowed");
         }
       }
 
-      const updated = await this.prisma.course.update({
-        where: { id },
+      return await this.prisma.course.update({
+        where: { id: courseId },
         data: {
-          title: dto.title,
+          name: dto.name,
           description: dto.description,
           duration: dto.duration,
+          durationType: dto.durationType,
+          status: dto.status,
           subjects: dto.subjects
-            ? dto.subjects as unknown as Prisma.InputJsonValue
+            ? this.toJson(dto.subjects)
             : undefined,
-          branch_id: dto.branch_id,
-          tenant_id: dto.tenant_id
         }
       });
-
-      await this.prisma.audit_Logs.create({
-        data: {
-          action: "UPDATE",
-          entityType: "COURSE",
-          entityId: id,
-          metadata: dto as unknown as Prisma.InputJsonValue
-        }
-      });
-
-      return updated;
 
     } catch (error) {
       this.handlePrismaError(error);
     }
   }
 
-  // ================= DELETE =================
-  async delete(id: string) {
+  // ================= DELETE BY COURSE ID =================
+  async deleteById(courseId: string) {
     try {
 
-      await this.findOne(id);
+      await this.getById(courseId);
 
       await this.prisma.course.delete({
-        where: { id }
-      });
-
-      await this.prisma.audit_Logs.create({
-        data: {
-          action: "DELETE",
-          entityType: "COURSE",
-          entityId: id
-        }
+        where: { id: courseId }
       });
 
       return { message: "Course deleted successfully" };
@@ -154,7 +134,6 @@ export class CourseService {
   // ================= COMMON ERROR HANDLER =================
   private handlePrismaError(error: any): never {
 
-    // Prisma Known Errors
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
       switch (error.code) {
@@ -170,7 +149,6 @@ export class CourseService {
       }
     }
 
-    // Already Nest Exception
     if (
       error instanceof BadRequestException ||
       error instanceof NotFoundException
@@ -178,11 +156,7 @@ export class CourseService {
       throw error;
     }
 
-    // Unknown Error
     console.error("Unexpected Error:", error);
     throw new InternalServerErrorException("Something went wrong");
   }
-
-  
-
 }
