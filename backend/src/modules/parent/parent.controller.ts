@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Req, UseGuards } from '@nestjs/common';
 import { ParentService } from './parent.service';
 import { CreateParentDto } from 'src/dto/create-parent.dto';
 import { UpdateParentDto } from 'src/dto/update-parent.dto';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/common/decorator/roles.decorator';
 //import { CreateParentDto } from './dto/create-parent.dto';
 //import { UpdateParentDto } from './dto/update-parent.dto';
 
@@ -10,8 +13,11 @@ export class ParentController {
   constructor(private readonly parentService: ParentService) {}
 
   @Post()
-  create(@Body() dto: CreateParentDto) {
-    return this.parentService.create(dto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
+  create(@Body() dto: CreateParentDto,@Req() req) {
+    console.log(`user data ${req.user}`);
+    return this.parentService.create(dto, req.user);
   }
 
   @Get()

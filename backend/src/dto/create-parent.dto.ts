@@ -1,8 +1,8 @@
 import { IsString, IsUUID, IsOptional, IsArray, IsEmail } from 'class-validator';
 
 export class CreateParentDto {
-  @IsUUID()
-  tenantId: string;
+  // @IsUUID()
+  // tenantId: string;
 
   @IsUUID()
   branchId: string;

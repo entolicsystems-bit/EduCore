@@ -21,7 +21,7 @@ export class CourseService {
   }
 
   // ================= CREATE =================
-  async create(dto: CreateCourseDto) {
+  async create(dto: CreateCourseDto, user:any) {
     try {
 
       // Validate duplicate subject codes
@@ -34,7 +34,7 @@ export class CourseService {
 
       return await this.prisma.course.create({
         data: {
-          tenantId: dto.tenantId,
+          tenantId: user.tenantId,
           name: dto.name,
           description: dto.description,
           duration: dto.duration,

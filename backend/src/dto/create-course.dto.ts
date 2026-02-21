@@ -14,8 +14,8 @@ import { SubjectJsonDto } from "./subject-json.dto";
 
 export class CreateCourseDto {
 
-  @IsUUID()
-  tenantId: string;
+  // @IsUUID()
+  // tenantId?: string;
 
   @IsString()
   name: string;

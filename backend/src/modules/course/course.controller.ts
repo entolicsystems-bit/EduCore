@@ -6,7 +6,8 @@ import {
   Delete,
   Param,
   Body,
-  UseGuards
+  UseGuards,
+  Req
 } from "@nestjs/common";
 import { CourseService } from "./course.service";
 import { CreateCourseDto } from "src/dto/create-course.dto";
@@ -21,11 +22,17 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   // ================= CREATE COURSE =================
-  //@UseGuards(JwtAuthGuard, RolesGuard)
-  //@Roles("ADMIN")
+  
   @Post()
-  async create(@Body() dto: CreateCourseDto) {
-    return this.courseService.create(dto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
+  async create(@Body() dto: CreateCourseDto, @Req() req) {
+    // console.log(`User data : ${req.user.role}`);
+    // console.log(`User data : ${req.user.id}`);
+    // console.log(`User data : ${req.user.email}`);
+    // console.log(`User data : ${req.user.tenantId}`);
+
+    return this.courseService.create(dto, req.user);
   }
 
   // ================= GET ALL COURSES =================
