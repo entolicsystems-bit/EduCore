@@ -57,19 +57,4 @@ export class StudentController {
     return this.studentService.deleteStudent(studentId);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN", "TEACHER")
-  @Patch("batches/:id/timetable")
-  updateBatch(
-    @Param("id") batchId: string,
-    @Body() dto: UpdateTimetable,
-    @Req() req,
-  ) {
-    return this.studentService.updateTimetable(batchId, dto, req.user);
-  }
-
-  @Get("batches/:id/timetable")
-  getTimetable(@Param("id") batchId: string) {
-    return this.studentService.getTimetable(batchId);
-  }
 }

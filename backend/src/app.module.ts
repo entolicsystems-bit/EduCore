@@ -25,6 +25,7 @@ import { CourseModule } from "./modules/course/course.module";
 import { ParentModule } from "./modules/parent/parent.module";
 
 import { BatchesModule } from "./modules/batches/batches.module";
+import { TimetableModule } from "./modules/timetable/timetable.module";
 
 
 @Module({
@@ -67,6 +68,7 @@ import { BatchesModule } from "./modules/batches/batches.module";
     verifyDocumentModule,
     CourseModule,
     ParentModule,
+    TimetableModule,
   ],
 
   // providers: [
