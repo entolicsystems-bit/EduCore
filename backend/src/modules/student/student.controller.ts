@@ -7,6 +7,7 @@ import {
   Patch,
   Param,
   Get,
+  Delete,
 } from "@nestjs/common";
 
 import { JwtAuthGuard } from "../../guards/jwt-auth.guard";
@@ -14,7 +15,8 @@ import { Roles } from "src/common/decorator/roles.decorator";
 import { RolesGuard } from "src/guards/roles.guard";
 import { StudentService } from "./student.service";
 import { studentProfileUpdateDto } from "src/dto/studentupdate.dto";
-import { CreateTimetableDto } from "src/dto/createTimetable.dto";
+import { UpdateTimetable } from "src/dto/updateTimetable.dto";
+import { retry } from "rxjs";
 
 @Controller("v1")
 export class StudentController {
@@ -27,11 +29,14 @@ export class StudentController {
     return this.studentService.convertLead(applicationId, req.user);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN", "TEACHER")
   @Get("profile/students/:id")
   getStudent(@Param("id") studentId: string, @Req() req) {
     return this.studentService.getStudentProfile(studentId, req.user);
+  }
+
+  @Get("profile/students")
+  getAllStudent() {
+    return this.studentService.getAllStudents();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,5 +48,28 @@ export class StudentController {
     @Req() req,
   ) {
     return this.studentService.updateStudentProfile(studentId, dto, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "TEACHER")
+  @Delete("profile/student/:id")
+  deleteStudent(@Param("id") studentId: string) {
+    return this.studentService.deleteStudent(studentId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "TEACHER")
+  @Patch("batches/:id/timetable")
+  updateBatch(
+    @Param("id") batchId: string,
+    @Body() dto: UpdateTimetable,
+    @Req() req,
+  ) {
+    return this.studentService.updateTimetable(batchId, dto, req.user);
+  }
+
+  @Get("batches/:id/timetable")
+  getTimetable(@Param("id") batchId: string) {
+    return this.studentService.getTimetable(batchId);
   }
 }

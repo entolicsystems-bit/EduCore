@@ -7,6 +7,8 @@ import {
   Patch,
   Param,
   Get,
+  UseInterceptors,
+  UploadedFile,
 } from "@nestjs/common";
 import { ApplicationService } from "./application.service";
 import { CreateApplicationDto } from "../../dto/application.dto";
@@ -14,6 +16,7 @@ import { JwtAuthGuard } from "../../guards/jwt-auth.guard";
 import { ApplicationStatus } from "@prisma/client";
 import { Roles } from "src/common/decorator/roles.decorator";
 import { RolesGuard } from "src/guards/roles.guard";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @Controller("v1/applications")
 @UseGuards(JwtAuthGuard)
@@ -21,11 +24,12 @@ export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
   // EPIC-1: Create Draft
+  @UseInterceptors(FileInterceptor("leadImage"))
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Post("create")
-  create(@Body() dto: CreateApplicationDto, @Req() req: any) {
-    return this.applicationService.createApplication(dto, req.user);
+  create(@UploadedFile() file: Express.Multer.File,@Body() dto: CreateApplicationDto, @Req() req: any) {
+    return this.applicationService.createApplication(dto, req.user,file);
   }
 
   // ===========================
