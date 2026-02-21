@@ -1,12 +1,14 @@
-import { NotificationService } from './../notifications/notification.service';
-import { NotificationEvents } from './../../constants/notification-event.constant';
+import { NotificationService } from "./../notifications/notification.service";
+import { NotificationEvents } from "./../../constants/notification-event.constant";
 
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
-import { CreateApplicationDto } from '../../dto/application.dto';
-import { CryptoUtil } from 'src/common/crypto/crypto.util';
-import { ALLOWED_TRANSITIONS } from './application-flow';
-import { ApplicationStatus } from '@prisma/client';
+import { Injectable, BadRequestException } from "@nestjs/common";
+import { PrismaService } from "../../database/prisma.service";
+import { CreateApplicationDto } from "../../dto/application.dto";
+import { CryptoUtil } from "src/common/crypto/crypto.util";
+import { ALLOWED_TRANSITIONS } from "./application-flow";
+import { ApplicationStatus } from "@prisma/client";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { randomUUID } from "crypto";
 
 function sanitizeFormData(data: any) {
   const sanitized = { ...data };
@@ -49,19 +51,25 @@ async function encryptFormPII(formData: any) {
   return copy;
 }
 
-
 @Injectable()
 export class ApplicationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService, // ✅ fixed DI
   ) {}
+  private s3 = new S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+  });
 
   // ===========================
   // 🔓 SAFE EMAIL EXTRACTOR
   // ===========================
   private async extractEmail(formData: any): Promise<string | null> {
-    if (!formData || typeof formData !== 'object' || !formData.email) {
+    if (!formData || typeof formData !== "object" || !formData.email) {
       return null;
     }
 
@@ -75,7 +83,12 @@ export class ApplicationService {
   // ===========================
   // CREATE APPLICATION (DRAFT)
   // ===========================
-  async createApplication(dto: CreateApplicationDto, user: any) {
+  async createApplication(
+    dto: CreateApplicationDto,
+    user: any,
+    file?: Express.Multer.File,
+  ) {
+    try{
     const { leadId, programId, formData } = dto;
     const { tenantId, branchId } = user;
 
@@ -83,8 +96,35 @@ export class ApplicationService {
       where: { id: leadId, tenantId, branchId, deleted_at: null },
     });
 
-    if (!lead) throw new BadRequestException('Lead not found');
+    if (!lead) throw new BadRequestException("Lead not found");
 
+    let imageUrl: string | undefined;
+
+    if (file) {
+      // Validate
+      if (!file.mimetype.startsWith("image/")) {
+        throw new BadRequestException("Only image files allowed");
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new BadRequestException("Image must be less than 5MB");
+      }
+
+      const extension = file.originalname.split(".").pop();
+      const key = `applications/${randomUUID()}.${extension}`;
+
+      await this.s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET!,
+          Key: key,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+          ServerSideEncryption: "AES256",
+        }),
+      );
+
+      imageUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    }
     const finalData = {
       name: formData?.name || lead.name,
       email: formData?.email || lead.email,
@@ -93,7 +133,7 @@ export class ApplicationService {
     };
 
     if (!finalData.name || !finalData.email || !finalData.phone) {
-      throw new BadRequestException('Name, email and phone are required');
+      throw new BadRequestException("Name, email and phone are required");
     }
 
     const existing = await this.prisma.application.findFirst({
@@ -101,12 +141,12 @@ export class ApplicationService {
     });
 
     if (existing) {
-      throw new BadRequestException('Application already exists');
+      throw new BadRequestException("Application already exists");
     }
 
     const sanitized = {
       ...sanitizeFormData(finalData),
-      _meta: { version: 'v1', storedAt: new Date() },
+      _meta: { version: "v1", storedAt: new Date() },
     };
 
     const encrypted = await encryptFormPII(sanitized);
@@ -120,13 +160,14 @@ export class ApplicationService {
         applicationRef: `APP-${Date.now()}`,
         formData: encrypted,
         status: ApplicationStatus.DRAFT,
+        leadImageUrl: imageUrl,
       },
     });
 
     await this.prisma.leadActivity.create({
       data: {
         lead_id: leadId,
-        action: 'APPLICATION_STARTED',
+        action: "APPLICATION_STARTED",
         metadata: { applicationId: application.id },
       },
     });
@@ -139,6 +180,10 @@ export class ApplicationService {
         applicationRef: application.applicationRef,
       },
     };
+  }catch(error){
+    console.log(error);
+    throw error;
+  }
   }
 
   // ===========================
@@ -151,10 +196,12 @@ export class ApplicationService {
       where: { id: applicationId, tenantId, branchId, deletedAt: null },
     });
 
-    if (!application) throw new BadRequestException('Application not found');
+    if (!application) throw new BadRequestException("Application not found");
 
     if (application.status !== ApplicationStatus.DRAFT) {
-      throw new BadRequestException('Application cannot be edited after submission');
+      throw new BadRequestException(
+        "Application cannot be edited after submission",
+      );
     }
 
     const sanitized = sanitizeFormData(formData);
@@ -194,9 +241,9 @@ export class ApplicationService {
       where: { id: applicationId, tenantId, branchId, deletedAt: null },
     });
 
-    if (!application) throw new BadRequestException('Application not found');
+    if (!application) throw new BadRequestException("Application not found");
     if (application.status !== ApplicationStatus.DRAFT) {
-      throw new BadRequestException('Only draft applications can be submitted');
+      throw new BadRequestException("Only draft applications can be submitted");
     }
 
     const updated = await this.prisma.application.update({
@@ -209,47 +256,47 @@ export class ApplicationService {
 
     await this.prisma.activityTimeline.create({
       data: {
-        entityType: 'APPLICATION',
+        entityType: "APPLICATION",
         entityId: applicationId,
-        eventType: 'STATUS_CHANGED',
-        title: 'Application Submitted',
+        eventType: "STATUS_CHANGED",
+        title: "Application Submitted",
         actorId: userId,
       },
     });
 
-    
-   // 🔔 EMAIL (non-blocking, template-safe)
+    // 🔔 EMAIL (non-blocking, template-safe)
 
-const email = await this.extractEmail(updated.formData);
+    const email = await this.extractEmail(updated.formData);
 
-// Cast formData to typed object
-const formData = updated.formData as ApplicationFormData;
-// 🔓 Decrypt the name
-let decryptedName: string | undefined;
-try {
-  decryptedName = formData.name ? await CryptoUtil.decrypt(formData.name) : undefined;
-} catch (err) {
-  console.warn(`Failed to decrypt applicant name for ${updated.id}`, err);
-  decryptedName = undefined;
-}
+    // Cast formData to typed object
+    const formData = updated.formData as ApplicationFormData;
+    // 🔓 Decrypt the name
+    let decryptedName: string | undefined;
+    try {
+      decryptedName = formData.name
+        ? await CryptoUtil.decrypt(formData.name)
+        : undefined;
+    } catch (err) {
+      console.warn(`Failed to decrypt applicant name for ${updated.id}`, err);
+      decryptedName = undefined;
+    }
 
-const displayName = decryptedName || 'Applicant';
+    const displayName = decryptedName || "Applicant";
 
-if (!email) {
-  console.warn(
-    `Email skipped for application ${updated.id}: email missing or invalid`,
-  );
-} else {
-  await this.notificationService
-    .notify(NotificationEvents.APPLICATION_SUBMITTED, {
-      to: email,
-      name: displayName || 'Applicant',      // <-- safe access
-      applicationId: updated.id,               // <-- safe access
-      applicationRef: updated.applicationRef, // already exists
-    })
-    .catch(err => console.error('EMAIL ERROR:', err));
-}
-
+    if (!email) {
+      console.warn(
+        `Email skipped for application ${updated.id}: email missing or invalid`,
+      );
+    } else {
+      await this.notificationService
+        .notify(NotificationEvents.APPLICATION_SUBMITTED, {
+          to: email,
+          name: displayName || "Applicant", // <-- safe access
+          applicationId: updated.id, // <-- safe access
+          applicationRef: updated.applicationRef, // already exists
+        })
+        .catch((err) => console.error("EMAIL ERROR:", err));
+    }
 
     return updated;
   }
@@ -270,18 +317,18 @@ if (!email) {
       STATIC_FEE_STATUS.isFeeRequired &&
       !STATIC_FEE_STATUS.isFeePaid
     ) {
-      throw new BadRequestException('Application fee not paid');
+      throw new BadRequestException("Application fee not paid");
     }
 
-    if (!['ADMIN', 'COUNSELLOR'].includes(role)) {
-      throw new BadRequestException('Permission denied');
+    if (!["ADMIN", "COUNSELLOR"].includes(role)) {
+      throw new BadRequestException("Permission denied");
     }
 
     const application = await this.prisma.application.findFirst({
       where: { id: applicationId, tenantId, branchId, deletedAt: null },
     });
 
-    if (!application) throw new BadRequestException('Application not found');
+    if (!application) throw new BadRequestException("Application not found");
 
     const oldStatus = application.status;
 
@@ -299,37 +346,36 @@ if (!email) {
 
     await this.prisma.activityTimeline.create({
       data: {
-        entityType: 'APPLICATION',
+        entityType: "APPLICATION",
         entityId: applicationId,
-        eventType: 'STATUS_CHANGED',
+        eventType: "STATUS_CHANGED",
         title: `Status changed to ${newStatus}`,
         description: notes,
         actorId: userId,
       },
     });
 
-
     //Email Notification (non-blocking)
     // 🔔 EMAIL (updated block here)
-const email = await this.extractEmail(updated.formData);
-const formData = updated.formData as ApplicationFormData;
+    const email = await this.extractEmail(updated.formData);
+    const formData = updated.formData as ApplicationFormData;
 
-if (!email) {
-  console.warn(
-    `Email skipped for application ${updated.id}: email missing or invalid`,
-  );
-} else {
-  await this.notificationService
-    .notify(NotificationEvents.APPLICATION_SUBMITTED, {
-      to: email,
-      name: formData.name || 'Applicant',
-      applicationId: updated.id,
-      applicationRef: updated.applicationRef,
-    })
-    .catch(err => console.error('EMAIL ERROR:', err));
-}
+    if (!email) {
+      console.warn(
+        `Email skipped for application ${updated.id}: email missing or invalid`,
+      );
+    } else {
+      await this.notificationService
+        .notify(NotificationEvents.APPLICATION_SUBMITTED, {
+          to: email,
+          name: formData.name || "Applicant",
+          applicationId: updated.id,
+          applicationRef: updated.applicationRef,
+        })
+        .catch((err) => console.error("EMAIL ERROR:", err));
+    }
 
-return updated;
+    return updated;
   }
   // ===========================
   // APPLICATION TIMELINE
@@ -337,11 +383,10 @@ return updated;
   async getApplicationTimeline(applicationId: string, user: any) {
     return this.prisma.activityTimeline.findMany({
       where: {
-        entityType: 'APPLICATION',
+        entityType: "APPLICATION",
         entityId: applicationId,
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
   }
 }
-

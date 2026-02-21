@@ -22,6 +22,7 @@ import { StudentModule } from "./modules/student/student.module";
 import { OfferLetterModule } from "./modules/import/documents/offerLetter/offer-letter.module";
 import { BatchesModule } from "./modules/batches/batches.module";
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({

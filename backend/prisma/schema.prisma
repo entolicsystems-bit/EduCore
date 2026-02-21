@@ -37,7 +37,10 @@ model LeadActivity {
 }
 
 model User {
+<<<<<<< HEAD
   //id                       String              @id @default(uuid()) @db.VarChar(250)
+=======
+>>>>>>> f3abc3d55ff67a1aee97d886fde460f7b22c85da
   id                         String              @id @default(uuid()) @db.Uuid
   name                       String              @db.VarChar(250)
   email                      String              @unique @db.VarChar(250)
@@ -152,7 +155,11 @@ model AdmissionDocument {
   fileSize      BigInt
   fileType      String
   status        DocumentStatus @default(UPLOADED)
+<<<<<<< HEAD
  verifiedBy String? @db.Uuid
+=======
+  verifiedBy String? @db.Uuid
+>>>>>>> f3abc3d55ff67a1aee97d886fde460f7b22c85da
   verifiedAt    DateTime?
   createdAt     DateTime       @default(now())
   application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
