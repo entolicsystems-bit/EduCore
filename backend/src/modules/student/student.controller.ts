@@ -7,6 +7,7 @@ import {
   Patch,
   Param,
   Get,
+  Delete,
 } from "@nestjs/common";
 
 import { JwtAuthGuard } from "../../guards/jwt-auth.guard";
@@ -15,6 +16,7 @@ import { RolesGuard } from "src/guards/roles.guard";
 import { StudentService } from "./student.service";
 import { studentProfileUpdateDto } from "src/dto/studentupdate.dto";
 import { UpdateTimetable } from "src/dto/updateTimetable.dto";
+import { retry } from "rxjs";
 
 @Controller("v1")
 export class StudentController {
@@ -50,13 +52,20 @@ export class StudentController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "TEACHER")
+  @Delete("profile/student/:id")
+  deleteStudent(@Param("id") studentId: string) {
+    return this.studentService.deleteStudent(studentId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN", "TEACHER")
   @Patch("batches/:id/timetable")
   updateBatch(
     @Param("id") batchId: string,
     @Body() dto: UpdateTimetable,
     @Req() req,
   ) {
-    return this.studentService.createTimetable(batchId, dto, req.user);
+    return this.studentService.updateTimetable(batchId, dto, req.user);
   }
 
   @Get("batches/:id/timetable")

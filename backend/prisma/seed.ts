@@ -33,40 +33,13 @@ async function seedAdmin() {
       phone: encryptedPhone,
       role: "ADMIN",
       passwordHash,
+      tenantId:"550e8400-e29b-41d4-a716-446655440000",
+      branchId:"a3f1c9d2-8b4e-4f6a-9d21-2b6f4c7e8a90"
     },
   });
 
   console.log("✅ Admin encrypted and seeded successfully");
 }
-
-// async function seedSystem() {
-//   console.log("CRYPTO_SECRET from seed:", process.env.CRYPTO_SECRET);
-
-//     const encryptedEmail = await CryptoUtil.encrypt("system@erp.com"); // 🔐
-//   const encryptedPhone = await CryptoUtil.encrypt("8888888888");   // 🔐
-
-//   const exists = await prisma.user.findUnique({
-//     where: { email: encryptedEmail },
-//   });
-
-//   if (exists) {
-//     console.log("ℹ️ System already exists");
-//     return;
-//   }
-
-//   await prisma.user.create({
-//     data: {
-//      name: await CryptoUtil.encrypt("System User"),// 🔐
-//     email: encryptedEmail,
-//     phone: encryptedPhone,
-//     role: 'SYSTEM',
-//     passwordHash: 'SYSTEM_NO_LOGIN',
-//     status: false,
-//     },
-//   });
-
-//   console.log("✅ System encrypted and seeded successfully");
-// }
 
 async function seedRolesAndPermissions() {
   const roles = [

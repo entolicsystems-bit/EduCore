@@ -22,7 +22,6 @@ export class TimetableSlot {
 
   @IsOptional()
   @IsString({ message: "Name must be a string" })
-  @IsNotEmpty({ message: "Name is required" })
   @Matches(/^[A-Za-z\s]+$/, {
     message: "Name must contain only letters and spaces",
   })
@@ -33,5 +32,5 @@ export class TimetableSlot {
 // UpdateTimetable DTO
 export class UpdateTimetable {
   @IsObject({ message: "Timetable must be an object" })
-  timetable: Record<string, TimetableSlot[]>;
+  timetable: Record<string, any>;
 }
