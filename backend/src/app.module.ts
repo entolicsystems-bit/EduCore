@@ -20,6 +20,9 @@ import { join } from "path";
 import { StorageModule } from "./modules/import/documents/offerLetter/storage/awsStorage.module";
 import { StudentModule } from "./modules/student/student.module";
 import { OfferLetterModule } from "./modules/import/documents/offerLetter/offer-letter.module";
+import { StaffModule } from "./modules/staff/staff.module";
+import { TeacherAssignmentModule } from "./modules/TeacherAssign/teacherAssignment.module";
+import { StudentEnrollModule } from "./modules/student_enroll/student.enroll.module";
 
 @Module({
   imports: [
@@ -53,11 +56,14 @@ import { OfferLetterModule } from "./modules/import/documents/offerLetter/offer-
     CsvModule,
     documentModule,
     AuditLogModule,
+    StaffModule,
     RolesModule,
     WinstonModule.forRoot(winstonOpions),
     ApplicationModule,
     OfferLetterModule,
     verifyDocumentModule,
+    TeacherAssignmentModule,
+    StudentEnrollModule
   ],
 
   // providers: [

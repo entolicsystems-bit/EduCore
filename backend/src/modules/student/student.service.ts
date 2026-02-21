@@ -1,9 +1,28 @@
 
-import { EventEmitter2 } from '@nestjs/event-emitter';
+interface StudentProfileData {
+  roll_number?: string;
+  personal?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  };
+  academic?: {
+    programId?: string;
+  };
+  enrolled_at?: Date;
+}
+
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../database/prisma.service";
-import { ApplicationStatus } from "@prisma/client";
+import { ApplicationStatus, User } from "@prisma/client";
 import { DocumentStatus } from "src/dto/verify-document.dto";
+import { application } from "express";
+import { publicDecrypt } from "node:crypto";
+import { CryptoUtil } from "src/common/crypto/crypto.util";
+import { isUUID } from "class-validator";
+import { studentProfileUpdateDto } from "src/dto/studentupdate.dto";
+import { CreateTimetableDto } from "src/dto/createTimetable.dto";
 
 @Injectable()
 export class StudentService {
@@ -60,9 +79,10 @@ export class StudentService {
 
         const student = await tx.student.create({
           data: {
-            application_id: application.id,
-            user_id: application.reviewedBy ?? user.id,
+            application_id: applicationId,
+            created_by: application.reviewedBy ?? user.id,
             tenant_id: application.tenantId,
+            branch_id: application.branchId,
             status: "ENROLLED",
             profile_data: {
               roll_number: rollNumber,
@@ -91,7 +111,6 @@ export class StudentService {
           where: { id: application.leadId },
           data: {
             status: "CONVERTED",
-            id: student.id,
           },
         });
 
@@ -140,7 +159,7 @@ export class StudentService {
       });
 
       // 🔔 STUDENT ENROLLED EVENT (AFTER COMMIT)
-      this.eventEmitter.emit('application.student_enrolled', {
+      this.eventEmitter.emit("application.student_enrolled", {
         applicationId: result.application_id,
         studentId: result.student_id,
 
@@ -154,5 +173,187 @@ export class StudentService {
       throw error;
     }
   }
-}
 
+  //get student profile
+  async getStudentProfile(studentId: string, reqUser: User) {
+    try {
+      //invalid uuid
+      if (!isUUID(studentId)) {
+        throw new BadRequestException("Invalid UUID format");
+      }
+      //find profile of student
+      const profile = await this.prisma.student.findUnique({
+        where: {
+          id: studentId,
+        },
+        //include application for guardian and personal details
+        include: {
+          application: true,
+        },
+      });
+      //invalid studentId
+      if (!profile) {
+        throw new BadRequestException("Invalid studentId");
+      }
+
+      //profiledata
+      const profileData = profile.profile_data as StudentProfileData;
+
+      //formdata for guardian details
+      const formData: any = profile.application?.formData;
+      return {
+        StudentProfile: {
+          //personal details
+          personalDetails: {
+            name: profileData.personal?.name
+              ? await CryptoUtil.decrypt(profileData.personal.name)
+              : null,
+            email: profileData.personal?.email
+              ? await CryptoUtil.decrypt(profileData.personal.email)
+              : null,
+            phone: profileData.personal?.phone
+              ? await CryptoUtil.decrypt(profileData.personal.phone)
+              : null,
+            dob: formData?.dob,
+            gender: formData?.gender,
+            bloodGroup: formData?.bloodGroup,
+            nationality: formData?.nationality,
+          },
+
+          //academic details
+          academicDetails: {
+            applicationId: profile.application_id,
+            programId: profileData.academic.programId,
+            rollNumber: profileData.roll_number,
+            enrolledDate: profileData.enrolled_at,
+          },
+
+          //guardian details
+          guardianDetails: {
+            guardianName: formData?.guardian?.name,
+            guardianEmail: formData?.guardian?.email,
+            guardianPhone: formData?.guardian?.phone,
+            guardianRelation: formData?.guardian?.relation,
+          },
+
+          //emergency contact
+          emergencyContact: formData?.emergencyContact,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  //update student profile
+  async updateStudentProfile(
+    studentId: string,
+    dto: studentProfileUpdateDto,
+    reqUser: User,
+  ) {
+    try {
+      //invalid uuid
+      if (!isUUID(studentId)) {
+        throw new BadRequestException("Invalid UUID format");
+      }
+
+      //find student
+      const student = await this.prisma.student.findUnique({
+        where: {
+          id: studentId,
+        },
+        include: { application: true },
+      });
+      if (!student) {
+        throw new BadRequestException("invalid studentId");
+      }
+
+      //created profile and form data to insert
+      const profileData = student.profile_data as any;
+      const formData: any = student.application?.formData || {};
+
+      //changing profile data if given
+      if (dto.name) {
+        profileData.personal.name = await CryptoUtil.encrypt(dto.name);
+      }
+      if (dto.email) {
+        profileData.personal.email = await CryptoUtil.encrypt(dto.email);
+      }
+      if (dto.phone) {
+        profileData.personal.phone = await CryptoUtil.encrypt(dto.phone);
+      }
+
+      //updating form data if given
+      if (dto.dob) formData.dob = dto.dob;
+      if (dto.gender) formData.gender = dto.gender;
+      if (dto.bloodGroup) formData.bloodGroup = dto.bloodGroup;
+      if (dto.nationality) formData.nationality = dto.nationality;
+
+      //updating guardian details if given
+      if (
+        dto.guardianName ||
+        dto.guardianEmail ||
+        dto.guardianPhone ||
+        dto.guardianRelation
+      ) {
+        formData.guardian = {
+          ...formData.guardian,
+          name: dto.guardianName ?? formData.guardian?.name,
+          email: dto.guardianEmail ?? formData.guardian?.email,
+          phone: dto.guardianPhone ?? formData.guardian?.phone,
+          relation: dto.guardianRelation ?? formData.guardian?.relation,
+        };
+      }
+
+      //updating emergency contact if given
+      if (dto.emergencyName || dto.emergencyPhone) {
+        formData.emergencyContact = {
+          ...formData.emergencyContact,
+          name: dto.emergencyName ?? formData.emergencyContact?.name,
+          phone: dto.emergencyPhone ?? formData.emergencyContact?.phone,
+        };
+      }
+
+      //updating both tables as per data
+      await this.prisma.$transaction(async (tx) => {
+        await tx.student.update({
+          where: { id: studentId },
+          data: {
+            profile_data: profileData,
+            updated_by_id: reqUser.id,
+            updated_at: new Date(),
+          },
+        });
+
+        await tx.application.update({
+          where: { id: student.application_id },
+          data: {
+            formData: formData,
+            updatedAt: new Date(),
+          },
+        });
+        await tx.audit_Logs.create({
+          data: {
+            action: "STUDENT_PROFILE_UPDATE",
+            entityType: "STUDENT_PROFILE",
+            entityId: studentId,
+            actorId: reqUser.id,
+            metadata: {
+              message: "student profile updated",
+              newProfileData: profileData,
+              newFormData: formData,
+            },
+          },
+        });
+      });
+
+      return {
+        message: "Student profile updated successfully",
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+}

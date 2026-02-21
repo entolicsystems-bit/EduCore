@@ -172,7 +172,7 @@ export class LeadsService {
     /**
      * Timeline is safe to fetch only AFTER ownership is verified
      */
-    const timeline = await this.repo.getTimeline(id, 1, 100);
+    const timeline = await this.repo.getTimeline(id, 1, 10);
 
     /**
      * 🔐 RESPONSE FILTERING (Excessive Data Exposure Protection)

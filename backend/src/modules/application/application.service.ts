@@ -151,6 +151,9 @@ export class ApplicationService {
       where: { id: applicationId, tenantId, branchId, deletedAt: null },
     });
 
+
+    
+
     if (!application) throw new BadRequestException('Application not found');
 
     if (application.status !== ApplicationStatus.DRAFT) {
@@ -220,16 +223,20 @@ export class ApplicationService {
     
    // 🔔 EMAIL (non-blocking, template-safe)
 
-const email = await this.extractEmail(updated.formData);
+// 🔔 EMAIL (non-blocking & fully safe)
 
-// Cast formData to typed object
+const email = await this.extractEmail(updated.formData);
 const formData = updated.formData as ApplicationFormData;
-// 🔓 Decrypt the name
+
+// 🔓 Decrypt Name Safely
 let decryptedName: string | undefined;
+
 try {
-  decryptedName = formData.name ? await CryptoUtil.decrypt(formData.name) : undefined;
+  decryptedName = formData.name
+    ? await CryptoUtil.decrypt(formData.name)
+    : undefined;
 } catch (err) {
-  console.warn(`Failed to decrypt applicant name for ${updated.id}`, err);
+  console.warn(`Failed to decrypt name for ${updated.id}`, err);
   decryptedName = undefined;
 }
 
@@ -243,17 +250,13 @@ if (!email) {
   await this.notificationService
     .notify(NotificationEvents.APPLICATION_SUBMITTED, {
       to: email,
-      name: displayName || 'Applicant',      // <-- safe access
-      applicationId: updated.id,               // <-- safe access
-      applicationRef: updated.applicationRef, // already exists
+      name: displayName,
+      applicationId: updated.id,
+      applicationRef: updated.applicationRef,
     })
     .catch(err => console.error('EMAIL ERROR:', err));
 }
-
-
-    return updated;
   }
-
   // ===========================
   // STATUS PIPELINE
   // ===========================
