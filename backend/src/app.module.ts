@@ -1,4 +1,3 @@
-import { NotificationModule } from "./modules/notifications/notification.module";
 import { ApplicationModule } from "./modules/application/application.module";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
@@ -23,6 +22,13 @@ import { OfferLetterModule } from "./modules/import/documents/offerLetter/offer-
 import { StaffModule } from "./modules/staff/staff.module";
 import { TeacherAssignmentModule } from "./modules/TeacherAssign/teacherAssignment.module";
 import { StudentEnrollModule } from "./modules/student_enroll/student.enroll.module";
+
+import { CourseModule } from "./modules/course/course.module";
+import { ParentModule } from "./modules/parent/parent.module";
+
+import { BatchesModule } from "./modules/batches/batches.module";
+import { NotificationModule } from "./modules/notifications/notification.module";
+
 
 @Module({
   imports: [
@@ -50,6 +56,7 @@ import { StudentEnrollModule } from "./modules/student_enroll/student.enroll.mod
     /* ✅ ADDED */
     NotificationModule,
 
+    BatchesModule,
     AuthModule,
     LeadsModule,
     StudentModule,
@@ -62,8 +69,12 @@ import { StudentEnrollModule } from "./modules/student_enroll/student.enroll.mod
     ApplicationModule,
     OfferLetterModule,
     verifyDocumentModule,
+
     TeacherAssignmentModule,
-    StudentEnrollModule
+    StudentEnrollModule,
+    CourseModule,
+    ParentModule,
+  
   ],
 
   // providers: [

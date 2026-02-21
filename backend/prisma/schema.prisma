@@ -37,7 +37,6 @@ model LeadActivity {
 }
 
 model User {
-  //id                       String              @id @default(uuid()) @db.VarChar(250)
   id                         String              @id @default(uuid()) @db.Uuid
   name                       String              @db.VarChar(250)
   email                      String              @unique @db.VarChar(250)
@@ -88,7 +87,6 @@ model UserRole {
   roleId Int
   role   Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
 
   @@unique([userId, roleId])
   @@index([userId])
@@ -153,6 +151,7 @@ model AdmissionDocument {
   fileType      String
   status        DocumentStatus @default(UPLOADED)
  verifiedBy String? @db.Uuid
+
   verifiedAt    DateTime?
   createdAt     DateTime       @default(now())
   application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
@@ -253,6 +252,7 @@ model Staff {
   user User @relation(fields: [userId], references: [id])
 
   teacherAssignments TeacherAssignment[]
+
 
   @@map("staff")
 }
@@ -356,7 +356,7 @@ model Enrollment {
   batchId    String           @db.Uuid
   status     EnrollmentStatus @default(ENROLLED)
   enrolledAt DateTime         @default(now())
-  deletedAt  DateTime?
+  deletedAt  DateTime?                                  //new added 
 
   student Student @relation(fields: [studentId], references: [id])
   batch   Batch   @relation(fields: [batchId], references: [id])
