@@ -51,7 +51,7 @@ export class ParentService {
     return this.prisma.$transaction(async (tx) => {
       const parent = await tx.parent.create({
         data: {
-          branchId: parentData.branchId,
+          branchId: user.branchId,
           relationship: parentData.relationship,
           userId: user.id,
           tenantId: user.tenantId,

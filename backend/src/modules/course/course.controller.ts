@@ -27,10 +27,8 @@ export class CourseController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   async create(@Body() dto: CreateCourseDto, @Req() req) {
-    // console.log(`User data : ${req.user.role}`);
-    // console.log(`User data : ${req.user.id}`);
-    // console.log(`User data : ${req.user.email}`);
-    // console.log(`User data : ${req.user.tenantId}`);
+    //console.log(`User data : ${req.user.branchId}`);
+    
 
     return this.courseService.create(dto, req.user);
   }
