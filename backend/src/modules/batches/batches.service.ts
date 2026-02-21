@@ -5,8 +5,9 @@ import { CreateBatchDto } from 'src/dto/create-batch.dto';
 @Injectable()
 export class BatchesService {
   constructor(private readonly prisma: PrismaService) {}
+  
 
-  async createBatch(dto: CreateBatchDto) {
+  async createBatch(dto: CreateBatchDto, User: any) {
     try {
       // 1. Verify Course exists
       const course = await this.prisma.course.findUnique({
@@ -21,13 +22,12 @@ export class BatchesService {
         data: {
           name: dto.name,
           capacity: dto.capacity,
-          start_date: new Date(dto.startDate),
-          end_date: new Date(dto.endDate),
-          course_id: dto.courseId,
-          branch_id: dto.branchId,
-          tenant_id: dto.tenantId,
-          timetable: dto.timetable ?? {},
-          status: 'ACTIVE',
+          startDate: new Date(dto.startDate),
+          endDate: new Date(dto.endDate),
+          courseId: dto.courseId,
+          tenantId: User.tenantId,
+          branchId: User.branchId
+         
         },
         include: { course: true },
       });
@@ -49,10 +49,10 @@ export class BatchesService {
   async findAll() {
     return this.prisma.batch.findMany({
       include: {
-        course: { select: { title: true } },
+        course: { select: { name: true } },
         _count: { select: { enrollments: true } },
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
