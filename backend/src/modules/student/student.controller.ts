@@ -53,7 +53,7 @@ export class StudentController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN", "TEACHER")
   @Delete("profile/student/:id")
-  deleteStudent(@Param("id") studentId: string) {
+  deleteStudent(@Param("id") studentId: string)  {
     return this.studentService.deleteStudent(studentId);
   }
 

@@ -1,3 +1,4 @@
+
 interface StudentProfileData {
   roll_number?: string;
   personal?: {
@@ -179,6 +180,9 @@ export class StudentService {
       this.eventEmitter.emit("application.student_enrolled", {
         applicationId: result.application_id,
         studentId: result.student_id,
+
+        roll_number: result.roll_number,
+        programId: result.program_id,
       });
 
       return result;

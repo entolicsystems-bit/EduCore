@@ -37,7 +37,6 @@ model LeadActivity {
 }
 
 model User {
-
   id                         String              @id @default(uuid()) @db.Uuid
   name                       String              @db.VarChar(250)
   email                      String              @unique @db.VarChar(250)
@@ -88,7 +87,6 @@ model UserRole {
   roleId Int
   role   Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  staffs Staff[]
 
   @@unique([userId, roleId])
   @@index([userId])
@@ -152,10 +150,7 @@ model AdmissionDocument {
   fileSize      BigInt
   fileType      String
   status        DocumentStatus @default(UPLOADED)
-
  verifiedBy String? @db.Uuid
-
- 
 
   verifiedAt    DateTime?
   createdAt     DateTime       @default(now())
@@ -243,22 +238,21 @@ model AuditLog {
 //sprint 3 
 
 model Staff {
-  id         String      @id @default(uuid()) @db.Uuid
-  tenantId   String      @db.Uuid
-  branchId   String      @db.Uuid
-  userId     String      @db.Uuid
-  name       String      @db.VarChar(150)
-  role       String      @db.VarChar(50)
-  department String?     @db.VarChar(100)
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @db.Uuid
+  branchId   String   @db.Uuid
+  userId     String   @db.Uuid
+  name       String
+  role       String
+  department String?
   status     StaffStatus @default(ACTIVE)
-  createdAt  DateTime    @default(now())
+  createdAt  DateTime @default(now())
 
-  user           User                @relation(fields: [userId], references: [id])
-  assignments    TeacherAssignment[]
-  userRoleId     Int
-  userRole       UserRole?           @relation(fields: [userRoleUserId, userRoleRoleId], references: [userId, roleId])
-  userRoleUserId String?             @db.Uuid
-  userRoleRoleId Int?
+  deletedAt  DateTime?   // ✅ SOFT DELETE FIELD
+  user User @relation(fields: [userId], references: [id])
+
+  teacherAssignments TeacherAssignment[]
+
 
   @@map("staff")
 }
@@ -362,6 +356,7 @@ model Enrollment {
   batchId    String           @db.Uuid
   status     EnrollmentStatus @default(ENROLLED)
   enrolledAt DateTime         @default(now())
+  deletedAt  DateTime?                                  //new added 
 
   student Student @relation(fields: [studentId], references: [id])
   batch   Batch   @relation(fields: [batchId], references: [id])

@@ -1,4 +1,3 @@
-import { NotificationModule } from "./modules/notifications/notification.module";
 import { ApplicationModule } from "./modules/application/application.module";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
@@ -20,12 +19,19 @@ import { join } from "path";
 import { StorageModule } from "./modules/import/documents/offerLetter/storage/awsStorage.module";
 import { StudentModule } from "./modules/student/student.module";
 import { OfferLetterModule } from "./modules/import/documents/offerLetter/offer-letter.module";
+import { StaffModule } from "./modules/staff/staff.module";
+import { TeacherAssignmentModule } from "./modules/TeacherAssign/teacherAssignment.module";
+import { StudentEnrollModule } from "./modules/student_enroll/student.enroll.module";
 
 import { CourseModule } from "./modules/course/course.module";
 import { ParentModule } from "./modules/parent/parent.module";
 
 import { BatchesModule } from "./modules/batches/batches.module";
+
 import { TimetableModule } from "./modules/timetable/timetable.module";
+
+import { NotificationModule } from "./modules/notifications/notification.module";
+
 
 
 @Module({
@@ -61,14 +67,19 @@ import { TimetableModule } from "./modules/timetable/timetable.module";
     CsvModule,
     documentModule,
     AuditLogModule,
+    StaffModule,
     RolesModule,
     WinstonModule.forRoot(winstonOpions),
     ApplicationModule,
     OfferLetterModule,
     verifyDocumentModule,
+
+    TeacherAssignmentModule,
+    StudentEnrollModule,
     CourseModule,
     ParentModule,
     TimetableModule,
+
   ],
 
   // providers: [
